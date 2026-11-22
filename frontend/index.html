@@ -1,0 +1,268 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MELLDRIVE — сервис поминутной и посуточной аренды автомобилей. Современный автопарк от эконома до бизнес-класса.">
+    <title>MELLDRIVE — Современный каршеринг | Аренда авто</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+    <!-- Панель локального редактора (без правки файлов) -->
+    <div class="editor-bar editor-only" id="editorBar">
+        <div class="container editor-bar__inner">
+            <span>🛠 <strong>Режим редактора:</strong> кликайте по тексту с рамкой для правки</span>
+            <div class="editor-bar__tools">
+                <label class="btn btn--secondary btn--sm" style="cursor:pointer;">
+                    📷 Загрузить логотип
+                    <input type="file" id="logoFileInput" accept="image/*" hidden>
+                </label>
+                <button type="button" class="btn btn--outline btn--sm" id="clearLogoBtn">Убрать лого-картинку</button>
+                <button type="button" class="btn btn--primary btn--sm" id="openAddCarModalBtn">+ Добавить авто</button>
+                <button type="button" class="btn btn--outline btn--sm" id="exportConfigBtn">💾 Экспорт JSON</button>
+                <label class="btn btn--outline btn--sm" style="cursor:pointer;">
+                    📂 Импорт JSON
+                    <input type="file" id="importConfigInput" accept=".json" hidden>
+                </label>
+                <button type="button" class="btn btn--danger btn--sm" id="resetConfigBtn">↺ Сбросить всё</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Шапка сайта -->
+    <header class="header">
+        <div class="container header__container">
+            <div class="logo-group">
+                <a href="#top" class="logo" id="brandLogoLink">
+                    <img id="brandLogoImg" class="logo__img hidden" src="" alt="Логотип">
+                    <span id="brandNameText" data-edit="siteName"><span class="logo__highlight">MELL</span>DRIVE</span>
+                </a>
+                <label class="btn btn--secondary btn--sm editor-only" style="cursor:pointer;" title="Заменить логотип с ПК">
+                    📷
+                    <input type="file" id="logoFileQuickInput" accept="image/*" hidden>
+                </label>
+            </div>
+
+            <nav class="nav" id="mainNav">
+                <ul class="nav__list">
+                    <li><a href="#top" class="nav__link active">Главная</a></li>
+                    <li><a href="#catalog" class="nav__link">Автопарк</a></li>
+                    <li><a href="#tariffs" class="nav__link">Тарифы</a></li>
+                    <li><a href="#faq" class="nav__link">FAQ</a></li>
+                    <li><a href="#contacts" class="nav__link">Контакты</a></li>
+                    <li><a href="#stub" class="nav__link" data-stub="О сервисе (этап 4)">О сервисе</a></li>
+                </ul>
+            </nav>
+
+            <div class="header__actions">
+                <button type="button" class="btn btn--secondary btn--sm" id="toggleEditorBtn">✏️ Редактор</button>
+                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Переключить тему">🌙</button>
+                <button type="button" class="btn btn--outline btn--sm" data-stub="Вход и регистрация (этап 5)">Вход</button>
+                <button type="button" class="btn btn--primary btn--sm" data-stub="Регистрация водителя (этап 5)">Регистрация</button>
+                <button type="button" class="burger" id="burgerBtn" aria-label="Открыть меню">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="top">
+        <!-- Промо-блок -->
+        <section class="hero">
+            <div class="container hero__container">
+                <div class="hero__content">
+                    <span class="hero__badge" data-edit="heroBadge">⚡ Мгновенное бронирование в один клик</span>
+                    <h1 class="hero__title" data-edit="heroTitle">Свобода движения с <span class="text-gradient">MELLDRIVE</span></h1>
+                    <p class="hero__subtitle" data-edit="heroSubtitle">Поминутная и суточная аренда премиум- и городских авто. Бензин, страховка КАСКО и парковка уже учтены.</p>
+                    <div class="hero__buttons">
+                        <a href="#catalog" class="btn btn--primary btn--large">Выбрать автомобиль</a>
+                        <a href="#tariffs" class="btn btn--secondary btn--large">Смотреть тарифы</a>
+                    </div>
+                    <div class="hero__stats">
+                        <div class="stat-item">
+                            <span class="stat-item__value" data-edit="stat1Val">от 10 ₽/мин</span>
+                            <span class="stat-item__label" data-edit="stat1Lbl">Поминутный тариф</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-item__value" data-edit="stat2Val">0 ₽</span>
+                            <span class="stat-item__label" data-edit="stat2Lbl">Депозит в городе</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-item__value" data-edit="stat3Val">24/7</span>
+                            <span class="stat-item__label" data-edit="stat3Lbl">Поддержка водителей</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Каталог авто -->
+        <section class="cars-preview section" id="catalog">
+            <div class="container">
+                <div class="section__header">
+                    <div>
+                        <h2 class="section__title" data-edit="catalogTitle">Автопарк MELLDRIVE</h2>
+                        <p class="section__subtitle" data-edit="catalogSubtitle">Включите «Редактор», чтобы менять авто, фото, цены и характеристики без правки файлов</p>
+                    </div>
+                    <div class="catalog-controls">
+                        <select id="categoryFilter" aria-label="Фильтр по категории">
+                            <option value="all">Все категории</option>
+                        </select>
+                        <select id="priceSort" aria-label="Сортировка по цене">
+                            <option value="default">По умолчанию</option>
+                            <option value="asc">Сначала дешевле (сутки)</option>
+                            <option value="desc">Сначала дороже (сутки)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="cars-grid" id="popularCarsGrid"></div>
+            </div>
+        </section>
+
+        <!-- Тарифы -->
+        <section class="tariffs section section--alt" id="tariffs">
+            <div class="container">
+                <div class="section__header">
+                    <div>
+                        <h2 class="section__title">Тарифные планы</h2>
+                        <p class="section__subtitle">Выберите формат поездки под задачу</p>
+                    </div>
+                </div>
+                <div class="tariffs-grid">
+                    <div class="tariff-card">
+                        <h3 class="tariff-card__title" data-edit="t1Title">Минутный</h3>
+                        <p class="tariff-card__desc" data-edit="t1Desc">Короткие поездки по городу без лишних переплат</p>
+                        <div class="tariff-card__price" data-edit="t1Price">от 10 ₽ / мин</div>
+                        <a href="#catalog" class="btn btn--outline btn--block">Выбрать авто</a>
+                    </div>
+                    <div class="tariff-card tariff-card--featured">
+                        <span class="tariff-card__badge">Хит</span>
+                        <h3 class="tariff-card__title" data-edit="t2Title">Часовые пакеты</h3>
+                        <p class="tariff-card__desc" data-edit="t2Desc">Поездки по делам, встречам и закупкам</p>
+                        <div class="tariff-card__price" data-edit="t2Price">от 450 ₽ / час</div>
+                        <a href="#catalog" class="btn btn--primary btn--block">Выбрать авто</a>
+                    </div>
+                    <div class="tariff-card">
+                        <h3 class="tariff-card__title" data-edit="t3Title">Суточный</h3>
+                        <p class="tariff-card__desc" data-edit="t3Desc">Поездки на целый день или выходные</p>
+                        <div class="tariff-card__price" data-edit="t3Price">от 2 100 ₽ / сутки</div>
+                        <a href="#catalog" class="btn btn--outline btn--block">Выбрать авто</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="faq section" id="faq">
+            <div class="container">
+                <div class="section__header">
+                    <div>
+                        <h2 class="section__title">Частые вопросы</h2>
+                        <p class="section__subtitle">Коротко о работе сервиса и редактора</p>
+                    </div>
+                </div>
+                <div class="accordion">
+                    <details class="accordion__item">
+                        <summary class="accordion__title">Как поменять название, логотип и машины без правки кода?</summary>
+                        <div class="accordion__content">
+                            <p>Нажмите кнопку «✏️ Редактор» в шапке. Тексты можно менять прямо по клику, логотип и фото машин — загружать с компьютера, а изменения сохраняются локально в браузере.</p>
+                        </div>
+                    </details>
+                    <details class="accordion__item">
+                        <summary class="accordion__title">Как вернуть изначальный вид сайта?</summary>
+                        <div class="accordion__content">
+                            <p>Включите «✏️ Редактор» и нажмите красную кнопку «↺ Сбросить всё» — сайт вернётся к исходным настройкам и автопарку.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Подвал -->
+    <footer class="footer" id="contacts">
+        <div class="container footer__container">
+            <div class="footer__col">
+                <div class="logo logo--footer"><span class="logo__highlight" data-edit="footerBrand">MELLDRIVE</span></div>
+                <p class="footer__text">Команда «MellSquad»: Навроцкий А., Кудрявцев А., Гаврилюк К., Алексеев А.</p>
+            </div>
+            <div class="footer__col">
+                <h4 class="footer__title">Разделы</h4>
+                <ul class="footer__links">
+                    <li><a href="#catalog">Автопарк</a></li>
+                    <li><a href="#tariffs">Тарифы</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer__col">
+                <h4 class="footer__title">Документы и доступ</h4>
+                <ul class="footer__links">
+                    <li><a href="#stub" data-stub="Политика конфиденциальности (этап 4)">Политика конфиденциальности</a></li>
+                    <li><a href="#stub" data-stub="Личный кабинет и админ-панель (этап 5)">Личный кабинет / Админка</a></li>
+                </ul>
+            </div>
+            <div class="footer__col">
+                <h4 class="footer__title">Контакты</h4>
+                <p class="footer__text" data-edit="footerPhone">Телефон: +7 (800) 555-35-35</p>
+                <p class="footer__text" data-edit="footerEmail">E-mail: support@melldrive.ru</p>
+            </div>
+        </div>
+        <div class="footer__bottom">
+            <div class="container">
+                <p>© 2026 MELLDRIVE (MellSquad). Учебная практика по тестированию ИС.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Модалка добавления/редактирования авто -->
+    <div class="modal hidden" id="carEditModal">
+        <div class="modal__box">
+            <h3 id="carModalHeading">Добавить автомобиль</h3>
+            <form class="modal__form" id="carEditForm">
+                <input type="hidden" id="editCarId">
+                <label>Марка и модель
+                    <input type="text" id="editCarName" required placeholder="Например: Porsche 911 Turbo S">
+                </label>
+                <label>Категория / Класс
+                    <input type="text" id="editCarCategory" required placeholder="Эконом / Комфорт / Бизнес / Электро / Спорт" value="Комфорт">
+                </label>
+                <label>Характеристики (через •)
+                    <input type="text" id="editCarSpecs" required placeholder="АКПП • 585 л.с. • Полный привод">
+                </label>
+                <div class="modal__row">
+                    <label>Цена за минуту (₽)
+                        <input type="number" step="0.5" min="1" id="editCarPriceMin" required value="25">
+                    </label>
+                    <label>Цена за сутки (₽)
+                        <input type="number" min="100" id="editCarPriceDay" required value="7500">
+                    </label>
+                </div>
+                <label>Загрузить фото авто с ПК
+                    <input type="file" id="editCarFile" accept="image/*">
+                </label>
+                <label>Или ссылка на фото (URL)
+                    <input type="text" id="editCarUrl" placeholder="https://...">
+                </label>
+                <div class="modal__actions">
+                    <button type="button" class="btn btn--outline" id="closeCarModalBtn">Отмена</button>
+                    <button type="submit" class="btn btn--primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модалка-заглушка для разделов следующих этапов -->
+    <div class="modal hidden" id="stubModal">
+        <div class="modal__box">
+            <h3>Раздел в разработке по плану практики</h3>
+            <p id="stubModalText" style="color: var(--text-muted); margin-bottom: 18px;"></p>
+            <div class="modal__actions">
+                <button type="button" class="btn btn--primary" id="closeStubModalBtn">Понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
