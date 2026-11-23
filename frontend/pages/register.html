@@ -15,7 +15,7 @@
                 <input type="text" id="fullName" required placeholder="Иван Смирнов" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
             </label>
             <label>Электронная почта (E-mail)
-                <input type="email" id="regEmail" required placeholder="driver@melldrive.ru" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+                <input type="email" id="regEmail" required placeholder="driver@example.com" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
             </label>
             <label>Номер телефона
                 <input type="tel" id="regPhone" required placeholder="+7 (999) 123-45-67" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
@@ -31,7 +31,7 @@
             </label>
             <label style="display:flex; gap:8px; align-items:flex-start; font-size:0.86rem; color:var(--text-muted); cursor:pointer;">
                 <input type="checkbox" id="confirmLicenseCb" required style="margin-top:3px;">
-                <span>Подтверждаю корректность серии и номера водительского удостоверения и согласие на проверку данных (BUG-044).</span>
+                <span>Подтверждаю корректность серии и номера водительского удостоверения и согласие на проверку данных.</span>
             </label>
             <p id="regError" class="hidden" style="color:var(--danger); font-size:0.88rem;"></p>
             <button type="submit" class="btn btn--primary btn--block">Создать аккаунт</button>
@@ -44,28 +44,17 @@
         const DB_KEY = 'melldrive_accounts_db_v1';
         const SESSION_KEY = 'melldrive_active_session_v1';
 
-        const DEFAULT_ACCOUNTS = [
-            {
-                id: 1,
-                name: 'Водитель MELLDRIVE',
-                email: 'demo@melldrive.ru',
-                phone: '+79990000000',
-                password: 'password123',
-                license: '9901123456',
-                licenseConfirmed: true
-            }
-        ];
-
         function loadAccountsDb() {
             try {
                 const raw = localStorage.getItem(DB_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed) && parsed.length) return parsed;
+                    if (Array.isArray(parsed)) {
+                        return parsed.filter(a => a && a.email && a.email.toLowerCase() !== '');
+                    }
                 }
             } catch (e) {}
-            localStorage.setItem(DB_KEY, JSON.stringify(DEFAULT_ACCOUNTS));
-            return [...DEFAULT_ACCOUNTS];
+            return [];
         }
 
         document.getElementById('regForm').addEventListener('submit', (e) => {
@@ -105,17 +94,17 @@
             const birth = new Date(val);
             const age = (Date.now() - birth.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
             if (age < 18) {
-                err.textContent = 'Регистрация доступна только с 18 лет (исправление BUG-001).';
+                err.textContent = 'Регистрация доступна только с 18 лет.';
                 err.classList.remove('hidden');
                 return;
             }
             if (digitsOnly.length !== 10) {
-                err.textContent = 'Серия и номер водительского удостоверения должны содержать ровно 10 цифр (исправление BUG-035).';
+                err.textContent = 'Серия и номер водительского удостоверения должны содержать ровно 10 цифр.';
                 err.classList.remove('hidden');
                 return;
             }
             if (!licenseConfirmed) {
-                err.textContent = 'Необходимо подтвердить номер водительского удостоверения (BUG-044).';
+                err.textContent = 'Необходимо подтвердить номер водительского удостоверения.';
                 err.classList.remove('hidden');
                 return;
             }
@@ -123,7 +112,7 @@
             const db = loadAccountsDb();
             const exists = db.some(acc => acc.email === email || acc.phone.replace(/\D/g, '') === phoneDigits);
             if (exists) {
-                err.textContent = 'Аккаунт с таким E-mail или телефоном уже зарегистрирован в локальной базе.';
+                err.textContent = 'Аккаунт с таким E-mail или телефоном уже существует в локальной базе.';
                 err.classList.remove('hidden');
                 return;
             }
@@ -139,26 +128,62 @@
             };
             db.push(newAccount);
             localStorage.setItem(DB_KEY, JSON.stringify(db));
-            localStorage.setItem(SESSION_KEY, JSON.stringify({ lastRegisteredEmail: email, loggedIn: false }));
+            localStorage.removeItem(SESSION_KEY);
 
             err.classList.add('hidden');
-            window.location.href = 'login.html?registered=1';
+            window.location.href = 'login.html?registered=1&email=' + encodeURIComponent(email);
         });
     </script>
 <script>
 (function() {
-    let isAdmin = false;
+    const SESSION_KEY = 'melldrive_active_session_v1';
+    const DB_KEY = 'melldrive_accounts_db_v1';
+
+    // Удаляем старые демо-записи, если остались в localStorage
     try {
-        const a = JSON.parse(localStorage.getItem('melldrive_admin_session_v1') || 'null');
-        isAdmin = Boolean(a && a.isAdmin === true);
+        const rawDb = localStorage.getItem(DB_KEY);
+        if (rawDb) {
+            const parsedDb = JSON.parse(rawDb);
+            if (Array.isArray(parsedDb)) {
+                const filtered = parsedDb.filter(acc => acc && acc.email && acc.email.toLowerCase() !== 'demo@melldrive.ru');
+                localStorage.setItem(DB_KEY, JSON.stringify(filtered));
+            }
+        }
     } catch (e) {}
-    if (!isAdmin) {
-        document.querySelectorAll('header a[href*="admin.html"]').forEach(a => {
+
+    function hasActiveSession() {
+        try {
+            const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+            return Boolean(s && s.loggedIn === true && s.email);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    window.mellLogout = function() {
+        localStorage.removeItem(SESSION_KEY);
+        const isInPages = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
+        window.location.href = isInPages ? '../index.html' : 'index.html';
+    };
+
+    const loggedIn = hasActiveSession();
+
+    // Если сессии нет — убираем ссылки на кабинет из меню
+    if (!loggedIn) {
+        document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
             const li = a.closest('li');
             if (li) li.remove();
             else a.remove();
         });
     }
+
+    // Навешиваем выход на любые кнопки/ссылки с data-logout или #logoutBtn
+    document.querySelectorAll('[data-logout], #logoutBtn').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.mellLogout();
+        });
+    });
 })();
 </script>
 </body>

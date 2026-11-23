@@ -5,237 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Личный кабинет — MELLDRIVE</title>
     <link rel="stylesheet" href="../assets/css/main.css">
-    <style>
-        .bookings-table-wrap {
-            margin-top: 28px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            overflow-x: auto;
-        }
-        table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
-        th, td { padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: left; }
-        th { color: var(--text-muted); font-weight: 600; }
-        .badge-active { color: var(--success); font-weight: 700; }
-        .badge-done { color: var(--text-muted); font-weight: 600; }
-    </style>
-<style id="force-nav-visible">
-  .header, .header .container, .header__container { overflow: visible !important; }
-  .header .nav, .header nav {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: static !important;
-    transform: none !important;
-    max-height: none !important;
-    width: auto !important;
-    background: transparent !important;
-  }
-  .header .nav__list {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 16px !important;
-  }
-  .header .nav__link { display: inline-block !important; white-space: nowrap !important; }
-</style>
+    <script>
+        (function() {
+            try {
+                const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+                if (!s || s.loggedIn !== true || !s.email) {
+                    window.location.replace('login.html');
+                }
+            } catch (e) {
+                window.location.replace('login.html');
+            }
+        })();
+    </script>
 </head>
 <body>
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
-                                                <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
+            <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
                 <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
-                    <li><a href="../index.html" class="nav__link" style="white-space:nowrap;">Главная</a></li>
-                    <li><a href="catalog.html" class="nav__link " style="white-space:nowrap;">Автопарк</a></li>
-                    <li><a href="map.html" class="nav__link " style="white-space:nowrap;">Карта зон</a></li>
-                    <li><a href="profile.html" class="nav__link active" style="white-space:nowrap;">Кабинет</a></li>
-                    <li><a href="admin.html" class="nav__link " style="white-space:nowrap;">Админка</a></li>
-                    <li><a href="ui-kit.html" class="nav__link " style="white-space:nowrap;">UI-кит</a></li>
+                    <li><a href="../index.html" class="nav__link">Главная</a></li>
+                    <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
+                    <li><a href="map.html" class="nav__link">Карта зон</a></li>
+                    <li><a href="profile.html" class="nav__link active">Кабинет</a></li>
+                    <li><a href="ui-kit.html" class="nav__link">UI-кит</a></li>
                 </ul>
             </nav>
             <div class="header__actions">
-                <a href="catalog.html" class="btn btn--primary btn--sm">+ Новая бронь</a>
-                <a href="login.html" class="btn btn--outline btn--sm">Выйти</a>
+                <button type="button" class="btn btn--outline btn--sm" id="logoutBtn" onclick="localStorage.removeItem('melldrive_active_session_v1'); window.location.href='../index.html';">Выйти</button>
             </div>
         </div>
     </header>
+
     <main class="section">
         <div class="container">
             <h1 class="section__title">Личный кабинет водителя</h1>
-            <p class="section__subtitle">Профиль, статус водительского удостоверения и активные бронирования</p>
-            <div class="cars-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-                <div class="car-card" style="padding:22px;">
-                    <h3 id="driverProfileTitle">Водитель: </h3><p id="driverProfileContacts" style="color:var(--text-muted); font-size:0.86rem; margin-top:4px;"></p>
-                    <p style="color:var(--text-muted); margin:10px 0;">Статус ВУ: <strong style="color:var(--success);">Подтверждено</strong></p>
-                    <p style="color:var(--text-muted);">Активный бонусный счёт: <strong style="color:var(--gold);">1 250 ₽</strong></p>
-                </div>
-                <div class="car-card" style="padding:22px;">
-                    <h3>Всего бронирований</h3>
-                    <p style="color:var(--text-muted); margin:10px 0;">Оформлено заказов: <strong id="bookingsCount" style="color:var(--gold);">0</strong></p>
-                    <button type="button" id="clearBookingsBtn" class="btn btn--outline btn--sm">Очистить историю</button>
-                </div>
+            <p class="section__subtitle">Активный профиль и история ваших бронирований</p>
+
+            <div class="car-card" style="padding:22px; margin-bottom:24px;">
+                <h3 id="driverProfileTitle">Профиль водителя</h3>
+                <p id="driverProfileContacts" style="color:var(--text-muted); font-size:0.88rem; margin-top:6px;"></p>
+                <p id="driverLicenseInfo" style="color:var(--success); font-size:0.86rem; margin-top:6px;"></p>
             </div>
 
-            <div class="bookings-table-wrap">
-                <h3 style="margin-bottom: 14px;">История и активные аренды</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>№ Брони</th>
-                            <th>Автомобиль</th>
-                            <th>Тариф и опции</th>
-                            <th>Сумма</th>
-                            <th>Дата</th>
-                            <th>Статус</th>
-                            <th>Действие</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bookingsBody"></tbody>
-                </table>
-            </div>
+            <h2 style="font-size:1.35rem; margin-bottom:14px;">Мои бронирования</h2>
+            <div id="myBookingsList" class="cars-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));"></div>
         </div>
     </main>
 
     <script>
-        let activeSession = null;
-        try {
-            activeSession = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
-        } catch (e) {}
-        if (!activeSession || !activeSession.loggedIn) {
-            window.location.replace('login.html');
-        }
+        const SESSION_KEY = 'melldrive_active_session_v1';
         const BOOKINGS_KEY = 'melldrive_bookings_v1';
-        const DEFAULT_BOOKINGS = [
-            {
-                id: 'MD-100042',
-                carName: 'BMW M5 Competition',
-                category: 'Спорт',
-                tariff: 'Сутки (24 ч)',
-                options: 'КАСКО',
-                total: 39490,
-                status: 'Завершена',
-                createdAt: '22.11.2026, 18:10'
-            }
-        ];
 
-        function loadBookings() {
-            try {
-                const raw = localStorage.getItem(BOOKINGS_KEY);
-                if (raw !== null) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) return parsed;
-                }
-            } catch (e) {}
-            localStorage.setItem(BOOKINGS_KEY, JSON.stringify(DEFAULT_BOOKINGS));
-            return DEFAULT_BOOKINGS;
-        }
+        let sess = null;
+        try { sess = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) {}
 
-        function saveBookings(list) {
-            localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
-                    try {
-            const acc = JSON.parse(localStorage.getItem('melldrive_user_account_v1') || 'null');
-            if (acc && acc.name) {
-                document.getElementById('driverProfileTitle').textContent = 'Водитель: ' + acc.name;
-                const info = [acc.email, acc.phone].filter(Boolean).join(' • ');
-                if (info) document.getElementById('driverProfileContacts').textContent = info;
-            }
-        } catch (e) {}
-                try {
-            const sess = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
-            if (sess && sess.loggedIn && sess.name) {
-                document.getElementById('driverProfileTitle').textContent = 'Водитель: ' + sess.name;
-                const info = [sess.email, sess.phone].filter(Boolean).join(' • ');
-                if (info) document.getElementById('driverProfileContacts').textContent = info;
-                const licText = sess.license ? ('ВУ: ' + sess.license + (sess.licenseConfirmed ? ' (подтверждено)' : '')) : '';
-                if (licText) document.getElementById('driverLicenseInfo').textContent = licText;
-            }
-        } catch (e) {}
-        renderBookings();
+        if (sess && sess.loggedIn) {
+            document.getElementById('driverProfileTitle').textContent = 'Водитель: ' + (sess.name || sess.email);
+            document.getElementById('driverProfileContacts').textContent = [sess.email, sess.phone].filter(Boolean).join(' • ');
+            document.getElementById('driverLicenseInfo').textContent = sess.license ? ('ВУ: ' + sess.license + (sess.licenseConfirmed ? ' (подтверждено)' : '')) : '';
         }
 
         function renderBookings() {
-            const list = loadBookings();
-            document.getElementById('bookingsCount').textContent = list.length;
-            const tbody = document.getElementById('bookingsBody');
+            const box = document.getElementById('myBookingsList');
+            let list = [];
+            try {
+                list = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+                if (!Array.isArray(list)) list = [];
+            } catch (e) { list = []; }
 
-            if (!list.length) {
-                tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text-muted); text-align:center;">Бронирований пока нет. Перейдите в <a href="catalog.html" style="color:var(--gold);">каталог</a>, чтобы оформить поездку.</td></tr>';
+            const mine = sess && sess.email
+                ? list.filter(b => !b.driverEmail || b.driverEmail.toLowerCase() === sess.email.toLowerCase())
+                : list;
+
+            if (!mine.length) {
+                box.innerHTML = '<div class="car-card" style="padding:20px;"><p style="color:var(--text-muted);">У вас пока нет оформленных бронирований. <a href="catalog.html" style="color:var(--gold);">Выбрать автомобиль →</a></p></div>';
                 return;
             }
 
-            tbody.innerHTML = list.map((b, idx) => `
-                <tr>
-                    <td><strong>${b.id}</strong></td>
-                    <td>${b.carName} <small style="color:var(--text-muted);">(${b.category})</small></td>
-                    <td>${b.tariff}<br><small style="color:var(--text-muted);">${b.options}</small></td>
-                    <td><strong style="color:var(--gold);">${Number(b.total).toLocaleString('ru-RU')} ₽</strong></td>
-                    <td>${b.createdAt}</td>
-                    <td><span class="${b.status === 'Активна' ? 'badge-active' : 'badge-done'}">${b.status}</span></td>
-                    <td>
-                        ${b.status === 'Активна'
-                            ? `<button type="button" class="btn btn--outline btn--sm" onclick="finishTrip(${idx})">Завершить</button>`
-                            : '—'}
-                    </td>
-                </tr>
+            box.innerHTML = mine.map(b => `
+                <div class="car-card" style="padding:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                        <strong>${b.id}</strong>
+                        <span style="color:var(--gold); font-weight:700;">${b.status}</span>
+                    </div>
+                    <h3 style="margin:8px 0 4px;">${b.carName}</h3>
+                    <p style="color:var(--text-muted); font-size:0.88rem;">${b.tariff} • ${b.options}</p>
+                    <p style="margin-top:10px; font-weight:800; color:var(--gold);">${Number(b.total).toLocaleString('ru-RU')} ₽</p>
+                    <small style="color:var(--text-muted);">${b.createdAt}</small>
+                </div>
             `).join('');
         }
 
-        window.finishTrip = function(idx) {
-            const list = loadBookings();
-            if (list[idx]) {
-                list[idx].status = 'Завершена';
-                saveBookings(list);
-            }
-        };
-
-        document.getElementById('clearBookingsBtn').addEventListener('click', () => { if (confirm('Очистить всю историю бронирований?')) { saveBookings([]); } });
-
-                try {
-            const acc = JSON.parse(localStorage.getItem('melldrive_user_account_v1') || 'null');
-            if (acc && acc.name) {
-                document.getElementById('driverProfileTitle').textContent = 'Водитель: ' + acc.name;
-                const info = [acc.email, acc.phone].filter(Boolean).join(' • ');
-                if (info) document.getElementById('driverProfileContacts').textContent = info;
-            }
-        } catch (e) {}
-                try {
-            const sess = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
-            if (sess && sess.loggedIn && sess.name) {
-                document.getElementById('driverProfileTitle').textContent = 'Водитель: ' + sess.name;
-                const info = [sess.email, sess.phone].filter(Boolean).join(' • ');
-                if (info) document.getElementById('driverProfileContacts').textContent = info;
-                const licText = sess.license ? ('ВУ: ' + sess.license + (sess.licenseConfirmed ? ' (подтверждено)' : '')) : '';
-                if (licText) document.getElementById('driverLicenseInfo').textContent = licText;
-            }
-        } catch (e) {}
         renderBookings();
     </script>
-<script>
-(function() {
-    let isAdmin = false;
-    try {
-        const a = JSON.parse(localStorage.getItem('melldrive_admin_session_v1') || 'null');
-        isAdmin = Boolean(a && a.isAdmin === true);
-    } catch (e) {}
-    if (!isAdmin) {
-        document.querySelectorAll('header a[href*="admin.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-})();
-</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
