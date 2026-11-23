@@ -1,12 +1,46 @@
 ﻿from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 
+ZONES = [
+    {
+        "id": "center",
+        "region": "moscow",
+        "title": "Центр и ТТК",
+        "parking": "Бесплатно на платных парковках города",
+        "cars": [
+            {"id": 101, "name": "Hyundai Solaris", "category": "Эконом", "price_min": 11.5, "price_day": 2400, "available": True},
+            {"id": 102, "name": "Mercedes-Maybach S 580", "category": "Бизнес", "price_min": 75.0, "price_day": 55000, "available": True},
+            {"id": 103, "name": "Porsche 911 Turbo S", "category": "Спорт", "price_min": 90.0, "price_day": 72000, "available": True},
+        ],
+    },
+    {
+        "id": "north",
+        "region": "moscow",
+        "title": "Север и ВДНХ",
+        "parking": "Разрешено в зелёной зоне",
+        "cars": [
+            {"id": 201, "name": "Haval Jolion 4WD", "category": "Комфорт", "price_min": 15.5, "price_day": 3500, "available": True},
+            {"id": 202, "name": "Tesla Model 3", "category": "Электро", "price_min": 25.0, "price_day": 6900, "available": True},
+        ],
+    },
+    {
+        "id": "korolev",
+        "region": "mo",
+        "title": "Королёв и Мытищи",
+        "parking": "Разрешено в границах зоны МО",
+        "cars": [
+            {"id": 401, "name": "Hyundai Solaris", "category": "Эконом", "price_min": 11.5, "price_day": 2400, "available": True},
+            {"id": 402, "name": "Haval Jolion 4WD", "category": "Комфорт", "price_min": 15.5, "price_day": 3500, "available": True},
+        ],
+    },
+]
+
 CARS = [
     {"id": 1, "name": "Hyundai Solaris", "category": "Эконом", "price_min": 11.5, "price_day": 2400, "available": True},
     {"id": 2, "name": "Haval Jolion 4WD", "category": "Комфорт", "price_min": 15.5, "price_day": 3500, "available": True},
     {"id": 3, "name": "Tesla Model 3", "category": "Электро", "price_min": 25.0, "price_day": 6900, "available": True},
     {"id": 4, "name": "BMW M5 Competition", "category": "Спорт", "price_min": 55.0, "price_day": 39000, "available": True},
-]
+] + [car for z in ZONES for car in z["cars"]]
 
 USERS = [
     {"id": 1, "email": "admin@melldrive.ru", "name": "Алексей Навроцкий", "role": "admin", "age": 19}
@@ -38,6 +72,8 @@ class MellDriveHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/api/cars":
             self._send_json(200, {"cars": CARS})
+        elif self.path == "/api/zones":
+            self._send_json(200, {"zones": ZONES})
         elif self.path == "/api/bookings":
             self._send_json(200, {"bookings": BOOKINGS})
         elif self.path == "/api/health":
@@ -55,7 +91,11 @@ class MellDriveHandler(BaseHTTPRequestHandler):
             return
 
         if self.path == "/api/auth/register":
-            age = int(data.get("age", 0))
+            try:
+                age = int(data.get("age", 0))
+            except (TypeError, ValueError):
+                self._send_json(400, {"error": "Некорректный формат возраста"})
+                return
             if age < 18:
                 self._send_json(400, {"error": "Регистрация доступна только с 18 лет (BUG-001)"})
                 return
@@ -91,6 +131,7 @@ class MellDriveHandler(BaseHTTPRequestHandler):
                 "id": f"MD-{100100 + len(BOOKINGS)}",
                 "car_id": car_id,
                 "car_name": car["name"],
+                "zone_id": data.get("zone_id", "center"),
                 "tariff": data.get("tariff", "minute"),
                 "status": "active",
             }
