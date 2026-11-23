@@ -396,8 +396,25 @@
     }
 })();
 </script>
+<script>
+(function() {
+    let isAdmin = false;
+    try {
+        const a = JSON.parse(localStorage.getItem('melldrive_admin_session_v1') || 'null');
+        isAdmin = Boolean(a && a.isAdmin === true);
+    } catch (e) {}
+    if (!isAdmin) {
+        document.querySelectorAll('header a[href*="admin.html"]').forEach(a => {
+            const li = a.closest('li');
+            if (li) li.remove();
+            else a.remove();
+        });
+    }
+})();
+</script>
 </body>
 </html>
+
 
 
 

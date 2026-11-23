@@ -96,6 +96,28 @@
 </style>
 </head>
 <body>
+    <div id="adminAuthOverlay" style="position:fixed; inset:0; background:var(--bg-main); display:flex; align-items:center; justify-content:center; padding:20px; z-index:9999;">
+        <div style="width:100%; max-width:420px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px;">
+            <a href="../index.html" class="logo" style="justify-content:center; margin-bottom:16px;"><span class="logo__highlight">MELL</span>DRIVE <small style="font-size:0.75rem; color:var(--gold); margin-left:6px;">ADMIN</small></a>
+            <h2 style="font-size:1.35rem; text-align:center; margin-bottom:8px;">Вход в панель администратора</h2>
+            <p style="font-size:0.82rem; color:var(--text-muted); text-align:center; margin-bottom:16px;">
+                Доступ только для сотрудников • Логин: <code>admin@melldrive.ru</code> / Пароль: <code>admin123</code>
+            </p>
+            <form id="adminLoginForm" style="display:grid; gap:13px;">
+                <label>Логин администратора
+                    <input type="text" id="adminLoginInput" required placeholder="admin@melldrive.ru" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+                </label>
+                <label>Пароль
+                    <input type="password" id="adminPassInput" required placeholder="••••••••" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+                </label>
+                <p id="adminAuthErr" class="hidden" style="color:var(--danger); font-size:0.86rem;"></p>
+                <button type="submit" class="btn btn--primary btn--block">Войти в админку</button>
+            </form>
+            <p style="margin-top:14px; text-align:center; font-size:0.88rem;">
+                <a href="../index.html" style="color:var(--gold);">← Вернуться на главную</a>
+            </p>
+        </div>
+    </div>
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE <small style="font-size:0.75rem; color:var(--gold); margin-left:6px;">ADMIN</small></a>
@@ -109,6 +131,7 @@
                     <li><a href="ui-kit.html" class="nav__link " style="white-space:nowrap;">UI-кит</a></li>
                 </ul>
             </nav>
+            <div class="header__actions"><button type="button" class="btn btn--outline btn--sm" id="adminLogoutBtn">Выйти из админки</button></div>
         </div>
     </header>
 
@@ -354,6 +377,47 @@
                 showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
             }
         });
+                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
+        const ADMIN_LOGIN = 'admin@melldrive.ru';
+        const ADMIN_PASS = 'admin123';
+
+        function checkAdminAuth() {
+            const overlay = document.getElementById('adminAuthOverlay');
+            let isAuthed = false;
+            try {
+                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+                isAuthed = Boolean(s && s.isAdmin === true);
+            } catch (e) {}
+            if (overlay) {
+                overlay.style.display = isAuthed ? 'none' : 'flex';
+            }
+            return isAuthed;
+        }
+
+        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
+            const p = document.getElementById('adminPassInput').value;
+            const err = document.getElementById('adminAuthErr');
+
+            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
+                err.classList.add('hidden');
+                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
+                checkAdminAuth();
+                renderAdmin();
+                renderAccountsDb();
+            } else {
+                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
+                err.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            checkAdminAuth();
+        });
+
+        checkAdminAuth();
         renderAdmin();
         renderAccountsDb();
             showToast(`Тарифы и данные для «${name}» сохранены.`);
@@ -421,6 +485,47 @@
                 showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
             }
         });
+                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
+        const ADMIN_LOGIN = 'admin@melldrive.ru';
+        const ADMIN_PASS = 'admin123';
+
+        function checkAdminAuth() {
+            const overlay = document.getElementById('adminAuthOverlay');
+            let isAuthed = false;
+            try {
+                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+                isAuthed = Boolean(s && s.isAdmin === true);
+            } catch (e) {}
+            if (overlay) {
+                overlay.style.display = isAuthed ? 'none' : 'flex';
+            }
+            return isAuthed;
+        }
+
+        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
+            const p = document.getElementById('adminPassInput').value;
+            const err = document.getElementById('adminAuthErr');
+
+            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
+                err.classList.add('hidden');
+                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
+                checkAdminAuth();
+                renderAdmin();
+                renderAccountsDb();
+            } else {
+                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
+                err.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            checkAdminAuth();
+        });
+
+        checkAdminAuth();
         renderAdmin();
         renderAccountsDb();
             showToast(`Автомобиль «${removed.name}» удалён из каталога.`);
@@ -492,6 +597,47 @@
                 showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
             }
         });
+                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
+        const ADMIN_LOGIN = 'admin@melldrive.ru';
+        const ADMIN_PASS = 'admin123';
+
+        function checkAdminAuth() {
+            const overlay = document.getElementById('adminAuthOverlay');
+            let isAuthed = false;
+            try {
+                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+                isAuthed = Boolean(s && s.isAdmin === true);
+            } catch (e) {}
+            if (overlay) {
+                overlay.style.display = isAuthed ? 'none' : 'flex';
+            }
+            return isAuthed;
+        }
+
+        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
+            const p = document.getElementById('adminPassInput').value;
+            const err = document.getElementById('adminAuthErr');
+
+            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
+                err.classList.add('hidden');
+                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
+                checkAdminAuth();
+                renderAdmin();
+                renderAccountsDb();
+            } else {
+                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
+                err.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            checkAdminAuth();
+        });
+
+        checkAdminAuth();
         renderAdmin();
         renderAccountsDb();
                 showToast(`Статус заказа ${list[idx].id} изменён на «${newStatus}».`);
@@ -569,6 +715,47 @@
                 showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
             }
         });
+                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
+        const ADMIN_LOGIN = 'admin@melldrive.ru';
+        const ADMIN_PASS = 'admin123';
+
+        function checkAdminAuth() {
+            const overlay = document.getElementById('adminAuthOverlay');
+            let isAuthed = false;
+            try {
+                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+                isAuthed = Boolean(s && s.isAdmin === true);
+            } catch (e) {}
+            if (overlay) {
+                overlay.style.display = isAuthed ? 'none' : 'flex';
+            }
+            return isAuthed;
+        }
+
+        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
+            const p = document.getElementById('adminPassInput').value;
+            const err = document.getElementById('adminAuthErr');
+
+            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
+                err.classList.add('hidden');
+                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
+                checkAdminAuth();
+                renderAdmin();
+                renderAccountsDb();
+            } else {
+                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
+                err.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            checkAdminAuth();
+        });
+
+        checkAdminAuth();
         renderAdmin();
         renderAccountsDb();
             showToast('Отзыв обновлён.');
@@ -632,6 +819,47 @@
                 showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
             }
         });
+                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
+        const ADMIN_LOGIN = 'admin@melldrive.ru';
+        const ADMIN_PASS = 'admin123';
+
+        function checkAdminAuth() {
+            const overlay = document.getElementById('adminAuthOverlay');
+            let isAuthed = false;
+            try {
+                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+                isAuthed = Boolean(s && s.isAdmin === true);
+            } catch (e) {}
+            if (overlay) {
+                overlay.style.display = isAuthed ? 'none' : 'flex';
+            }
+            return isAuthed;
+        }
+
+        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
+            const p = document.getElementById('adminPassInput').value;
+            const err = document.getElementById('adminAuthErr');
+
+            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
+                err.classList.add('hidden');
+                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
+                checkAdminAuth();
+                renderAdmin();
+                renderAccountsDb();
+            } else {
+                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
+                err.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            checkAdminAuth();
+        });
+
+        checkAdminAuth();
         renderAdmin();
         renderAccountsDb();
             showToast('Отзыв удалён.');
@@ -802,6 +1030,47 @@
                 showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
             }
         });
+                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
+        const ADMIN_LOGIN = 'admin@melldrive.ru';
+        const ADMIN_PASS = 'admin123';
+
+        function checkAdminAuth() {
+            const overlay = document.getElementById('adminAuthOverlay');
+            let isAuthed = false;
+            try {
+                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+                isAuthed = Boolean(s && s.isAdmin === true);
+            } catch (e) {}
+            if (overlay) {
+                overlay.style.display = isAuthed ? 'none' : 'flex';
+            }
+            return isAuthed;
+        }
+
+        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
+            const p = document.getElementById('adminPassInput').value;
+            const err = document.getElementById('adminAuthErr');
+
+            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
+                err.classList.add('hidden');
+                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
+                checkAdminAuth();
+                renderAdmin();
+                renderAccountsDb();
+            } else {
+                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
+                err.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            checkAdminAuth();
+        });
+
+        checkAdminAuth();
         renderAdmin();
         renderAccountsDb();
             showToast(`Автомобиль «${name}» добавлен в автопарк.`);
@@ -864,6 +1133,47 @@
                 showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
             }
         });
+                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
+        const ADMIN_LOGIN = 'admin@melldrive.ru';
+        const ADMIN_PASS = 'admin123';
+
+        function checkAdminAuth() {
+            const overlay = document.getElementById('adminAuthOverlay');
+            let isAuthed = false;
+            try {
+                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+                isAuthed = Boolean(s && s.isAdmin === true);
+            } catch (e) {}
+            if (overlay) {
+                overlay.style.display = isAuthed ? 'none' : 'flex';
+            }
+            return isAuthed;
+        }
+
+        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
+            const p = document.getElementById('adminPassInput').value;
+            const err = document.getElementById('adminAuthErr');
+
+            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
+                err.classList.add('hidden');
+                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
+                checkAdminAuth();
+                renderAdmin();
+                renderAccountsDb();
+            } else {
+                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
+                err.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            checkAdminAuth();
+        });
+
+        checkAdminAuth();
         renderAdmin();
         renderAccountsDb();
                 showToast('Базовый автопарк восстановлен.');
@@ -930,11 +1240,53 @@
                 showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
             }
         });
+                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
+        const ADMIN_LOGIN = 'admin@melldrive.ru';
+        const ADMIN_PASS = 'admin123';
+
+        function checkAdminAuth() {
+            const overlay = document.getElementById('adminAuthOverlay');
+            let isAuthed = false;
+            try {
+                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+                isAuthed = Boolean(s && s.isAdmin === true);
+            } catch (e) {}
+            if (overlay) {
+                overlay.style.display = isAuthed ? 'none' : 'flex';
+            }
+            return isAuthed;
+        }
+
+        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
+            const p = document.getElementById('adminPassInput').value;
+            const err = document.getElementById('adminAuthErr');
+
+            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
+                err.classList.add('hidden');
+                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
+                checkAdminAuth();
+                renderAdmin();
+                renderAccountsDb();
+            } else {
+                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
+                err.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            checkAdminAuth();
+        });
+
+        checkAdminAuth();
         renderAdmin();
         renderAccountsDb();
     </script>
 </body>
 </html>
+
 
 
 
