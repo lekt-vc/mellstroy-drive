@@ -11,8 +11,8 @@
         <a href="../index.html" class="logo" style="justify-content:center; margin-bottom:18px;"><span class="logo__highlight">MELL</span>DRIVE</a>
         <h1 style="font-size:1.5rem; margin-bottom:16px; text-align:center;">Регистрация водителя</h1>
         <form id="regForm" style="display:grid; gap:14px;">
-            <label>Имя и фамилия
-                <input type="text" required placeholder="Алексей Навроцкий" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+            <label>Имя и фамилия (обязательно оба поля через пробел)
+                <input type="text" id="fullName" required placeholder="Иван Смирнов" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
             </label>
             <label>Дата рождения (от 18 лет)
                 <input type="date" id="birthDate" required style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
@@ -30,11 +30,18 @@
     <script>
         document.getElementById('regForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            const fullName = document.getElementById('fullName').value.trim();
+            const nameParts = fullName.split(/\s+/).filter(Boolean);
             const val = document.getElementById('birthDate').value;
             const rawLicense = document.getElementById('driverLicense').value;
             const digitsOnly = rawLicense.replace(/\D/g, '');
             const err = document.getElementById('regError');
 
+            if (nameParts.length < 2 || nameParts.some(p => p.length < 2)) {
+                err.textContent = 'Укажите и имя, и фамилию (минимум два слова через пробел).';
+                err.classList.remove('hidden');
+                return;
+            }
             if (!val) return;
             const birth = new Date(val);
             const age = (Date.now() - birth.getTime()) / (1000 * 60 * 60 * 24 * 365.25);

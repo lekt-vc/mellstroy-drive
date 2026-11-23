@@ -43,7 +43,7 @@ CARS = [
 ] + [car for z in ZONES for car in z["cars"]]
 
 USERS = [
-    {"id": 1, "email": "admin@melldrive.ru", "name": "Алексей Навроцкий", "role": "admin", "age": 19}
+    {"id": 1, "email": "admin@melldrive.ru", "name": "Водитель (lekt-vc)", "role": "admin", "age": 19}
 ]
 
 BOOKINGS = []
@@ -145,3 +145,4 @@ if __name__ == "__main__":
     server = HTTPServer(("127.0.0.1", 8080), MellDriveHandler)
     print("MELLDRIVE API running on http://127.0.0.1:8080")
     server.serve_forever()
+
