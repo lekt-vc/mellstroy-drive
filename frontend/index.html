@@ -69,6 +69,27 @@
             margin-top: 4px;
         }
     </style>
+
+<style id="force-nav-visible">
+  .header, .header .container, .header__container { overflow: visible !important; }
+  .header .nav, .header nav {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    transform: none !important;
+    max-height: none !important;
+    width: auto !important;
+    background: transparent !important;
+  }
+  .header .nav__list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 16px !important;
+  }
+  .header .nav__link { display: inline-block !important; white-space: nowrap !important; }
+</style>
 </head>
 <body>
     <div class="editor-bar" id="editorBar">
@@ -81,23 +102,22 @@
         </div>
     </div>
 
-    <header class="header">
+            <header class="header">
         <div class="container header__container">
             <a href="index.html" class="logo" id="brandLogo">
                 <span class="logo__highlight">MELL</span>DRIVE
             </a>
-            <nav class="nav" id="mainNav">
-                <ul class="nav__list">
-                    <li><a href="index.html" class="nav__link active">Главная</a></li>
-                    <li><a href="pages/catalog.html" class="nav__link">Автопарк</a></li>
-                    <li><a href="pages/map.html" class="nav__link">Карта зон</a></li>
-                    <li><a href="#tariffs" class="nav__link">Тарифы</a></li>
-                    <li><a href="pages/profile.html" class="nav__link">Кабинет</a></li>
-                    <li><a href="pages/admin.html" class="nav__link">Админка</a></li>
-                    <li><a href="pages/ui-kit.html" class="nav__link">UI-кит</a></li>
+            <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
+                <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
+                    <li><a href="index.html" class="nav__link active" style="white-space:nowrap;">Главная</a></li>
+                    <li><a href="pages/catalog.html" class="nav__link" style="white-space:nowrap;">Автопарк</a></li>
+                    <li><a href="pages/map.html" class="nav__link" style="white-space:nowrap;">Карта зон</a></li>
+                    <li><a href="pages/profile.html" class="nav__link" style="white-space:nowrap;">Кабинет</a></li>
+                    <li><a href="pages/admin.html" class="nav__link" style="white-space:nowrap;">Админка</a></li>
+                    <li><a href="pages/ui-kit.html" class="nav__link" style="white-space:nowrap;">UI-кит</a></li>
                 </ul>
             </nav>
-            <div class="header__actions">
+            <div class="header__actions" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                 <button type="button" class="theme-toggle" id="themeToggle" aria-label="Сменить тему">🌙</button>
                 <button type="button" class="btn btn--outline btn--sm" id="toggleEditorBtn">Редактор</button>
                 <a href="pages/login.html" class="btn btn--primary btn--sm">Войти</a>
@@ -209,4 +229,6 @@
     <script src="assets/js/app.js"></script>
 </body>
 </html>
+
+
 

@@ -74,19 +74,39 @@
         }
         .toast-banner.show { display: block; }
     </style>
+<style id="force-nav-visible">
+  .header, .header .container, .header__container { overflow: visible !important; }
+  .header .nav, .header nav {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    transform: none !important;
+    max-height: none !important;
+    width: auto !important;
+    background: transparent !important;
+  }
+  .header .nav__list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 16px !important;
+  }
+  .header .nav__link { display: inline-block !important; white-space: nowrap !important; }
+</style>
 </head>
 <body>
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE <small style="font-size:0.75rem; color:var(--gold); margin-left:6px;">ADMIN</small></a>
-                        <nav class="nav" id="mainNav">
-                <ul class="nav__list">
-                    <li><a href="../index.html" class="nav__link">Главная</a></li>
-                    <li><a href="catalog.html" class="nav__link ">Автопарк</a></li>
-                    <li><a href="map.html" class="nav__link ">Карта зон</a></li>
-                    <li><a href="profile.html" class="nav__link ">Кабинет</a></li>
-                    <li><a href="admin.html" class="nav__link active">Админка</a></li>
-                    <li><a href="ui-kit.html" class="nav__link ">UI-кит</a></li>
+                                                <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
+                <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
+                    <li><a href="../index.html" class="nav__link" style="white-space:nowrap;">Главная</a></li>
+                    <li><a href="catalog.html" class="nav__link " style="white-space:nowrap;">Автопарк</a></li>
+                    <li><a href="map.html" class="nav__link " style="white-space:nowrap;">Карта зон</a></li>
+                    <li><a href="profile.html" class="nav__link " style="white-space:nowrap;">Кабинет</a></li>
+                    <li><a href="admin.html" class="nav__link active" style="white-space:nowrap;">Админка</a></li>
+                    <li><a href="ui-kit.html" class="nav__link " style="white-space:nowrap;">UI-кит</a></li>
                 </ul>
             </nav>
         </div>
@@ -915,6 +935,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
