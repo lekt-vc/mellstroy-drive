@@ -227,8 +227,25 @@
     </div>
 
     <script src="assets/js/app.js"></script>
+<script>
+(function() {
+    let loggedIn = false;
+    try {
+        const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+        loggedIn = Boolean(s && s.loggedIn);
+    } catch (e) {}
+    if (!loggedIn) {
+        document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
+            const li = a.closest('li');
+            if (li) li.remove();
+            else a.remove();
+        });
+    }
+})();
+</script>
 </body>
 </html>
+
 
 
 

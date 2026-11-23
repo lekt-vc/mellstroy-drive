@@ -67,7 +67,7 @@
             <p class="section__subtitle">Профиль, статус водительского удостоверения и активные бронирования</p>
             <div class="cars-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
                 <div class="car-card" style="padding:22px;">
-                    <h3 id="driverProfileTitle">Водитель: lekt-vc</h3><p id="driverProfileContacts" style="color:var(--text-muted); font-size:0.86rem; margin-top:4px;"></p>
+                    <h3 id="driverProfileTitle">Водитель: </h3><p id="driverProfileContacts" style="color:var(--text-muted); font-size:0.86rem; margin-top:4px;"></p>
                     <p style="color:var(--text-muted); margin:10px 0;">Статус ВУ: <strong style="color:var(--success);">Подтверждено</strong></p>
                     <p style="color:var(--text-muted);">Активный бонусный счёт: <strong style="color:var(--gold);">1 250 ₽</strong></p>
                 </div>
@@ -99,6 +99,13 @@
     </main>
 
     <script>
+        let activeSession = null;
+        try {
+            activeSession = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+        } catch (e) {}
+        if (!activeSession || !activeSession.loggedIn) {
+            window.location.replace('login.html');
+        }
         const BOOKINGS_KEY = 'melldrive_bookings_v1';
         const DEFAULT_BOOKINGS = [
             {
@@ -207,6 +214,7 @@
     </script>
 </body>
 </html>
+
 
 
 
