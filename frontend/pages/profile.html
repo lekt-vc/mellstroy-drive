@@ -142,11 +142,10 @@
             }
         };
 
-        document.getElementById('clearBookingsBtn').addEventListener('click', () => {
-            saveBookings([]);
-        });
+        document.getElementById('clearBookingsBtn').addEventListener('click', () => { if (confirm('Очистить всю историю бронирований?')) { saveBookings([]); } });
 
         renderBookings();
     </script>
 </body>
 </html>
+
