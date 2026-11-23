@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автопарк — MELLDRIVE</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <style>
+        .catalog-toolbar {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .catalog-toolbar input, .catalog-toolbar select {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 11px 14px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .catalog-toolbar { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header__container">
+            <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
+            <nav class="nav">
+                <ul class="nav__list">
+                    <li><a href="../index.html" class="nav__link">Главная</a></li>
+                    <li><a href="catalog.html" class="nav__link active">Автопарк</a></li>
+                    <li><a href="profile.html" class="nav__link">Кабинет</a></li>
+                    <li><a href="admin.html" class="nav__link">Админка</a></li>
+                </ul>
+            </nav>
+            <div class="header__actions">
+                <a href="../index.html" class="btn btn--outline btn--sm">На главную</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="section">
+        <div class="container">
+            <h1 class="section__title">Каталог автопарка</h1>
+            <p class="section__subtitle">Найдено авто: <strong id="carsCount">0</strong></p>
+
+            <div class="catalog-toolbar">
+                <input type="search" id="qInput" placeholder="Поиск по марке или характеристикам...">
+                <select id="catFilter"><option value="all">Все классы</option></select>
+                <select id="sortFilter">
+                    <option value="default">Без сортировки</option>
+                    <option value="price-asc">Сначала дешевле (сутки)</option>
+                    <option value="price-desc">Сначала дороже (сутки)</option>
+                </select>
+            </div>
+
+            <div class="cars-grid" id="catalogGrid"></div>
+        </div>
+    </main>
+
+    <script>
+        const STORAGE_KEY = 'melldrive_cms_v2';
+        const DEFAULT_CARS = [
+            { id: 1, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceDay: 2400, img: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80' },
+            { id: 2, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Камеры 360', priceMin: 15.5, priceDay: 3500, img: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=800&q=80' },
+            { id: 3, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Премиум', priceMin: 25.0, priceDay: 6900, img: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=800&q=80' },
+            { id: 4, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceDay: 39000, img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80' }
+        ];
+
+        let cars = DEFAULT_CARS;
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed.cars) && parsed.cars.length) cars = parsed.cars;
+            }
+        } catch (e) {}
+
+        const catSel = document.getElementById('catFilter');
+        [...new Set(cars.map(c => c.category))].forEach(cat => {
+            const o = document.createElement('option');
+            o.value = cat;
+            o.textContent = cat;
+            catSel.appendChild(o);
+        });
+
+        function render() {
+            const q = document.getElementById('qInput').value.trim().toLowerCase();
+            const cat = catSel.value;
+            const sort = document.getElementById('sortFilter').value;
+
+            let list = cars.filter(c => (!cat || cat === 'all' || c.category === cat) && (!q || c.name.toLowerCase().includes(q) || c.specs.toLowerCase().includes(q)));
+            if (sort === 'price-asc') list.sort((a, b) => a.priceDay - b.priceDay);
+            if (sort === 'price-desc') list.sort((a, b) => b.priceDay - a.priceDay);
+
+            document.getElementById('carsCount').textContent = list.length;
+            document.getElementById('catalogGrid').innerHTML = list.map(car => `
+                <article class="car-card">
+                    <div class="car-card__badge">${car.category}</div>
+                    <img class="car-card__img" src="${car.img}" alt="${car.name}">
+                    <div class="car-card__body">
+                        <h3 class="car-card__title">${car.name}</h3>
+                        <div class="car-card__specs">${car.specs}</div>
+                        <div class="car-card__pricing">
+                            <span class="car-card__price">${Number(car.priceMin).toFixed(2)} ₽ / мин</span>
+                            <span class="car-card__price-sub">или ${Number(car.priceDay).toLocaleString('ru-RU')} ₽ / сутки</span>
+                        </div>
+                        <a href="car.html?id=${car.id}" class="btn btn--primary btn--block">Забронировать</a>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        document.getElementById('qInput').addEventListener('input', render);
+        catSel.addEventListener('change', render);
+        document.getElementById('sortFilter').addEventListener('change', render);
+        render();
+    </script>
+</body>
+</html>
