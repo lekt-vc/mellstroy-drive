@@ -44,7 +44,7 @@
             <p class="section__subtitle">Профиль, статус водительского удостоверения и активные бронирования</p>
             <div class="cars-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
                 <div class="car-card" style="padding:22px;">
-                    <h3>Водитель: Водитель (lekt-vc)</h3>
+                    <h3 id="driverProfileTitle">Водитель: lekt-vc</h3><p id="driverProfileContacts" style="color:var(--text-muted); font-size:0.86rem; margin-top:4px;"></p>
                     <p style="color:var(--text-muted); margin:10px 0;">Статус ВУ: <strong style="color:var(--success);">Подтверждено</strong></p>
                     <p style="color:var(--text-muted);">Активный бонусный счёт: <strong style="color:var(--gold);">1 250 ₽</strong></p>
                 </div>
@@ -104,7 +104,15 @@
 
         function saveBookings(list) {
             localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
-            renderBookings();
+                    try {
+            const acc = JSON.parse(localStorage.getItem('melldrive_user_account_v1') || 'null');
+            if (acc && acc.name) {
+                document.getElementById('driverProfileTitle').textContent = 'Водитель: ' + acc.name;
+                const info = [acc.email, acc.phone].filter(Boolean).join(' • ');
+                if (info) document.getElementById('driverProfileContacts').textContent = info;
+            }
+        } catch (e) {}
+        renderBookings();
         }
 
         function renderBookings() {
@@ -144,9 +152,18 @@
 
         document.getElementById('clearBookingsBtn').addEventListener('click', () => { if (confirm('Очистить всю историю бронирований?')) { saveBookings([]); } });
 
+                try {
+            const acc = JSON.parse(localStorage.getItem('melldrive_user_account_v1') || 'null');
+            if (acc && acc.name) {
+                document.getElementById('driverProfileTitle').textContent = 'Водитель: ' + acc.name;
+                const info = [acc.email, acc.phone].filter(Boolean).join(' • ');
+                if (info) document.getElementById('driverProfileContacts').textContent = info;
+            }
+        } catch (e) {}
         renderBookings();
     </script>
 </body>
 </html>
+
 
 

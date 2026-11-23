@@ -8,12 +8,12 @@ const DEFAULT_CMS = {
         catalogTitle: 'Популярные авто в парке'
     },
     cars: [
-        { id: 1, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceDay: 2400, img: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80' },
-        { id: 2, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Камеры 360', priceMin: 15.5, priceDay: 3500, img: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=800&q=80' },
-        { id: 3, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Премиум', priceMin: 25.0, priceDay: 6900, img: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=800&q=80' },
-        { id: 4, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceDay: 39000, img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80' },
-        { id: 5, name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Полный привод', priceMin: 75.0, priceDay: 55000, img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=800&q=80' },
-        { id: 6, name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • 0-100 за 2.7 с', priceMin: 90.0, priceDay: 72000, img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80' }
+        { id: 1, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceDay: 2400, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg/960px-2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg' },
+        { id: 2, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Камеры 360', priceMin: 15.5, priceDay: 3500, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Haval_Jolion_China_%282%29.jpg/960px-Haval_Jolion_China_%282%29.jpg' },
+        { id: 3, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Премиум', priceMin: 25.0, priceDay: 6900, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/2019_Tesla_Model_3_Performance_AWD_Red_Front.jpg/960px-2019_Tesla_Model_3_Performance_AWD_Red_Front.jpg' },
+        { id: 4, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceDay: 39000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/BMW_M5_F90_Competition_IMG_3602.jpg/960px-BMW_M5_F90_Competition_IMG_3602.jpg' },
+        { id: 5, name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Полный привод', priceMin: 75.0, priceDay: 55000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Mercedes-Maybach_S_580_4MATIC_X223_IMG_4266.jpg/960px-Mercedes-Maybach_S_580_4MATIC_X223_IMG_4266.jpg' },
+        { id: 6, name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • 0-100 за 2.7 с', priceMin: 90.0, priceDay: 72000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg/960px-Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg' }
     ]
 };
 
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
             specs,
             priceMin,
             priceDay,
-            img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80'
+            img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg/960px-Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg'
         });
         saveCms();
         renderFilters();
@@ -172,3 +172,4 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('mainNav')?.classList.toggle('open');
     });
 });
+
