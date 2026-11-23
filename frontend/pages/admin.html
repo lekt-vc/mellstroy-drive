@@ -74,28 +74,9 @@
         }
         .toast-banner.show { display: block; }
     </style>
-<style id="force-nav-visible">
-  .header, .header .container, .header__container { overflow: visible !important; }
-  .header .nav, .header nav {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: static !important;
-    transform: none !important;
-    max-height: none !important;
-    width: auto !important;
-    background: transparent !important;
-  }
-  .header .nav__list {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 16px !important;
-  }
-  .header .nav__link { display: inline-block !important; white-space: nowrap !important; }
-</style>
 </head>
 <body>
+    <!-- Окно входа администратора -->
     <div id="adminAuthOverlay" style="position:fixed; inset:0; background:var(--bg-main); display:flex; align-items:center; justify-content:center; padding:20px; z-index:9999;">
         <div style="width:100%; max-width:420px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px;">
             <a href="../index.html" class="logo" style="justify-content:center; margin-bottom:16px;"><span class="logo__highlight">MELL</span>DRIVE <small style="font-size:0.75rem; color:var(--gold); margin-left:6px;">ADMIN</small></a>
@@ -105,40 +86,42 @@
             </p>
             <form id="adminLoginForm" style="display:grid; gap:13px;">
                 <label>Логин администратора
-                    <input type="text" id="adminLoginInput" required placeholder="admin@melldrive.ru" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+                    <input type="text" id="adminLoginInput" required value="admin@melldrive.ru" placeholder="admin@melldrive.ru" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
                 </label>
                 <label>Пароль
-                    <input type="password" id="adminPassInput" required placeholder="••••••••" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+                    <input type="password" id="adminPassInput" required placeholder="admin123" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
                 </label>
-                <p id="adminAuthErr" class="hidden" style="color:var(--danger); font-size:0.86rem;"></p>
-                <button type="submit" class="btn btn--primary btn--block">Войти в админку</button>
+                <p id="adminAuthErr" style="display:none; color:var(--danger); font-size:0.86rem; margin:0;"></p>
+                <button type="submit" id="adminLoginSubmitBtn" class="btn btn--primary btn--block">Войти в админку</button>
             </form>
             <p style="margin-top:14px; text-align:center; font-size:0.88rem;">
                 <a href="../index.html" style="color:var(--gold);">← Вернуться на главную</a>
             </p>
         </div>
     </div>
+
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE <small style="font-size:0.75rem; color:var(--gold); margin-left:6px;">ADMIN</small></a>
-                                                <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
+            <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
                 <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
-                    <li><a href="../index.html" class="nav__link" style="white-space:nowrap;">Главная</a></li>
-                    <li><a href="catalog.html" class="nav__link " style="white-space:nowrap;">Автопарк</a></li>
-                    <li><a href="map.html" class="nav__link " style="white-space:nowrap;">Карта зон</a></li>
-                    <li><a href="profile.html" class="nav__link " style="white-space:nowrap;">Кабинет</a></li>
-                    <li><a href="admin.html" class="nav__link active" style="white-space:nowrap;">Админка</a></li>
-                    <li><a href="ui-kit.html" class="nav__link " style="white-space:nowrap;">UI-кит</a></li>
+                    <li><a href="../index.html" class="nav__link">На сайт</a></li>
+                    <li><a href="catalog.html" class="nav__link">Каталог</a></li>
+                    <li><a href="map.html" class="nav__link">Карта зон</a></li>
+                    <li><a href="admin.html" class="nav__link active">Админка</a></li>
+                    <li><a href="ui-kit.html" class="nav__link">UI-кит</a></li>
                 </ul>
             </nav>
-            <div class="header__actions"><button type="button" class="btn btn--outline btn--sm" id="adminLogoutBtn">Выйти из админки</button></div>
+            <div class="header__actions">
+                <button type="button" class="btn btn--outline btn--sm" id="adminLogoutBtn">Выйти из админки</button>
+            </div>
         </div>
     </header>
 
     <main class="section">
         <div class="container">
             <h1 class="section__title">Панель администратора</h1>
-            <p class="section__subtitle">Управление автопарком и ценами, контроль заказов и модерация отзывов</p>
+            <p class="section__subtitle">Управление автопарком и ценами, контроль заказов, модерация отзывов и база аккаунтов</p>
 
             <div class="toast-banner" id="adminToast"></div>
 
@@ -240,8 +223,8 @@
                     <tbody id="adminReviewsBody"></tbody>
                 </table>
             </div>
-        </div>
-                <!-- Блок 5: Локальная база аккаунтов -->
+
+            <!-- Блок 5: Локальная база аккаунтов -->
             <div class="admin-panel-box">
                 <div class="panel-head">
                     <h3>Локальная база аккаунтов (melldrive_accounts_db_v1)</h3>
@@ -265,9 +248,15 @@
     </main>
 
     <script>
+        const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
         const STORAGE_KEY = 'melldrive_cms_v2';
         const BOOKINGS_KEY = 'melldrive_bookings_v1';
         const REVIEWS_KEY = 'melldrive_reviews_v1';
+        const DB_KEY = 'melldrive_accounts_db_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
+
+        const ADMIN_LOGIN = 'admin@melldrive.ru';
+        const ADMIN_PASS = 'admin123';
 
         const DEFAULT_CARS = [
             { id: 1, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceDay: 2400, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg/960px-2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg' },
@@ -278,12 +267,38 @@
             { id: 6, name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • 0-100 за 2.7 с', priceMin: 90.0, priceDay: 72000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg/960px-Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg' }
         ];
 
+        const BASE_DEMO_ACCOUNT = [
+            {
+                id: 1,
+                name: 'Водитель MELLDRIVE',
+                email: 'demo@melldrive.ru',
+                phone: '+79990000000',
+                password: 'password123',
+                license: '9901123456',
+                licenseConfirmed: true
+            }
+        ];
+
         function showToast(msg) {
             const el = document.getElementById('adminToast');
+            if (!el) return;
             el.textContent = msg;
             el.classList.add('show');
             clearTimeout(window._toastTimer);
             window._toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+        }
+
+        function checkAdminAuth() {
+            const overlay = document.getElementById('adminAuthOverlay');
+            let isAuthed = false;
+            try {
+                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+                isAuthed = Boolean(s && s.isAdmin === true);
+            } catch (e) {}
+            if (overlay) {
+                overlay.style.display = isAuthed ? 'none' : 'flex';
+            }
+            return isAuthed;
         }
 
         function getCmsState() {
@@ -309,7 +324,6 @@
         function saveCarRow(idx) {
             const cars = getCmsState().cars;
             if (!cars[idx]) return;
-
             const name = document.getElementById(`carName_${idx}`).value.trim();
             const category = document.getElementById(`carCat_${idx}`).value;
             const specs = document.getElementById(`carSpecs_${idx}`).value.trim();
@@ -317,109 +331,12 @@
             const priceDay = Number(document.getElementById(`carDay_${idx}`).value);
 
             if (!name || !specs || priceMin <= 0 || priceDay <= 0 || Number.isNaN(priceMin) || Number.isNaN(priceDay)) {
-                showToast('Ошибка: проверьте название и положительную цену (BUG-009).');
+                showToast('Ошибка: проверьте название и положительную цену.');
                 return;
             }
-
             cars[idx] = { ...cars[idx], name, category, specs, priceMin, priceDay };
             saveCmsCars(cars);
-                    const DB_KEY = 'melldrive_accounts_db_v1';
-        const SESSION_KEY = 'melldrive_active_session_v1';
-        const BASE_DEMO_ACCOUNT = [
-            {
-                id: 1,
-                name: 'Водитель MELLDRIVE',
-                email: 'demo@melldrive.ru',
-                phone: '+79990000000',
-                password: 'password123',
-                license: '9901123456',
-                licenseConfirmed: true
-            }
-        ];
-
-        function getAccountsDb() {
-            try {
-                const raw = localStorage.getItem(DB_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) return parsed;
-                }
-            } catch (e) {}
-            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-            return [...BASE_DEMO_ACCOUNT];
-        }
-
-        function renderAccountsDb() {
-            const accs = getAccountsDb();
-            const body = document.getElementById('adminAccountsBody');
-            if (!body) return;
-            if (!accs.length) {
-                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
-                return;
-            }
-            body.innerHTML = accs.map(a => 
-                <tr>
-                    <td><strong></strong></td>
-                    <td></td>
-                    <td></td>
-                    <td><code></code></td>
-                    <td></td>
-                    <td style="color:var(--success);"></td>
-                </tr>
-            ).join('');
-        }
-
-        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
-            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
-                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-                localStorage.removeItem(SESSION_KEY);
-                renderAccountsDb();
-                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
-            }
-        });
-                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
-        const ADMIN_LOGIN = 'admin@melldrive.ru';
-        const ADMIN_PASS = 'admin123';
-
-        function checkAdminAuth() {
-            const overlay = document.getElementById('adminAuthOverlay');
-            let isAuthed = false;
-            try {
-                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
-                isAuthed = Boolean(s && s.isAdmin === true);
-            } catch (e) {}
-            if (overlay) {
-                overlay.style.display = isAuthed ? 'none' : 'flex';
-            }
-            return isAuthed;
-        }
-
-        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
-            const p = document.getElementById('adminPassInput').value;
-            const err = document.getElementById('adminAuthErr');
-
-            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
-                err.classList.add('hidden');
-                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
-                checkAdminAuth();
-                renderAdmin();
-                renderAccountsDb();
-            } else {
-                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
-                err.classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem(ADMIN_SESSION_KEY);
-            checkAdminAuth();
-        });
-
-        checkAdminAuth();
-        renderAdmin();
-        renderAccountsDb();
+            renderAll();
             showToast(`Тарифы и данные для «${name}» сохранены.`);
         }
 
@@ -431,103 +348,7 @@
             }
             const removed = cars.splice(idx, 1)[0];
             saveCmsCars(cars);
-                    const DB_KEY = 'melldrive_accounts_db_v1';
-        const SESSION_KEY = 'melldrive_active_session_v1';
-        const BASE_DEMO_ACCOUNT = [
-            {
-                id: 1,
-                name: 'Водитель MELLDRIVE',
-                email: 'demo@melldrive.ru',
-                phone: '+79990000000',
-                password: 'password123',
-                license: '9901123456',
-                licenseConfirmed: true
-            }
-        ];
-
-        function getAccountsDb() {
-            try {
-                const raw = localStorage.getItem(DB_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) return parsed;
-                }
-            } catch (e) {}
-            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-            return [...BASE_DEMO_ACCOUNT];
-        }
-
-        function renderAccountsDb() {
-            const accs = getAccountsDb();
-            const body = document.getElementById('adminAccountsBody');
-            if (!body) return;
-            if (!accs.length) {
-                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
-                return;
-            }
-            body.innerHTML = accs.map(a => 
-                <tr>
-                    <td><strong></strong></td>
-                    <td></td>
-                    <td></td>
-                    <td><code></code></td>
-                    <td></td>
-                    <td style="color:var(--success);"></td>
-                </tr>
-            ).join('');
-        }
-
-        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
-            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
-                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-                localStorage.removeItem(SESSION_KEY);
-                renderAccountsDb();
-                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
-            }
-        });
-                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
-        const ADMIN_LOGIN = 'admin@melldrive.ru';
-        const ADMIN_PASS = 'admin123';
-
-        function checkAdminAuth() {
-            const overlay = document.getElementById('adminAuthOverlay');
-            let isAuthed = false;
-            try {
-                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
-                isAuthed = Boolean(s && s.isAdmin === true);
-            } catch (e) {}
-            if (overlay) {
-                overlay.style.display = isAuthed ? 'none' : 'flex';
-            }
-            return isAuthed;
-        }
-
-        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
-            const p = document.getElementById('adminPassInput').value;
-            const err = document.getElementById('adminAuthErr');
-
-            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
-                err.classList.add('hidden');
-                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
-                checkAdminAuth();
-                renderAdmin();
-                renderAccountsDb();
-            } else {
-                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
-                err.classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem(ADMIN_SESSION_KEY);
-            checkAdminAuth();
-        });
-
-        checkAdminAuth();
-        renderAdmin();
-        renderAccountsDb();
+            renderAll();
             showToast(`Автомобиль «${removed.name}» удалён из каталога.`);
         }
 
@@ -543,103 +364,7 @@
             if (list[idx]) {
                 list[idx].status = newStatus;
                 localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
-                        const DB_KEY = 'melldrive_accounts_db_v1';
-        const SESSION_KEY = 'melldrive_active_session_v1';
-        const BASE_DEMO_ACCOUNT = [
-            {
-                id: 1,
-                name: 'Водитель MELLDRIVE',
-                email: 'demo@melldrive.ru',
-                phone: '+79990000000',
-                password: 'password123',
-                license: '9901123456',
-                licenseConfirmed: true
-            }
-        ];
-
-        function getAccountsDb() {
-            try {
-                const raw = localStorage.getItem(DB_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) return parsed;
-                }
-            } catch (e) {}
-            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-            return [...BASE_DEMO_ACCOUNT];
-        }
-
-        function renderAccountsDb() {
-            const accs = getAccountsDb();
-            const body = document.getElementById('adminAccountsBody');
-            if (!body) return;
-            if (!accs.length) {
-                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
-                return;
-            }
-            body.innerHTML = accs.map(a => 
-                <tr>
-                    <td><strong></strong></td>
-                    <td></td>
-                    <td></td>
-                    <td><code></code></td>
-                    <td></td>
-                    <td style="color:var(--success);"></td>
-                </tr>
-            ).join('');
-        }
-
-        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
-            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
-                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-                localStorage.removeItem(SESSION_KEY);
-                renderAccountsDb();
-                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
-            }
-        });
-                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
-        const ADMIN_LOGIN = 'admin@melldrive.ru';
-        const ADMIN_PASS = 'admin123';
-
-        function checkAdminAuth() {
-            const overlay = document.getElementById('adminAuthOverlay');
-            let isAuthed = false;
-            try {
-                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
-                isAuthed = Boolean(s && s.isAdmin === true);
-            } catch (e) {}
-            if (overlay) {
-                overlay.style.display = isAuthed ? 'none' : 'flex';
-            }
-            return isAuthed;
-        }
-
-        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
-            const p = document.getElementById('adminPassInput').value;
-            const err = document.getElementById('adminAuthErr');
-
-            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
-                err.classList.add('hidden');
-                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
-                checkAdminAuth();
-                renderAdmin();
-                renderAccountsDb();
-            } else {
-                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
-                err.classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem(ADMIN_SESSION_KEY);
-            checkAdminAuth();
-        });
-
-        checkAdminAuth();
-        renderAdmin();
-        renderAccountsDb();
+                renderAll();
                 showToast(`Статус заказа ${list[idx].id} изменён на «${newStatus}».`);
             }
         }
@@ -654,110 +379,11 @@
         function saveReviewEdit(idx) {
             const list = getReviews();
             if (!list[idx]) return;
-            const textEl = document.getElementById(`revTextEdit_${idx}`);
-            const ratingEl = document.getElementById(`revRatingEdit_${idx}`);
-            const statusEl = document.getElementById(`revStatusEdit_${idx}`);
-            if (textEl) list[idx].text = textEl.value.trim();
-            if (ratingEl) list[idx].rating = Number(ratingEl.value) || 5;
-            if (statusEl) list[idx].status = statusEl.value;
+            list[idx].text = document.getElementById(`revTextEdit_${idx}`).value.trim();
+            list[idx].rating = Number(document.getElementById(`revRatingEdit_${idx}`).value) || 5;
+            list[idx].status = document.getElementById(`revStatusEdit_${idx}`).value;
             localStorage.setItem(REVIEWS_KEY, JSON.stringify(list));
-                    const DB_KEY = 'melldrive_accounts_db_v1';
-        const SESSION_KEY = 'melldrive_active_session_v1';
-        const BASE_DEMO_ACCOUNT = [
-            {
-                id: 1,
-                name: 'Водитель MELLDRIVE',
-                email: 'demo@melldrive.ru',
-                phone: '+79990000000',
-                password: 'password123',
-                license: '9901123456',
-                licenseConfirmed: true
-            }
-        ];
-
-        function getAccountsDb() {
-            try {
-                const raw = localStorage.getItem(DB_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) return parsed;
-                }
-            } catch (e) {}
-            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-            return [...BASE_DEMO_ACCOUNT];
-        }
-
-        function renderAccountsDb() {
-            const accs = getAccountsDb();
-            const body = document.getElementById('adminAccountsBody');
-            if (!body) return;
-            if (!accs.length) {
-                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
-                return;
-            }
-            body.innerHTML = accs.map(a => 
-                <tr>
-                    <td><strong></strong></td>
-                    <td></td>
-                    <td></td>
-                    <td><code></code></td>
-                    <td></td>
-                    <td style="color:var(--success);"></td>
-                </tr>
-            ).join('');
-        }
-
-        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
-            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
-                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-                localStorage.removeItem(SESSION_KEY);
-                renderAccountsDb();
-                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
-            }
-        });
-                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
-        const ADMIN_LOGIN = 'admin@melldrive.ru';
-        const ADMIN_PASS = 'admin123';
-
-        function checkAdminAuth() {
-            const overlay = document.getElementById('adminAuthOverlay');
-            let isAuthed = false;
-            try {
-                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
-                isAuthed = Boolean(s && s.isAdmin === true);
-            } catch (e) {}
-            if (overlay) {
-                overlay.style.display = isAuthed ? 'none' : 'flex';
-            }
-            return isAuthed;
-        }
-
-        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
-            const p = document.getElementById('adminPassInput').value;
-            const err = document.getElementById('adminAuthErr');
-
-            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
-                err.classList.add('hidden');
-                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
-                checkAdminAuth();
-                renderAdmin();
-                renderAccountsDb();
-            } else {
-                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
-                err.classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem(ADMIN_SESSION_KEY);
-            checkAdminAuth();
-        });
-
-        checkAdminAuth();
-        renderAdmin();
-        renderAccountsDb();
+            renderAll();
             showToast('Отзыв обновлён.');
         }
 
@@ -765,19 +391,9 @@
             const list = getReviews();
             list.splice(idx, 1);
             localStorage.setItem(REVIEWS_KEY, JSON.stringify(list));
-                    const DB_KEY = 'melldrive_accounts_db_v1';
-        const SESSION_KEY = 'melldrive_active_session_v1';
-        const BASE_DEMO_ACCOUNT = [
-            {
-                id: 1,
-                name: 'Водитель MELLDRIVE',
-                email: 'demo@melldrive.ru',
-                phone: '+79990000000',
-                password: 'password123',
-                license: '9901123456',
-                licenseConfirmed: true
-            }
-        ];
+            renderAll();
+            showToast('Отзыв удалён.');
+        }
 
         function getAccountsDb() {
             try {
@@ -791,81 +407,7 @@
             return [...BASE_DEMO_ACCOUNT];
         }
 
-        function renderAccountsDb() {
-            const accs = getAccountsDb();
-            const body = document.getElementById('adminAccountsBody');
-            if (!body) return;
-            if (!accs.length) {
-                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
-                return;
-            }
-            body.innerHTML = accs.map(a => 
-                <tr>
-                    <td><strong></strong></td>
-                    <td></td>
-                    <td></td>
-                    <td><code></code></td>
-                    <td></td>
-                    <td style="color:var(--success);"></td>
-                </tr>
-            ).join('');
-        }
-
-        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
-            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
-                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-                localStorage.removeItem(SESSION_KEY);
-                renderAccountsDb();
-                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
-            }
-        });
-                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
-        const ADMIN_LOGIN = 'admin@melldrive.ru';
-        const ADMIN_PASS = 'admin123';
-
-        function checkAdminAuth() {
-            const overlay = document.getElementById('adminAuthOverlay');
-            let isAuthed = false;
-            try {
-                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
-                isAuthed = Boolean(s && s.isAdmin === true);
-            } catch (e) {}
-            if (overlay) {
-                overlay.style.display = isAuthed ? 'none' : 'flex';
-            }
-            return isAuthed;
-        }
-
-        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
-            const p = document.getElementById('adminPassInput').value;
-            const err = document.getElementById('adminAuthErr');
-
-            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
-                err.classList.add('hidden');
-                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
-                checkAdminAuth();
-                renderAdmin();
-                renderAccountsDb();
-            } else {
-                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
-                err.classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem(ADMIN_SESSION_KEY);
-            checkAdminAuth();
-        });
-
-        checkAdminAuth();
-        renderAdmin();
-        renderAccountsDb();
-            showToast('Отзыв удалён.');
-        }
-
-        function renderAdmin() {
+        function renderAll() {
             const cars = getCmsState().cars;
             document.getElementById('statCars').textContent = cars.length;
 
@@ -892,16 +434,13 @@
             const list = getBookings();
             document.getElementById('statOrders').textContent = list.length;
             document.getElementById('statActive').textContent = list.filter(b => b.status === 'Активна').length;
-            const sum = list
-                .filter(b => b.status !== 'Отменена')
-                .reduce((acc, b) => acc + (Number(b.total) || 0), 0);
+            const sum = list.filter(b => b.status !== 'Отменена').reduce((acc, b) => acc + (Number(b.total) || 0), 0);
             document.getElementById('statRevenue').textContent = `${sum.toLocaleString('ru-RU')} ₽`;
 
             const tbody = document.getElementById('adminOrdersBody');
-            if (!list.length) {
-                tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">Заказов пока нет.</td></tr>';
-            } else {
-                tbody.innerHTML = list.map((b, idx) => `
+            tbody.innerHTML = !list.length
+                ? '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">Заказов пока нет.</td></tr>'
+                : list.map((b, idx) => `
                     <tr>
                         <td><strong>${b.id}</strong></td>
                         <td>${b.carName}</td>
@@ -917,14 +456,12 @@
                         </td>
                     </tr>
                 `).join('');
-            }
 
             const reviews = getReviews();
             const revBody = document.getElementById('adminReviewsBody');
-            if (!reviews.length) {
-                revBody.innerHTML = '<tr><td colspan="5" style="color:var(--text-muted); text-align:center;">Отзывов пока нет.</td></tr>';
-            } else {
-                revBody.innerHTML = reviews.map((r, idx) => `
+            revBody.innerHTML = !reviews.length
+                ? '<tr><td colspan="5" style="color:var(--text-muted); text-align:center;">Отзывов пока нет.</td></tr>'
+                : reviews.map((r, idx) => `
                     <tr>
                         <td><strong>${r.author}</strong><br><small style="color:var(--text-muted);">${r.date || ''}</small></td>
                         <td>
@@ -946,8 +483,44 @@
                         </td>
                     </tr>
                 `).join('');
-            }
+
+            const accs = getAccountsDb();
+            const accBody = document.getElementById('adminAccountsBody');
+            accBody.innerHTML = !accs.length
+                ? '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>'
+                : accs.map(a => `
+                    <tr>
+                        <td><strong>${a.name}</strong></td>
+                        <td>${a.email}</td>
+                        <td>${a.phone}</td>
+                        <td><code>${a.password}</code></td>
+                        <td>${a.license || '—'}</td>
+                        <td style="color:var(--success);">${a.licenseConfirmed ? 'Подтверждено' : 'Не проверено'}</td>
+                    </tr>
+                `).join('');
         }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
+            const p = document.getElementById('adminPassInput').value.trim();
+            const err = document.getElementById('adminAuthErr');
+
+            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
+                err.style.display = 'none';
+                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
+                checkAdminAuth();
+                renderAll();
+            } else {
+                err.textContent = 'Неверный логин или пароль администратора. Введите admin@melldrive.ru и admin123.';
+                err.style.display = 'block';
+            }
+        });
+
+        document.getElementById('adminLogoutBtn').addEventListener('click', () => {
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            checkAdminAuth();
+        });
 
         document.getElementById('adminAddCarForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -962,7 +535,6 @@
                 showToast('Укажите корректные данные и положительные цены.');
                 return;
             }
-
             const cars = getCmsState().cars;
             const nextId = Math.max(0, ...cars.map(c => Number(c.id) || 0)) + 1;
             cars.push({
@@ -976,207 +548,24 @@
             });
             saveCmsCars(cars);
             e.target.reset();
-                    const DB_KEY = 'melldrive_accounts_db_v1';
-        const SESSION_KEY = 'melldrive_active_session_v1';
-        const BASE_DEMO_ACCOUNT = [
-            {
-                id: 1,
-                name: 'Водитель MELLDRIVE',
-                email: 'demo@melldrive.ru',
-                phone: '+79990000000',
-                password: 'password123',
-                license: '9901123456',
-                licenseConfirmed: true
-            }
-        ];
-
-        function getAccountsDb() {
-            try {
-                const raw = localStorage.getItem(DB_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) return parsed;
-                }
-            } catch (e) {}
-            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-            return [...BASE_DEMO_ACCOUNT];
-        }
-
-        function renderAccountsDb() {
-            const accs = getAccountsDb();
-            const body = document.getElementById('adminAccountsBody');
-            if (!body) return;
-            if (!accs.length) {
-                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
-                return;
-            }
-            body.innerHTML = accs.map(a => 
-                <tr>
-                    <td><strong></strong></td>
-                    <td></td>
-                    <td></td>
-                    <td><code></code></td>
-                    <td></td>
-                    <td style="color:var(--success);"></td>
-                </tr>
-            ).join('');
-        }
-
-        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
-            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
-                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-                localStorage.removeItem(SESSION_KEY);
-                renderAccountsDb();
-                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
-            }
-        });
-                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
-        const ADMIN_LOGIN = 'admin@melldrive.ru';
-        const ADMIN_PASS = 'admin123';
-
-        function checkAdminAuth() {
-            const overlay = document.getElementById('adminAuthOverlay');
-            let isAuthed = false;
-            try {
-                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
-                isAuthed = Boolean(s && s.isAdmin === true);
-            } catch (e) {}
-            if (overlay) {
-                overlay.style.display = isAuthed ? 'none' : 'flex';
-            }
-            return isAuthed;
-        }
-
-        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
-            const p = document.getElementById('adminPassInput').value;
-            const err = document.getElementById('adminAuthErr');
-
-            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
-                err.classList.add('hidden');
-                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
-                checkAdminAuth();
-                renderAdmin();
-                renderAccountsDb();
-            } else {
-                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
-                err.classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem(ADMIN_SESSION_KEY);
-            checkAdminAuth();
-        });
-
-        checkAdminAuth();
-        renderAdmin();
-        renderAccountsDb();
+            renderAll();
             showToast(`Автомобиль «${name}» добавлен в автопарк.`);
         });
 
         document.getElementById('resetFleetBtn').addEventListener('click', () => {
             if (confirm('Вернуть исходный список из 6 автомобилей и базовые тарифы?')) {
                 saveCmsCars([...DEFAULT_CARS]);
-                        const DB_KEY = 'melldrive_accounts_db_v1';
-        const SESSION_KEY = 'melldrive_active_session_v1';
-        const BASE_DEMO_ACCOUNT = [
-            {
-                id: 1,
-                name: 'Водитель MELLDRIVE',
-                email: 'demo@melldrive.ru',
-                phone: '+79990000000',
-                password: 'password123',
-                license: '9901123456',
-                licenseConfirmed: true
+                renderAll();
+                showToast('Базовый автопарк восстановлен.');
             }
-        ];
+        });
 
-        function getAccountsDb() {
-            try {
-                const raw = localStorage.getItem(DB_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) return parsed;
-                }
-            } catch (e) {}
-            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-            return [...BASE_DEMO_ACCOUNT];
-        }
-
-        function renderAccountsDb() {
-            const accs = getAccountsDb();
-            const body = document.getElementById('adminAccountsBody');
-            if (!body) return;
-            if (!accs.length) {
-                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
-                return;
-            }
-            body.innerHTML = accs.map(a => 
-                <tr>
-                    <td><strong></strong></td>
-                    <td></td>
-                    <td></td>
-                    <td><code></code></td>
-                    <td></td>
-                    <td style="color:var(--success);"></td>
-                </tr>
-            ).join('');
-        }
-
-        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
-            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
+        document.getElementById('clearAccountsDbBtn').addEventListener('click', () => {
+            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только demo-аккаунт?')) {
                 localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
                 localStorage.removeItem(SESSION_KEY);
-                renderAccountsDb();
-                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
-            }
-        });
-                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
-        const ADMIN_LOGIN = 'admin@melldrive.ru';
-        const ADMIN_PASS = 'admin123';
-
-        function checkAdminAuth() {
-            const overlay = document.getElementById('adminAuthOverlay');
-            let isAuthed = false;
-            try {
-                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
-                isAuthed = Boolean(s && s.isAdmin === true);
-            } catch (e) {}
-            if (overlay) {
-                overlay.style.display = isAuthed ? 'none' : 'flex';
-            }
-            return isAuthed;
-        }
-
-        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
-            const p = document.getElementById('adminPassInput').value;
-            const err = document.getElementById('adminAuthErr');
-
-            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
-                err.classList.add('hidden');
-                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
-                checkAdminAuth();
-                renderAdmin();
-                renderAccountsDb();
-            } else {
-                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
-                err.classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem(ADMIN_SESSION_KEY);
-            checkAdminAuth();
-        });
-
-        checkAdminAuth();
-        renderAdmin();
-        renderAccountsDb();
-                showToast('Базовый автопарк восстановлен.');
+                renderAll();
+                showToast('Локальная база аккаунтов очищена.');
             }
         });
 
@@ -1186,109 +575,8 @@
         window.saveReviewEdit = saveReviewEdit;
         window.deleteReview = deleteReview;
 
-                const DB_KEY = 'melldrive_accounts_db_v1';
-        const SESSION_KEY = 'melldrive_active_session_v1';
-        const BASE_DEMO_ACCOUNT = [
-            {
-                id: 1,
-                name: 'Водитель MELLDRIVE',
-                email: 'demo@melldrive.ru',
-                phone: '+79990000000',
-                password: 'password123',
-                license: '9901123456',
-                licenseConfirmed: true
-            }
-        ];
-
-        function getAccountsDb() {
-            try {
-                const raw = localStorage.getItem(DB_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) return parsed;
-                }
-            } catch (e) {}
-            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-            return [...BASE_DEMO_ACCOUNT];
-        }
-
-        function renderAccountsDb() {
-            const accs = getAccountsDb();
-            const body = document.getElementById('adminAccountsBody');
-            if (!body) return;
-            if (!accs.length) {
-                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
-                return;
-            }
-            body.innerHTML = accs.map(a => 
-                <tr>
-                    <td><strong></strong></td>
-                    <td></td>
-                    <td></td>
-                    <td><code></code></td>
-                    <td></td>
-                    <td style="color:var(--success);"></td>
-                </tr>
-            ).join('');
-        }
-
-        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
-            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
-                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-                localStorage.removeItem(SESSION_KEY);
-                renderAccountsDb();
-                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
-            }
-        });
-                const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
-        const ADMIN_LOGIN = 'admin@melldrive.ru';
-        const ADMIN_PASS = 'admin123';
-
-        function checkAdminAuth() {
-            const overlay = document.getElementById('adminAuthOverlay');
-            let isAuthed = false;
-            try {
-                const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
-                isAuthed = Boolean(s && s.isAdmin === true);
-            } catch (e) {}
-            if (overlay) {
-                overlay.style.display = isAuthed ? 'none' : 'flex';
-            }
-            return isAuthed;
-        }
-
-        document.getElementById('adminLoginForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const l = document.getElementById('adminLoginInput').value.trim().toLowerCase();
-            const p = document.getElementById('adminPassInput').value;
-            const err = document.getElementById('adminAuthErr');
-
-            if (l === ADMIN_LOGIN && p === ADMIN_PASS) {
-                err.classList.add('hidden');
-                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ isAdmin: true, login: l }));
-                checkAdminAuth();
-                renderAdmin();
-                renderAccountsDb();
-            } else {
-                err.textContent = 'Неверный логин или пароль администратора (BUG-046).';
-                err.classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem(ADMIN_SESSION_KEY);
-            checkAdminAuth();
-        });
-
         checkAdminAuth();
-        renderAdmin();
-        renderAccountsDb();
+        renderAll();
     </script>
 </body>
 </html>
-
-
-
-
-
-
