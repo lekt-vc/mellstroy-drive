@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта зон каршеринга — Москва и Подмосковье | MELLDRIVE</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <style>
+        .map-layout {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        .zone-canvas {
+            position: relative;
+            min-height: 460px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background:
+                radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.14), transparent 62%),
+                linear-gradient(135deg, rgba(147, 51, 234, 0.08), rgba(9, 9, 13, 0.96));
+            overflow: hidden;
+            padding: 20px;
+        }
+        .ring-mkad {
+            position: absolute;
+            left: 50%; top: 50%;
+            width: 240px; height: 240px;
+            transform: translate(-50%, -50%);
+            border: 2px dashed rgba(234, 179, 8, 0.55);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .ring-label {
+            position: absolute;
+            top: 8px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.72rem;
+            color: var(--gold);
+            background: var(--bg-card);
+            padding: 1px 6px;
+            border-radius: 6px;
+        }
+        .zone-pin {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            padding: 7px 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.45);
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+        .zone-pin:hover, .zone-pin.active {
+            transform: translate(-50%, -50%) scale(1.06);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        .zone-pin--mo { border-color: rgba(147, 51, 234, 0.65); }
+        .zone-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+        }
+        .zone-list { display: grid; gap: 10px; margin-top: 16px; }
+        .zone-item {
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-main);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .zone-item.active { border-color: var(--gold); }
+        @media (max-width: 900px) {
+            .map-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header__container">
+            <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
+            <nav class="nav">
+                <ul class="nav__list">
+                    <li><a href="../index.html" class="nav__link">Главная</a></li>
+                    <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
+                    <li><a href="map.html" class="nav__link active">Карта зон</a></li>
+                    <li><a href="profile.html" class="nav__link">Кабинет</a></li>
+                    <li><a href="admin.html" class="nav__link">Админка</a></li>
+                </ul>
+            </nav>
+            <div class="header__actions">
+                <a href="catalog.html" class="btn btn--primary btn--sm">Найти авто</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="section">
+        <div class="container">
+            <h1 class="section__title">Карта работы каршеринга: Москва и Подмосковье</h1>
+            <p class="section__subtitle">Зелёная зона завершения аренды в пределах МКАД и ключевые города ближайшего Подмосковья</p>
+
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+                <button type="button" class="btn btn--primary btn--sm" data-filter="all">Все зоны</button>
+                <button type="button" class="btn btn--outline btn--sm" data-filter="moscow">Москва (внутри МКАД)</button>
+                <button type="button" class="btn btn--outline btn--sm" data-filter="mo">Ближайшее Подмосковье</button>
+            </div>
+
+            <div class="map-layout">
+                <div class="zone-canvas" id="zoneCanvas">
+                    <div class="ring-mkad"><span class="ring-label">МКАД</span></div>
+                    <div id="pinsLayer"></div>
+                </div>
+
+                <div class="zone-card">
+                    <span class="hero__badge" id="selectedBadge">Москва • Зелёная зона</span>
+                    <h2 id="selectedTitle" style="font-size:1.4rem; margin:8px 0;">Центр и ТТК</h2>
+                    <p id="selectedDesc" style="color:var(--text-muted); font-size:0.92rem; line-height:1.5;"></p>
+                    <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border); font-size:0.9rem; display:grid; gap:6px;">
+                        <div><strong>Свободных авто рядом:</strong> <span id="selectedCars" style="color:var(--gold);">18 шт.</span></div>
+                        <div><strong>Завершение аренды:</strong> <span id="selectedParking" style="color:var(--success);">Разрешено на городских парковках</span></div>
+                    </div>
+                    <a href="catalog.html" class="btn btn--primary btn--block" style="margin-top:18px;">Выбрать авто в этой зоне</a>
+                    <div class="zone-list" id="zoneList"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const ZONES = [
+            { id: 'center', region: 'moscow', badge: 'Москва • Зелёная зона', title: 'Центр и ТТК', x: 50, y: 50, cars: '18 шт.', parking: 'Бесплатно на платных парковках города', desc: 'Высокая плотность авто эконом-, комфорт- и бизнес-класса. Быстрая подача за 5–8 минут.' },
+            { id: 'north', region: 'moscow', badge: 'Москва • САО / СВАО', title: 'Север и ВДНХ', x: 52, y: 27, cars: '12 шт.', parking: 'Разрешено в зелёной зоне', desc: 'Удобный выезд на Дмитровское и Ярославское шоссе.' },
+            { id: 'city', region: 'moscow', badge: 'Москва • ЗАО', title: 'Москва-Сити и Кутузовский', x: 34, y: 46, cars: '14 шт.', parking: 'Спецзоны и городские парковки', desc: 'Премиальные и электромобили для деловых поездок по западу Москвы.' },
+            { id: 'korolev', region: 'mo', badge: 'Подмосковье • Северо-Восток', title: 'Королёв и Мытищи', x: 76, y: 22, cars: '9 шт.', parking: 'Разрешено в границах зоны МО', desc: 'Зона работы по Ярославскому направлению с выездом на МКАД.' },
+            { id: 'khimki', region: 'mo', badge: 'Подмосковье • Северо-Запад', title: 'Химки и Долгопрудный', x: 22, y: 20, cars: '11 шт.', parking: 'Разрешено в границах зоны МО', desc: 'Удобный маршрут по Ленинградскому шоссе и подъезд к аэропорту.' },
+            { id: 'odintsovo', region: 'mo', badge: 'Подмосковье • Запад', title: 'Одинцово и Красногорск', x: 18, y: 58, cars: '8 шт.', parking: 'Разрешено в границах зоны МО', desc: 'Поездки по Минскому, Можайскому и Новорижскому направлениям.' },
+            { id: 'vidnoe', region: 'mo', badge: 'Подмосковье • Юг', title: 'Видное и Домодедово', x: 66, y: 78, cars: '7 шт.', parking: 'Разрешено в границах зоны МО', desc: 'Южное направление с быстрым доступом к МКАД и трассе М-4.' }
+        ];
+
+        let currentFilter = 'all';
+        let activeZoneId = 'center';
+
+        function renderMap() {
+            const list = currentFilter === 'all' ? ZONES : ZONES.filter(z => z.region === currentFilter);
+            if (!list.some(z => z.id === activeZoneId) && list.length) activeZoneId = list[0].id;
+            const active = list.find(z => z.id === activeZoneId) || list[0];
+
+            const pinsLayer = document.getElementById('pinsLayer');
+            pinsLayer.innerHTML = list.map(z => `
+                <button type="button"
+                    class="zone-pin ${z.region === 'mo' ? 'zone-pin--mo' : ''} ${z.id === active?.id ? 'active' : ''}"
+                    style="left:${z.x}%; top:${z.y}%;"
+                    onclick="selectZone('${z.id}')">${z.title}</button>
+            `).join('');
+
+            const zoneList = document.getElementById('zoneList');
+            zoneList.innerHTML = list.map(z => `
+                <div class="zone-item ${z.id === active?.id ? 'active' : ''}" onclick="selectZone('${z.id}')">
+                    <div>
+                        <strong>${z.title}</strong>
+                        <div style="font-size:0.78rem; color:var(--text-muted);">${z.badge}</div>
+                    </div>
+                    <span style="color:var(--gold); font-weight:700; font-size:0.85rem;">${z.cars}</span>
+                </div>
+            `).join('');
+
+            if (active) {
+                document.getElementById('selectedBadge').textContent = active.badge;
+                document.getElementById('selectedTitle').textContent = active.title;
+                document.getElementById('selectedDesc').textContent = active.desc;
+                document.getElementById('selectedCars').textContent = active.cars;
+                document.getElementById('selectedParking').textContent = active.parking;
+            }
+        }
+
+        window.selectZone = function(id) {
+            activeZoneId = id;
+            renderMap();
+        };
+
+        document.querySelectorAll('[data-filter]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentFilter = btn.dataset.filter;
+                renderMap();
+            });
+        });
+
+        renderMap();
+    </script>
+</body>
+</html>
