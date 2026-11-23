@@ -197,6 +197,27 @@
                 </table>
             </div>
         </div>
+                <!-- Блок 5: Локальная база аккаунтов -->
+            <div class="admin-panel-box">
+                <div class="panel-head">
+                    <h3>Локальная база аккаунтов (melldrive_accounts_db_v1)</h3>
+                    <button type="button" class="btn btn--danger btn--sm" id="clearAccountsDbBtn">Очистить базу аккаунтов</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Имя и фамилия</th>
+                            <th>E-mail</th>
+                            <th>Телефон</th>
+                            <th>Пароль</th>
+                            <th>ВУ (10 цифр)</th>
+                            <th>Статус ВУ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminAccountsBody"></tbody>
+                </table>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -258,7 +279,62 @@
 
             cars[idx] = { ...cars[idx], name, category, specs, priceMin, priceDay };
             saveCmsCars(cars);
-            renderAdmin();
+                    const DB_KEY = 'melldrive_accounts_db_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
+        const BASE_DEMO_ACCOUNT = [
+            {
+                id: 1,
+                name: 'Водитель MELLDRIVE',
+                email: 'demo@melldrive.ru',
+                phone: '+79990000000',
+                password: 'password123',
+                license: '9901123456',
+                licenseConfirmed: true
+            }
+        ];
+
+        function getAccountsDb() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {}
+            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+            return [...BASE_DEMO_ACCOUNT];
+        }
+
+        function renderAccountsDb() {
+            const accs = getAccountsDb();
+            const body = document.getElementById('adminAccountsBody');
+            if (!body) return;
+            if (!accs.length) {
+                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
+                return;
+            }
+            body.innerHTML = accs.map(a => 
+                <tr>
+                    <td><strong></strong></td>
+                    <td></td>
+                    <td></td>
+                    <td><code></code></td>
+                    <td></td>
+                    <td style="color:var(--success);"></td>
+                </tr>
+            ).join('');
+        }
+
+        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
+            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
+                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+                localStorage.removeItem(SESSION_KEY);
+                renderAccountsDb();
+                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
+            }
+        });
+        renderAdmin();
+        renderAccountsDb();
             showToast(`Тарифы и данные для «${name}» сохранены.`);
         }
 
@@ -270,7 +346,62 @@
             }
             const removed = cars.splice(idx, 1)[0];
             saveCmsCars(cars);
-            renderAdmin();
+                    const DB_KEY = 'melldrive_accounts_db_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
+        const BASE_DEMO_ACCOUNT = [
+            {
+                id: 1,
+                name: 'Водитель MELLDRIVE',
+                email: 'demo@melldrive.ru',
+                phone: '+79990000000',
+                password: 'password123',
+                license: '9901123456',
+                licenseConfirmed: true
+            }
+        ];
+
+        function getAccountsDb() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {}
+            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+            return [...BASE_DEMO_ACCOUNT];
+        }
+
+        function renderAccountsDb() {
+            const accs = getAccountsDb();
+            const body = document.getElementById('adminAccountsBody');
+            if (!body) return;
+            if (!accs.length) {
+                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
+                return;
+            }
+            body.innerHTML = accs.map(a => 
+                <tr>
+                    <td><strong></strong></td>
+                    <td></td>
+                    <td></td>
+                    <td><code></code></td>
+                    <td></td>
+                    <td style="color:var(--success);"></td>
+                </tr>
+            ).join('');
+        }
+
+        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
+            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
+                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+                localStorage.removeItem(SESSION_KEY);
+                renderAccountsDb();
+                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
+            }
+        });
+        renderAdmin();
+        renderAccountsDb();
             showToast(`Автомобиль «${removed.name}» удалён из каталога.`);
         }
 
@@ -286,7 +417,62 @@
             if (list[idx]) {
                 list[idx].status = newStatus;
                 localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
-                renderAdmin();
+                        const DB_KEY = 'melldrive_accounts_db_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
+        const BASE_DEMO_ACCOUNT = [
+            {
+                id: 1,
+                name: 'Водитель MELLDRIVE',
+                email: 'demo@melldrive.ru',
+                phone: '+79990000000',
+                password: 'password123',
+                license: '9901123456',
+                licenseConfirmed: true
+            }
+        ];
+
+        function getAccountsDb() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {}
+            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+            return [...BASE_DEMO_ACCOUNT];
+        }
+
+        function renderAccountsDb() {
+            const accs = getAccountsDb();
+            const body = document.getElementById('adminAccountsBody');
+            if (!body) return;
+            if (!accs.length) {
+                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
+                return;
+            }
+            body.innerHTML = accs.map(a => 
+                <tr>
+                    <td><strong></strong></td>
+                    <td></td>
+                    <td></td>
+                    <td><code></code></td>
+                    <td></td>
+                    <td style="color:var(--success);"></td>
+                </tr>
+            ).join('');
+        }
+
+        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
+            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
+                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+                localStorage.removeItem(SESSION_KEY);
+                renderAccountsDb();
+                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
+            }
+        });
+        renderAdmin();
+        renderAccountsDb();
                 showToast(`Статус заказа ${list[idx].id} изменён на «${newStatus}».`);
             }
         }
@@ -308,7 +494,62 @@
             if (ratingEl) list[idx].rating = Number(ratingEl.value) || 5;
             if (statusEl) list[idx].status = statusEl.value;
             localStorage.setItem(REVIEWS_KEY, JSON.stringify(list));
-            renderAdmin();
+                    const DB_KEY = 'melldrive_accounts_db_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
+        const BASE_DEMO_ACCOUNT = [
+            {
+                id: 1,
+                name: 'Водитель MELLDRIVE',
+                email: 'demo@melldrive.ru',
+                phone: '+79990000000',
+                password: 'password123',
+                license: '9901123456',
+                licenseConfirmed: true
+            }
+        ];
+
+        function getAccountsDb() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {}
+            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+            return [...BASE_DEMO_ACCOUNT];
+        }
+
+        function renderAccountsDb() {
+            const accs = getAccountsDb();
+            const body = document.getElementById('adminAccountsBody');
+            if (!body) return;
+            if (!accs.length) {
+                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
+                return;
+            }
+            body.innerHTML = accs.map(a => 
+                <tr>
+                    <td><strong></strong></td>
+                    <td></td>
+                    <td></td>
+                    <td><code></code></td>
+                    <td></td>
+                    <td style="color:var(--success);"></td>
+                </tr>
+            ).join('');
+        }
+
+        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
+            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
+                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+                localStorage.removeItem(SESSION_KEY);
+                renderAccountsDb();
+                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
+            }
+        });
+        renderAdmin();
+        renderAccountsDb();
             showToast('Отзыв обновлён.');
         }
 
@@ -316,7 +557,62 @@
             const list = getReviews();
             list.splice(idx, 1);
             localStorage.setItem(REVIEWS_KEY, JSON.stringify(list));
-            renderAdmin();
+                    const DB_KEY = 'melldrive_accounts_db_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
+        const BASE_DEMO_ACCOUNT = [
+            {
+                id: 1,
+                name: 'Водитель MELLDRIVE',
+                email: 'demo@melldrive.ru',
+                phone: '+79990000000',
+                password: 'password123',
+                license: '9901123456',
+                licenseConfirmed: true
+            }
+        ];
+
+        function getAccountsDb() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {}
+            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+            return [...BASE_DEMO_ACCOUNT];
+        }
+
+        function renderAccountsDb() {
+            const accs = getAccountsDb();
+            const body = document.getElementById('adminAccountsBody');
+            if (!body) return;
+            if (!accs.length) {
+                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
+                return;
+            }
+            body.innerHTML = accs.map(a => 
+                <tr>
+                    <td><strong></strong></td>
+                    <td></td>
+                    <td></td>
+                    <td><code></code></td>
+                    <td></td>
+                    <td style="color:var(--success);"></td>
+                </tr>
+            ).join('');
+        }
+
+        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
+            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
+                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+                localStorage.removeItem(SESSION_KEY);
+                renderAccountsDb();
+                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
+            }
+        });
+        renderAdmin();
+        renderAccountsDb();
             showToast('Отзыв удалён.');
         }
 
@@ -431,14 +727,124 @@
             });
             saveCmsCars(cars);
             e.target.reset();
-            renderAdmin();
+                    const DB_KEY = 'melldrive_accounts_db_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
+        const BASE_DEMO_ACCOUNT = [
+            {
+                id: 1,
+                name: 'Водитель MELLDRIVE',
+                email: 'demo@melldrive.ru',
+                phone: '+79990000000',
+                password: 'password123',
+                license: '9901123456',
+                licenseConfirmed: true
+            }
+        ];
+
+        function getAccountsDb() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {}
+            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+            return [...BASE_DEMO_ACCOUNT];
+        }
+
+        function renderAccountsDb() {
+            const accs = getAccountsDb();
+            const body = document.getElementById('adminAccountsBody');
+            if (!body) return;
+            if (!accs.length) {
+                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
+                return;
+            }
+            body.innerHTML = accs.map(a => 
+                <tr>
+                    <td><strong></strong></td>
+                    <td></td>
+                    <td></td>
+                    <td><code></code></td>
+                    <td></td>
+                    <td style="color:var(--success);"></td>
+                </tr>
+            ).join('');
+        }
+
+        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
+            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
+                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+                localStorage.removeItem(SESSION_KEY);
+                renderAccountsDb();
+                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
+            }
+        });
+        renderAdmin();
+        renderAccountsDb();
             showToast(`Автомобиль «${name}» добавлен в автопарк.`);
         });
 
         document.getElementById('resetFleetBtn').addEventListener('click', () => {
             if (confirm('Вернуть исходный список из 6 автомобилей и базовые тарифы?')) {
                 saveCmsCars([...DEFAULT_CARS]);
-                renderAdmin();
+                        const DB_KEY = 'melldrive_accounts_db_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
+        const BASE_DEMO_ACCOUNT = [
+            {
+                id: 1,
+                name: 'Водитель MELLDRIVE',
+                email: 'demo@melldrive.ru',
+                phone: '+79990000000',
+                password: 'password123',
+                license: '9901123456',
+                licenseConfirmed: true
+            }
+        ];
+
+        function getAccountsDb() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {}
+            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+            return [...BASE_DEMO_ACCOUNT];
+        }
+
+        function renderAccountsDb() {
+            const accs = getAccountsDb();
+            const body = document.getElementById('adminAccountsBody');
+            if (!body) return;
+            if (!accs.length) {
+                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
+                return;
+            }
+            body.innerHTML = accs.map(a => 
+                <tr>
+                    <td><strong></strong></td>
+                    <td></td>
+                    <td></td>
+                    <td><code></code></td>
+                    <td></td>
+                    <td style="color:var(--success);"></td>
+                </tr>
+            ).join('');
+        }
+
+        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
+            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
+                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+                localStorage.removeItem(SESSION_KEY);
+                renderAccountsDb();
+                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
+            }
+        });
+        renderAdmin();
+        renderAccountsDb();
                 showToast('Базовый автопарк восстановлен.');
             }
         });
@@ -449,8 +855,64 @@
         window.saveReviewEdit = saveReviewEdit;
         window.deleteReview = deleteReview;
 
+                const DB_KEY = 'melldrive_accounts_db_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
+        const BASE_DEMO_ACCOUNT = [
+            {
+                id: 1,
+                name: 'Водитель MELLDRIVE',
+                email: 'demo@melldrive.ru',
+                phone: '+79990000000',
+                password: 'password123',
+                license: '9901123456',
+                licenseConfirmed: true
+            }
+        ];
+
+        function getAccountsDb() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {}
+            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+            return [...BASE_DEMO_ACCOUNT];
+        }
+
+        function renderAccountsDb() {
+            const accs = getAccountsDb();
+            const body = document.getElementById('adminAccountsBody');
+            if (!body) return;
+            if (!accs.length) {
+                body.innerHTML = '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>';
+                return;
+            }
+            body.innerHTML = accs.map(a => 
+                <tr>
+                    <td><strong></strong></td>
+                    <td></td>
+                    <td></td>
+                    <td><code></code></td>
+                    <td></td>
+                    <td style="color:var(--success);"></td>
+                </tr>
+            ).join('');
+        }
+
+        document.getElementById('clearAccountsDbBtn')?.addEventListener('click', () => {
+            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только базовый demo-аккаунт?')) {
+                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+                localStorage.removeItem(SESSION_KEY);
+                renderAccountsDb();
+                showToast('Локальная база аккаунтов очищена (оставлен demo@melldrive.ru).');
+            }
+        });
         renderAdmin();
+        renderAccountsDb();
     </script>
 </body>
 </html>
+
 

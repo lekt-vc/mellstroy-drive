@@ -112,6 +112,16 @@
                 if (info) document.getElementById('driverProfileContacts').textContent = info;
             }
         } catch (e) {}
+                try {
+            const sess = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+            if (sess && sess.loggedIn && sess.name) {
+                document.getElementById('driverProfileTitle').textContent = 'Водитель: ' + sess.name;
+                const info = [sess.email, sess.phone].filter(Boolean).join(' • ');
+                if (info) document.getElementById('driverProfileContacts').textContent = info;
+                const licText = sess.license ? ('ВУ: ' + sess.license + (sess.licenseConfirmed ? ' (подтверждено)' : '')) : '';
+                if (licText) document.getElementById('driverLicenseInfo').textContent = licText;
+            }
+        } catch (e) {}
         renderBookings();
         }
 
@@ -160,10 +170,21 @@
                 if (info) document.getElementById('driverProfileContacts').textContent = info;
             }
         } catch (e) {}
+                try {
+            const sess = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+            if (sess && sess.loggedIn && sess.name) {
+                document.getElementById('driverProfileTitle').textContent = 'Водитель: ' + sess.name;
+                const info = [sess.email, sess.phone].filter(Boolean).join(' • ');
+                if (info) document.getElementById('driverProfileContacts').textContent = info;
+                const licText = sess.license ? ('ВУ: ' + sess.license + (sess.licenseConfirmed ? ' (подтверждено)' : '')) : '';
+                if (licText) document.getElementById('driverLicenseInfo').textContent = licText;
+            }
+        } catch (e) {}
         renderBookings();
     </script>
 </body>
 </html>
+
 
 
 

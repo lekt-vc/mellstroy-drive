@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../assets/css/main.css">
 </head>
 <body style="display:flex; min-height:100vh; align-items:center; justify-content:center; padding:20px;">
-    <div style="width:100%; max-width:480px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px;">
+    <div style="width:100%; max-width:490px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px;">
         <a href="../index.html" class="logo" style="justify-content:center; margin-bottom:18px;"><span class="logo__highlight">MELL</span>DRIVE</a>
         <h1 style="font-size:1.5rem; margin-bottom:16px; text-align:center;">Регистрация водителя</h1>
         <form id="regForm" style="display:grid; gap:13px;">
@@ -29,6 +29,10 @@
             <label>Серия и номер ВУ (строго 10 цифр)
                 <input type="text" id="driverLicense" inputmode="numeric" maxlength="14" required placeholder="9901123456" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
             </label>
+            <label style="display:flex; gap:8px; align-items:flex-start; font-size:0.86rem; color:var(--text-muted); cursor:pointer;">
+                <input type="checkbox" id="confirmLicenseCb" required style="margin-top:3px;">
+                <span>Подтверждаю корректность серии и номера водительского удостоверения и согласие на проверку данных (BUG-044).</span>
+            </label>
             <p id="regError" class="hidden" style="color:var(--danger); font-size:0.88rem;"></p>
             <button type="submit" class="btn btn--primary btn--block">Создать аккаунт</button>
         </form>
@@ -37,18 +41,44 @@
         </p>
     </div>
     <script>
-        const ACCOUNT_KEY = 'melldrive_user_account_v1';
+        const DB_KEY = 'melldrive_accounts_db_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
+
+        const DEFAULT_ACCOUNTS = [
+            {
+                id: 1,
+                name: 'Водитель MELLDRIVE',
+                email: 'demo@melldrive.ru',
+                phone: '+79990000000',
+                password: 'password123',
+                license: '9901123456',
+                licenseConfirmed: true
+            }
+        ];
+
+        function loadAccountsDb() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length) return parsed;
+                }
+            } catch (e) {}
+            localStorage.setItem(DB_KEY, JSON.stringify(DEFAULT_ACCOUNTS));
+            return [...DEFAULT_ACCOUNTS];
+        }
 
         document.getElementById('regForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const fullName = document.getElementById('fullName').value.trim();
             const nameParts = fullName.split(/\s+/).filter(Boolean);
-            const email = document.getElementById('regEmail').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
             const phone = document.getElementById('regPhone').value.trim();
             const phoneDigits = phone.replace(/\D/g, '');
             const password = document.getElementById('regPassword').value;
             const val = document.getElementById('birthDate').value;
             const digitsOnly = document.getElementById('driverLicense').value.replace(/\D/g, '');
+            const licenseConfirmed = document.getElementById('confirmLicenseCb').checked;
             const err = document.getElementById('regError');
 
             if (nameParts.length < 2 || nameParts.some(p => p.length < 2)) {
@@ -84,15 +114,34 @@
                 err.classList.remove('hidden');
                 return;
             }
+            if (!licenseConfirmed) {
+                err.textContent = 'Необходимо подтвердить номер водительского удостоверения (BUG-044).';
+                err.classList.remove('hidden');
+                return;
+            }
 
-            err.classList.add('hidden');
-            localStorage.setItem(ACCOUNT_KEY, JSON.stringify({
+            const db = loadAccountsDb();
+            const exists = db.some(acc => acc.email === email || acc.phone.replace(/\D/g, '') === phoneDigits);
+            if (exists) {
+                err.textContent = 'Аккаунт с таким E-mail или телефоном уже зарегистрирован в локальной базе.';
+                err.classList.remove('hidden');
+                return;
+            }
+
+            const newAccount = {
+                id: Date.now(),
                 name: fullName,
                 email,
                 phone,
+                password,
                 license: digitsOnly,
-                loggedIn: false
-            }));
+                licenseConfirmed: true
+            };
+            db.push(newAccount);
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+            localStorage.setItem(SESSION_KEY, JSON.stringify({ lastRegisteredEmail: email, loggedIn: false }));
+
+            err.classList.add('hidden');
             window.location.href = 'login.html?registered=1';
         });
     </script>
