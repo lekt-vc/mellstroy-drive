@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карта зон каршеринга — Москва и Подмосковье | MELLDRIVE</title>
     <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
     <style>
         .map-layout {
             display: grid;
@@ -13,19 +12,19 @@
             gap: 24px;
             align-items: start;
         }
-        #realMap {
+        .map-frame-wrap {
             width: 100%;
             height: 500px;
             border-radius: var(--radius);
             border: 1px solid var(--border);
             overflow: hidden;
-            z-index: 1;
-            background: #14141f;
-        }
-        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
             background: var(--bg-card);
-            color: var(--text-main);
-            border: 1px solid var(--border);
+        }
+        .map-frame-wrap iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
         }
         .zone-card {
             background: var(--bg-card);
@@ -71,42 +70,22 @@
         .zone-car-chip:hover { border-color: var(--gold); color: var(--gold); }
         @media (max-width: 900px) {
             .map-layout { grid-template-columns: 1fr; }
-            #realMap { height: 380px; }
+            .map-frame-wrap { height: 380px; }
         }
     </style>
-<style id="force-nav-visible">
-  .header, .header .container, .header__container { overflow: visible !important; }
-  .header .nav, .header nav {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: static !important;
-    transform: none !important;
-    max-height: none !important;
-    width: auto !important;
-    background: transparent !important;
-  }
-  .header .nav__list {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 16px !important;
-  }
-  .header .nav__link { display: inline-block !important; white-space: nowrap !important; }
-</style>
 </head>
 <body>
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
-                                                <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
+            <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
                 <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
-                    <li><a href="../index.html" class="nav__link" style="white-space:nowrap;">Главная</a></li>
-                    <li><a href="catalog.html" class="nav__link " style="white-space:nowrap;">Автопарк</a></li>
-                    <li><a href="map.html" class="nav__link active" style="white-space:nowrap;">Карта зон</a></li>
-                    
-                    <li><a href="admin.html" class="nav__link " style="white-space:nowrap;">Админка</a></li>
-                    <li><a href="ui-kit.html" class="nav__link " style="white-space:nowrap;">UI-кит</a></li>
+                    <li><a href="../index.html" class="nav__link">Главная</a></li>
+                    <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
+                    <li><a href="map.html" class="nav__link active">Карта зон</a></li>
+                    <li><a href="profile.html" class="nav__link">Кабинет</a></li>
+                    <li><a href="admin.html" class="nav__link">Админка</a></li>
+                    <li><a href="ui-kit.html" class="nav__link">UI-кит</a></li>
                 </ul>
             </nav>
             <div class="header__actions">
@@ -118,16 +97,18 @@
     <main class="section">
         <div class="container">
             <h1 class="section__title">Карта работы каршеринга: Москва и Подмосковье</h1>
-            <p class="section__subtitle">Интерактивная карта точек подачи и зон завершения аренды в Москве и ближайшем Подмосковье</p>
+            <p class="section__subtitle">Яндекс.Карты с точками подачи и зонами завершения аренды в Москве и ближайшем Подмосковье</p>
 
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
-                <button type="button" class="btn btn--primary btn--sm" id="btnFilterAll" onclick="setZoneFilter('all', this)">Все зоны</button>
+                <button type="button" class="btn btn--primary btn--sm" onclick="setZoneFilter('all', this)">Все зоны</button>
                 <button type="button" class="btn btn--outline btn--sm" onclick="setZoneFilter('moscow', this)">Москва (внутри МКАД)</button>
                 <button type="button" class="btn btn--outline btn--sm" onclick="setZoneFilter('mo', this)">Ближайшее Подмосковье</button>
             </div>
 
             <div class="map-layout">
-                <div id="realMap"></div>
+                <div class="map-frame-wrap">
+                    <iframe id="yandexMapFrame" title="Яндекс.Карта зон MELLDRIVE" loading="lazy" allowfullscreen></iframe>
+                </div>
 
                 <div class="zone-card">
                     <span class="hero__badge" id="selectedBadge">Москва • Зелёная зона</span>
@@ -145,11 +126,10 @@
         </div>
     </main>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
         const ZONES = [
             {
-                id: 'center', region: 'moscow', lat: 55.7558, lng: 37.6173,
+                id: 'center', region: 'moscow', lat: 55.7558, lng: 37.6173, zoom: 12,
                 badge: 'Москва • Зелёная зона', title: 'Центр и ТТК',
                 parking: 'Бесплатно на городских парковках в пределах МКАД',
                 desc: 'Высокая плотность авто эконом-, комфорт- и бизнес-класса. Подача за 5–8 минут.',
@@ -160,7 +140,7 @@
                 ]
             },
             {
-                id: 'north', region: 'moscow', lat: 55.8290, lng: 37.6330,
+                id: 'north', region: 'moscow', lat: 55.8290, lng: 37.6330, zoom: 13,
                 badge: 'Москва • САО / СВАО', title: 'Север и ВДНХ',
                 parking: 'Разрешено в зелёной зоне Москвы',
                 desc: 'Удобный выезд на проспект Мира, Дмитровское и Ярославское шоссе.',
@@ -170,7 +150,7 @@
                 ]
             },
             {
-                id: 'city', region: 'moscow', lat: 55.7495, lng: 37.5371,
+                id: 'city', region: 'moscow', lat: 55.7495, lng: 37.5371, zoom: 13,
                 badge: 'Москва • ЗАО', title: 'Москва-Сити и Кутузовский',
                 parking: 'Спецзоны и городские парковки',
                 desc: 'Премиальные и электромобили для поездок по западу Москвы и ТТК.',
@@ -180,7 +160,7 @@
                 ]
             },
             {
-                id: 'korolev', region: 'mo', lat: 55.9209, lng: 37.8545,
+                id: 'korolev', region: 'mo', lat: 55.9209, lng: 37.8545, zoom: 13,
                 badge: 'Подмосковье • Северо-Восток', title: 'Королёв',
                 parking: 'Разрешено в границах зоны МО',
                 desc: 'Работа по Ярославскому направлению с быстрым выездом на МКАД.',
@@ -190,7 +170,7 @@
                 ]
             },
             {
-                id: 'mytishchi', region: 'mo', lat: 55.9105, lng: 37.7364,
+                id: 'mytishchi', region: 'mo', lat: 55.9105, lng: 37.7364, zoom: 13,
                 badge: 'Подмосковье • Северо-Восток', title: 'Мытищи',
                 parking: 'Разрешено в границах зоны МО',
                 desc: 'Зона обслуживания у ж/д и выезда на Осташковское и Ярославское шоссе.',
@@ -200,7 +180,7 @@
                 ]
             },
             {
-                id: 'khimki', region: 'mo', lat: 55.8970, lng: 37.4297,
+                id: 'khimki', region: 'mo', lat: 55.8970, lng: 37.4297, zoom: 13,
                 badge: 'Подмосковье • Северо-Запад', title: 'Химки',
                 parking: 'Разрешено в границах зоны МО',
                 desc: 'Ленинградское направление и подъезд к северному кластеру области.',
@@ -210,7 +190,7 @@
                 ]
             },
             {
-                id: 'odintsovo', region: 'mo', lat: 55.6789, lng: 37.2639,
+                id: 'odintsovo', region: 'mo', lat: 55.6789, lng: 37.2639, zoom: 13,
                 badge: 'Подмосковье • Запад', title: 'Одинцово',
                 parking: 'Разрешено в границах зоны МО',
                 desc: 'Западное направление: Можайское и Минское шоссе, выезд на МКАД.',
@@ -220,7 +200,7 @@
                 ]
             },
             {
-                id: 'vidnoe', region: 'mo', lat: 55.5535, lng: 37.7016,
+                id: 'vidnoe', region: 'mo', lat: 55.5535, lng: 37.7016, zoom: 13,
                 badge: 'Подмосковье • Юг', title: 'Видное',
                 parking: 'Разрешено в границах зоны МО',
                 desc: 'Южное направление с удобным выездом на МКАД и трассу М-4.',
@@ -235,58 +215,14 @@
 
         let currentFilter = 'all';
         let activeZoneId = 'center';
-        let map = null;
-        let markersLayer = null;
-
-        if (typeof L !== 'undefined') {
-            map = L.map('realMap').setView([55.76, 37.62], 10);
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
-                maxZoom: 18
-            }).addTo(map);
-
-            // Ориентировочный радиус зоны покрытия Москвы и ближайшего МО
-            L.circle([55.7558, 37.6173], {
-                radius: 26000,
-                color: '#eab308',
-                weight: 2,
-                dashArray: '6, 6',
-                fillColor: '#22c55e',
-                fillOpacity: 0.08
-            }).addTo(map);
-
-            markersLayer = L.layerGroup().addTo(map);
-        }
 
         function renderMap() {
             const list = currentFilter === 'all' ? ZONES : ZONES.filter(z => z.region === currentFilter);
             if (!list.some(z => z.id === activeZoneId) && list.length) activeZoneId = list[0].id;
             const active = list.find(z => z.id === activeZoneId) || list[0];
 
-            if (markersLayer) {
-                markersLayer.clearLayers();
-                list.forEach(z => {
-                    const isSelected = z.id === active?.id;
-                    const marker = L.circleMarker([z.lat, z.lng], {
-                        radius: isSelected ? 11 : 8,
-                        color: z.region === 'mo' ? '#a855f7' : '#22c55e',
-                        weight: 3,
-                        fillColor: isSelected ? '#eab308' : '#161622',
-                        fillOpacity: 0.95
-                    }).addTo(markersLayer);
-
-                    marker.bindPopup(`<strong>${z.title}</strong><br><small>${z.badge}</small><br>Авто в зоне: <b>${z.cars.length}</b>`);
-                    marker.on('click', () => selectZone(z.id, false));
-                    if (isSelected) marker.openPopup();
-                });
-
-                if (active && map) {
-                    map.setView([active.lat, active.lng], currentFilter === 'all' ? 10 : 11, { animate: true });
-                }
-            }
-
             document.getElementById('zoneList').innerHTML = list.map(z => `
-                <div class="zone-item ${z.id === active?.id ? 'active' : ''}" onclick="selectZone('${z.id}', true)">
+                <div class="zone-item ${z.id === active?.id ? 'active' : ''}" onclick="selectZone('${z.id}')">
                     <div>
                         <strong>${z.title}</strong>
                         <div style="font-size:0.78rem; color:var(--text-muted);">${z.badge}</div>
@@ -296,6 +232,12 @@
             `).join('');
 
             if (active) {
+                const frame = document.getElementById('yandexMapFrame');
+                const ll = `${active.lng},${active.lat}`;
+                const pt = `${active.lng},${active.lat},pm2rdm`;
+                const nextSrc = `https://yandex.ru/map-widget/v1/?ll=${encodeURIComponent(ll)}&z=${active.zoom}&pt=${encodeURIComponent(pt)}`;
+                if (frame.src !== nextSrc) frame.src = nextSrc;
+
                 document.getElementById('selectedBadge').textContent = active.badge;
                 document.getElementById('selectedTitle').textContent = active.title;
                 document.getElementById('selectedDesc').textContent = active.desc;
@@ -329,26 +271,21 @@
 
         renderMap();
     </script>
-<script>
-(function() {
-    let loggedIn = false;
-    try {
-        const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
-        loggedIn = Boolean(s && s.loggedIn);
-    } catch (e) {}
-    if (!loggedIn) {
-        document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-})();
-</script>
+    <script>
+    (function() {
+        let loggedIn = false;
+        try {
+            const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+            loggedIn = Boolean(s && s.loggedIn);
+        } catch (e) {}
+        if (!loggedIn) {
+            document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
+                const li = a.closest('li');
+                if (li) li.remove();
+                else a.remove();
+            });
+        }
+    })();
+    </script>
 </body>
 </html>
-
-
-
-
-
