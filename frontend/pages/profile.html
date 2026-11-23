@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет — MELLDRIVE</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container header__container">
+            <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
+            <nav class="nav">
+                <ul class="nav__list">
+                    <li><a href="../index.html" class="nav__link">Главная</a></li>
+                    <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
+                    <li><a href="profile.html" class="nav__link active">Кабинет</a></li>
+                </ul>
+            </nav>
+            <div class="header__actions">
+                <a href="login.html" class="btn btn--outline btn--sm">Выйти</a>
+            </div>
+        </div>
+    </header>
+    <main class="section">
+        <div class="container">
+            <h1 class="section__title">Личный кабинет водителя</h1>
+            <p class="section__subtitle">Профиль, статус водительского удостоверения и история бронирований</p>
+            <div class="cars-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                <div class="car-card" style="padding:22px;">
+                    <h3>Водитель: Алексей Навроцкий</h3>
+                    <p style="color:var(--text-muted); margin:10px 0;">Статус ВУ: <strong style="color:var(--success);">Подтверждено</strong></p>
+                    <p style="color:var(--text-muted);">Активный бонусный счёт: <strong style="color:var(--gold);">1 250 ₽</strong></p>
+                </div>
+                <div class="car-card" style="padding:22px;">
+                    <h3>Последняя поездка</h3>
+                    <p style="color:var(--text-muted); margin:10px 0;">BMW M5 Competition • Тариф «Сутки»</p>
+                    <p style="color:var(--text-muted);">Статус: <strong style="color:var(--gold);">Завершена</strong></p>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

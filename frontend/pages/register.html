@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация — MELLDRIVE</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body style="display:flex; min-height:100vh; align-items:center; justify-content:center; padding:20px;">
+    <div style="width:100%; max-width:460px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px;">
+        <a href="../index.html" class="logo" style="justify-content:center; margin-bottom:18px;"><span class="logo__highlight">MELL</span>DRIVE</a>
+        <h1 style="font-size:1.5rem; margin-bottom:16px; text-align:center;">Регистрация водителя</h1>
+        <form id="regForm" style="display:grid; gap:14px;">
+            <label>Имя и фамилия
+                <input type="text" required placeholder="Алексей Навроцкий" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+            </label>
+            <label>Дата рождения (от 18 лет)
+                <input type="date" id="birthDate" required style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+            </label>
+            <label>Серия и номер ВУ
+                <input type="text" required placeholder="99 01 123456" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+            </label>
+            <p id="regError" class="hidden" style="color:var(--danger); font-size:0.88rem;"></p>
+            <button type="submit" class="btn btn--primary btn--block">Создать аккаунт</button>
+        </form>
+        <p style="margin-top:16px; font-size:0.9rem; color:var(--text-muted); text-align:center;">
+            Уже есть профиль? <a href="login.html" style="color:var(--gold);">Войти</a>
+        </p>
+    </div>
+    <script>
+        document.getElementById('regForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const val = document.getElementById('birthDate').value;
+            const err = document.getElementById('regError');
+            if (!val) return;
+            const birth = new Date(val);
+            const age = (Date.now() - birth.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+            if (age < 18) {
+                err.textContent = 'Регистрация доступна только с 18 лет (исправление BUG-001).';
+                err.classList.remove('hidden');
+                return;
+            }
+            err.classList.add('hidden');
+            window.location.href = 'profile.html';
+        });
+    </script>
+</body>
+</html>

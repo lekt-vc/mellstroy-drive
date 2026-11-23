@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — MELLDRIVE</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body style="display:flex; min-height:100vh; align-items:center; justify-content:center; padding:20px;">
+    <div style="width:100%; max-width:420px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px;">
+        <a href="../index.html" class="logo" style="justify-content:center; margin-bottom:18px;"><span class="logo__highlight">MELL</span>DRIVE</a>
+        <h1 style="font-size:1.5rem; margin-bottom:16px; text-align:center;">Вход в аккаунт</h1>
+        <form id="loginForm" style="display:grid; gap:14px;">
+            <label>E-mail или телефон
+                <input type="text" required placeholder="driver@melldrive.ru" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+            </label>
+            <label>Пароль
+                <input type="password" required placeholder="••••••••" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+            </label>
+            <button type="submit" class="btn btn--primary btn--block">Войти</button>
+        </form>
+        <p style="margin-top:16px; font-size:0.9rem; color:var(--text-muted); text-align:center;">
+            Нет аккаунта? <a href="register.html" style="color:var(--gold);">Регистрация</a> • <a href="profile.html" style="color:var(--gold);">Кабинет</a>
+        </p>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            window.location.href = 'profile.html';
+        });
+    </script>
+</body>
+</html>
