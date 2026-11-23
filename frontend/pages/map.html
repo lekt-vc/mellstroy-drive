@@ -81,6 +81,22 @@
             gap: 10px;
         }
         .zone-item.active { border-color: var(--gold); }
+        .zone-cars-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .zone-car-chip {
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: 8px;
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            text-decoration: none;
+        }
+        .zone-car-chip:hover { border-color: var(--gold); color: var(--gold); }
         @media (max-width: 900px) {
             .map-layout { grid-template-columns: 1fr; }
         }
@@ -126,11 +142,12 @@
                     <span class="hero__badge" id="selectedBadge">Москва • Зелёная зона</span>
                     <h2 id="selectedTitle" style="font-size:1.4rem; margin:8px 0;">Центр и ТТК</h2>
                     <p id="selectedDesc" style="color:var(--text-muted); font-size:0.92rem; line-height:1.5;"></p>
-                    <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border); font-size:0.9rem; display:grid; gap:6px;">
-                        <div><strong>Свободных авто рядом:</strong> <span id="selectedCars" style="color:var(--gold);">18 шт.</span></div>
+                    <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border); font-size:0.9rem; display:grid; gap:8px;">
+                        <div><strong>Доступно в зоне:</strong> <span id="selectedCarsCount" style="color:var(--gold);">0 авто</span></div>
+                        <div class="zone-cars-preview" id="selectedCarsChips"></div>
                         <div><strong>Завершение аренды:</strong> <span id="selectedParking" style="color:var(--success);">Разрешено на городских парковках</span></div>
                     </div>
-                    <a href="catalog.html" class="btn btn--primary btn--block" style="margin-top:18px;">Выбрать авто в этой зоне</a>
+                    <a id="zoneCatalogLink" href="catalog.html?zone=center" class="btn btn--primary btn--block" style="margin-top:18px;">Выбрать авто в этой зоне</a>
                     <div class="zone-list" id="zoneList"></div>
                 </div>
             </div>
@@ -139,14 +156,73 @@
 
     <script>
         const ZONES = [
-            { id: 'center', region: 'moscow', badge: 'Москва • Зелёная зона', title: 'Центр и ТТК', x: 50, y: 50, cars: '18 шт.', parking: 'Бесплатно на платных парковках города', desc: 'Высокая плотность авто эконом-, комфорт- и бизнес-класса. Быстрая подача за 5–8 минут.' },
-            { id: 'north', region: 'moscow', badge: 'Москва • САО / СВАО', title: 'Север и ВДНХ', x: 52, y: 27, cars: '12 шт.', parking: 'Разрешено в зелёной зоне', desc: 'Удобный выезд на Дмитровское и Ярославское шоссе.' },
-            { id: 'city', region: 'moscow', badge: 'Москва • ЗАО', title: 'Москва-Сити и Кутузовский', x: 34, y: 46, cars: '14 шт.', parking: 'Спецзоны и городские парковки', desc: 'Премиальные и электромобили для деловых поездок по западу Москвы.' },
-            { id: 'korolev', region: 'mo', badge: 'Подмосковье • Северо-Восток', title: 'Королёв и Мытищи', x: 76, y: 22, cars: '9 шт.', parking: 'Разрешено в границах зоны МО', desc: 'Зона работы по Ярославскому направлению с выездом на МКАД.' },
-            { id: 'khimki', region: 'mo', badge: 'Подмосковье • Северо-Запад', title: 'Химки и Долгопрудный', x: 22, y: 20, cars: '11 шт.', parking: 'Разрешено в границах зоны МО', desc: 'Удобный маршрут по Ленинградскому шоссе и подъезд к аэропорту.' },
-            { id: 'odintsovo', region: 'mo', badge: 'Подмосковье • Запад', title: 'Одинцово и Красногорск', x: 18, y: 58, cars: '8 шт.', parking: 'Разрешено в границах зоны МО', desc: 'Поездки по Минскому, Можайскому и Новорижскому направлениям.' },
-            { id: 'vidnoe', region: 'mo', badge: 'Подмосковье • Юг', title: 'Видное и Домодедово', x: 66, y: 78, cars: '7 шт.', parking: 'Разрешено в границах зоны МО', desc: 'Южное направление с быстрым доступом к МКАД и трассе М-4.' }
+            {
+                id: 'center', region: 'moscow', badge: 'Москва • Зелёная зона', title: 'Центр и ТТК', x: 50, y: 50,
+                parking: 'Бесплатно на платных парковках города',
+                desc: 'Высокая плотность авто эконом-, комфорт- и бизнес-класса. Быстрая подача за 5–8 минут.',
+                cars: [
+                    { id: 101, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Центр / ТТК', priceMin: 11.5, priceDay: 2400, img: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80' },
+                    { id: 102, name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Центр / ТТК', priceMin: 75.0, priceDay: 55000, img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=800&q=80' },
+                    { id: 103, name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • Центр / ТТК', priceMin: 90.0, priceDay: 72000, img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80' }
+                ]
+            },
+            {
+                id: 'north', region: 'moscow', badge: 'Москва • САО / СВАО', title: 'Север и ВДНХ', x: 52, y: 27,
+                parking: 'Разрешено в зелёной зоне',
+                desc: 'Удобный выезд на Дмитровское и Ярославское шоссе.',
+                cars: [
+                    { id: 201, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • ВДНХ', priceMin: 15.5, priceDay: 3500, img: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=800&q=80' },
+                    { id: 202, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Север', priceMin: 25.0, priceDay: 6900, img: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=800&q=80' }
+                ]
+            },
+            {
+                id: 'city', region: 'moscow', badge: 'Москва • ЗАО', title: 'Москва-Сити и Кутузовский', x: 34, y: 46,
+                parking: 'Спецзоны и городские парковки',
+                desc: 'Премиальные и электромобили для деловых поездок по западу Москвы.',
+                cars: [
+                    { id: 301, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • Москва-Сити', priceMin: 55.0, priceDay: 39000, img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80' },
+                    { id: 302, name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Кутузовский', priceMin: 75.0, priceDay: 55000, img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=800&q=80' }
+                ]
+            },
+            {
+                id: 'korolev', region: 'mo', badge: 'Подмосковье • Северо-Восток', title: 'Королёв и Мытищи', x: 76, y: 22,
+                parking: 'Разрешено в границах зоны МО',
+                desc: 'Зона работы по Ярославскому направлению с выездом на МКАД.',
+                cars: [
+                    { id: 401, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Королёв / Мытищи', priceMin: 11.5, priceDay: 2400, img: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80' },
+                    { id: 402, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Мытищи', priceMin: 15.5, priceDay: 3500, img: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=800&q=80' }
+                ]
+            },
+            {
+                id: 'khimki', region: 'mo', badge: 'Подмосковье • Северо-Запад', title: 'Химки и Долгопрудный', x: 22, y: 20,
+                parking: 'Разрешено в границах зоны МО',
+                desc: 'Удобный маршрут по Ленинградскому шоссе и подъезд к аэропорту.',
+                cars: [
+                    { id: 501, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Химки', priceMin: 25.0, priceDay: 6900, img: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=800&q=80' },
+                    { id: 502, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Долгопрудный', priceMin: 11.5, priceDay: 2400, img: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80' }
+                ]
+            },
+            {
+                id: 'odintsovo', region: 'mo', badge: 'Подмосковье • Запад', title: 'Одинцово и Красногорск', x: 18, y: 58,
+                parking: 'Разрешено в границах зоны МО',
+                desc: 'Поездки по Минскому, Можайскому и Новорижскому направлениям.',
+                cars: [
+                    { id: 601, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Красногорск', priceMin: 15.5, priceDay: 3500, img: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=800&q=80' },
+                    { id: 602, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • Одинцово', priceMin: 55.0, priceDay: 39000, img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80' }
+                ]
+            },
+            {
+                id: 'vidnoe', region: 'mo', badge: 'Подмосковье • Юг', title: 'Видное и Домодедово', x: 66, y: 78,
+                parking: 'Разрешено в границах зоны МО',
+                desc: 'Южное направление с быстрым доступом к МКАД и трассе М-4.',
+                cars: [
+                    { id: 701, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Видное', priceMin: 11.5, priceDay: 2400, img: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80' },
+                    { id: 702, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Домодедово', priceMin: 25.0, priceDay: 6900, img: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=800&q=80' }
+                ]
+            }
         ];
+
+        localStorage.setItem('melldrive_zones_v1', JSON.stringify(ZONES));
 
         let currentFilter = 'all';
         let activeZoneId = 'center';
@@ -156,22 +232,20 @@
             if (!list.some(z => z.id === activeZoneId) && list.length) activeZoneId = list[0].id;
             const active = list.find(z => z.id === activeZoneId) || list[0];
 
-            const pinsLayer = document.getElementById('pinsLayer');
-            pinsLayer.innerHTML = list.map(z => `
+            document.getElementById('pinsLayer').innerHTML = list.map(z => `
                 <button type="button"
                     class="zone-pin ${z.region === 'mo' ? 'zone-pin--mo' : ''} ${z.id === active?.id ? 'active' : ''}"
                     style="left:${z.x}%; top:${z.y}%;"
                     onclick="selectZone('${z.id}')">${z.title}</button>
             `).join('');
 
-            const zoneList = document.getElementById('zoneList');
-            zoneList.innerHTML = list.map(z => `
+            document.getElementById('zoneList').innerHTML = list.map(z => `
                 <div class="zone-item ${z.id === active?.id ? 'active' : ''}" onclick="selectZone('${z.id}')">
                     <div>
                         <strong>${z.title}</strong>
                         <div style="font-size:0.78rem; color:var(--text-muted);">${z.badge}</div>
                     </div>
-                    <span style="color:var(--gold); font-weight:700; font-size:0.85rem;">${z.cars}</span>
+                    <span style="color:var(--gold); font-weight:700; font-size:0.85rem;">${z.cars.length} авто</span>
                 </div>
             `).join('');
 
@@ -179,8 +253,13 @@
                 document.getElementById('selectedBadge').textContent = active.badge;
                 document.getElementById('selectedTitle').textContent = active.title;
                 document.getElementById('selectedDesc').textContent = active.desc;
-                document.getElementById('selectedCars').textContent = active.cars;
+                document.getElementById('selectedCarsCount').textContent = `${active.cars.length} авто в зоне`;
                 document.getElementById('selectedParking').textContent = active.parking;
+                document.getElementById('zoneCatalogLink').href = `catalog.html?zone=${active.id}`;
+
+                document.getElementById('selectedCarsChips').innerHTML = active.cars.map(c => `
+                    <a class="zone-car-chip" href="car.html?id=${c.id}&zone=${active.id}">${c.name} (${c.priceMin} ₽/мин)</a>
+                `).join('');
             }
         }
 

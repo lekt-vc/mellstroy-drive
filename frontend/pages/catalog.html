@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Каталог автомобилей MELLDRIVE — фильтры по классу, зонам и ценам.">
     <title>Автопарк — MELLDRIVE</title>
     <link rel="stylesheet" href="../assets/css/main.css">
     <style>
@@ -21,6 +22,15 @@
             font-size: 0.95rem;
             width: 100%;
         }
+        .breadcrumbs {
+            display: flex;
+            gap: 8px;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .breadcrumbs a { color: var(--gold); text-decoration: none; }
         @media (max-width: 768px) {
             .catalog-toolbar { grid-template-columns: 1fr; }
         }
@@ -30,24 +40,37 @@
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
-            <nav class="nav">
+            <nav class="nav" id="mainNav">
                 <ul class="nav__list">
                     <li><a href="../index.html" class="nav__link">Главная</a></li>
                     <li><a href="catalog.html" class="nav__link active">Автопарк</a></li>
+                    <li><a href="map.html" class="nav__link">Карта зон</a></li>
                     <li><a href="profile.html" class="nav__link">Кабинет</a></li>
                     <li><a href="admin.html" class="nav__link">Админка</a></li>
                 </ul>
             </nav>
             <div class="header__actions">
-                <a href="../index.html" class="btn btn--outline btn--sm">На главную</a>
+                <a href="map.html" class="btn btn--outline btn--sm">Карта зон</a>
+                <a href="../index.html" class="btn btn--primary btn--sm">На главную</a>
             </div>
         </div>
     </header>
 
     <main class="section">
         <div class="container">
-            <h1 class="section__title">Каталог автопарка</h1>
-            <p class="section__subtitle">Найдено авто: <strong id="carsCount">0</strong></p>
+            <nav class="breadcrumbs" aria-label="Хлебные крошки">
+                <a href="../index.html">Главная</a> <span>/</span> <a href="map.html">Карта зон</a> <span>/</span> <span>Автопарк</span>
+            </nav>
+
+            <div class="section__header">
+                <div>
+                    <h1 class="section__title" id="catalogHeading">Каталог автопарка</h1>
+                    <p class="section__subtitle">Найдено автомобилей: <strong id="carsCount">0</strong> <span id="zoneBadgeText"></span></p>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <a id="allCarsBtn" href="catalog.html" class="btn btn--outline btn--sm hidden">Показать весь парк</a>
+                </div>
+            </div>
 
             <div class="catalog-toolbar">
                 <input type="search" id="qInput" placeholder="Поиск по марке или характеристикам...">
@@ -65,12 +88,19 @@
 
     <script>
         const STORAGE_KEY = 'melldrive_cms_v2';
+        const ZONES_KEY = 'melldrive_zones_v1';
+
         const DEFAULT_CARS = [
             { id: 1, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceDay: 2400, img: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80' },
             { id: 2, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Камеры 360', priceMin: 15.5, priceDay: 3500, img: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=800&q=80' },
             { id: 3, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Премиум', priceMin: 25.0, priceDay: 6900, img: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=800&q=80' },
-            { id: 4, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceDay: 39000, img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80' }
+            { id: 4, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceDay: 39000, img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80' },
+            { id: 5, name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Полный привод', priceMin: 75.0, priceDay: 55000, img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=800&q=80' },
+            { id: 6, name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • 0-100 за 2.7 с', priceMin: 90.0, priceDay: 72000, img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80' }
         ];
+
+        const params = new URLSearchParams(window.location.search);
+        const zoneParam = params.get('zone');
 
         let cars = DEFAULT_CARS;
         try {
@@ -80,6 +110,21 @@
                 if (Array.isArray(parsed.cars) && parsed.cars.length) cars = parsed.cars;
             }
         } catch (e) {}
+
+        let activeZone = null;
+        if (zoneParam) {
+            try {
+                const zones = JSON.parse(localStorage.getItem(ZONES_KEY) || '[]');
+                activeZone = zones.find(z => z.id === zoneParam) || null;
+            } catch (e) {}
+        }
+
+        if (activeZone && Array.isArray(activeZone.cars) && activeZone.cars.length) {
+            cars = activeZone.cars;
+            document.getElementById('catalogHeading').textContent = `Авто в зоне: ${activeZone.title}`;
+            document.getElementById('zoneBadgeText').textContent = `(${activeZone.badge})`;
+            document.getElementById('allCarsBtn').classList.remove('hidden');
+        }
 
         const catSel = document.getElementById('catFilter');
         [...new Set(cars.map(c => c.category))].forEach(cat => {
@@ -99,21 +144,24 @@
             if (sort === 'price-desc') list.sort((a, b) => b.priceDay - a.priceDay);
 
             document.getElementById('carsCount').textContent = list.length;
-            document.getElementById('catalogGrid').innerHTML = list.map(car => `
-                <article class="car-card">
-                    <div class="car-card__badge">${car.category}</div>
-                    <img class="car-card__img" src="${car.img}" alt="${car.name}">
-                    <div class="car-card__body">
-                        <h3 class="car-card__title">${car.name}</h3>
-                        <div class="car-card__specs">${car.specs}</div>
-                        <div class="car-card__pricing">
-                            <span class="car-card__price">${Number(car.priceMin).toFixed(2)} ₽ / мин</span>
-                            <span class="car-card__price-sub">или ${Number(car.priceDay).toLocaleString('ru-RU')} ₽ / сутки</span>
+            document.getElementById('catalogGrid').innerHTML = list.map(car => {
+                const zoneSuffix = activeZone ? `&zone=${activeZone.id}` : '';
+                return `
+                    <article class="car-card">
+                        <div class="car-card__badge">${car.category}</div>
+                        <img class="car-card__img" src="${car.img}" alt="${car.name}">
+                        <div class="car-card__body">
+                            <h3 class="car-card__title">${car.name}</h3>
+                            <div class="car-card__specs">${car.specs}</div>
+                            <div class="car-card__pricing">
+                                <span class="car-card__price">${Number(car.priceMin).toFixed(2)} ₽ / мин</span>
+                                <span class="car-card__price-sub">или ${Number(car.priceDay).toLocaleString('ru-RU')} ₽ / сутки</span>
+                            </div>
+                            <a href="car.html?id=${car.id}${zoneSuffix}" class="btn btn--primary btn--block">Забронировать</a>
                         </div>
-                        <a href="car.html?id=${car.id}" class="btn btn--primary btn--block">Забронировать</a>
-                    </div>
-                </article>
-            `).join('');
+                    </article>
+                `;
+            }).join('');
         }
 
         document.getElementById('qInput').addEventListener('input', render);
