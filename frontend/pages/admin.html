@@ -27,6 +27,27 @@
             margin-bottom: 24px;
             overflow-x: auto;
         }
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .add-car-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            align-items: end;
+        }
+        .add-car-grid label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         th, td { padding: 11px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
         th { color: var(--text-muted); }
@@ -35,10 +56,23 @@
             color: var(--text-main);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 6px 9px;
+            padding: 7px 10px;
             font-size: 0.86rem;
         }
-        input.edit-input { width: 100%; min-width: 180px; }
+        input.edit-input { width: 100%; }
+        input.num-input { width: 105px; }
+        .toast-banner {
+            display: none;
+            margin-bottom: 18px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: rgba(34, 197, 94, 0.14);
+            border: 1px solid rgba(34, 197, 94, 0.45);
+            color: var(--success);
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+        .toast-banner.show { display: block; }
     </style>
 </head>
 <body>
@@ -60,15 +94,75 @@
     <main class="section">
         <div class="container">
             <h1 class="section__title">Панель администратора</h1>
-            <p class="section__subtitle">Управление заказами, выручкой и редактирование отзывов клиентов</p>
+            <p class="section__subtitle">Управление автопарком и ценами, контроль заказов и модерация отзывов</p>
+
+            <div class="toast-banner" id="adminToast"></div>
 
             <div class="admin-stats">
-                <div class="stat-box"><div>Автомобилей в парке</div><div class="stat-box__val" id="statCars">6</div></div>
+                <div class="stat-box"><div>Автомобилей в парке</div><div class="stat-box__val" id="statCars">0</div></div>
                 <div class="stat-box"><div>Всего бронирований</div><div class="stat-box__val" id="statOrders">0</div></div>
                 <div class="stat-box"><div>Активных аренд</div><div class="stat-box__val" id="statActive">0</div></div>
                 <div class="stat-box"><div>Выручка (без отмен)</div><div class="stat-box__val" id="statRevenue">0 ₽</div></div>
             </div>
 
+            <!-- Блок 1: Добавление нового автомобиля -->
+            <div class="admin-panel-box">
+                <div class="panel-head">
+                    <h3>Добавить автомобиль в автопарк</h3>
+                    <span style="font-size:0.84rem; color:var(--text-muted);">Авто сразу появится на главной и в общем каталоге</span>
+                </div>
+                <form class="add-car-grid" id="adminAddCarForm">
+                    <label>Марка и модель
+                        <input class="edit-input" type="text" id="admCarName" required placeholder="Например: Zeekr 001">
+                    </label>
+                    <label>Класс
+                        <select class="status-select" id="admCarCat">
+                            <option value="Эконом">Эконом</option>
+                            <option value="Комфорт">Комфорт</option>
+                            <option value="Электро">Электро</option>
+                            <option value="Бизнес">Бизнес</option>
+                            <option value="Спорт">Спорт</option>
+                        </select>
+                    </label>
+                    <label>Характеристики
+                        <input class="edit-input" type="text" id="admCarSpecs" required placeholder="АКПП • 544 л.с. • Полный привод">
+                    </label>
+                    <label>Цена ₽ / мин
+                        <input class="edit-input" type="number" id="admCarMin" step="0.5" min="1" required value="22">
+                    </label>
+                    <label>Цена ₽ / сутки
+                        <input class="edit-input" type="number" id="admCarDay" step="50" min="100" required value="5900">
+                    </label>
+                    <label>URL фото (необязательно)
+                        <input class="edit-input" type="url" id="admCarImg" placeholder="https://...">
+                    </label>
+                    <button type="submit" class="btn btn--primary">Добавить авто</button>
+                </form>
+            </div>
+
+            <!-- Блок 2: Редактирование парка и тарифов -->
+            <div class="admin-panel-box">
+                <div class="panel-head">
+                    <h3>Автопарк и управление тарифами</h3>
+                    <button type="button" class="btn btn--outline btn--sm" id="resetFleetBtn">Сбросить парк к базовому</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Модель</th>
+                            <th>Класс</th>
+                            <th>Характеристики</th>
+                            <th>₽ / мин</th>
+                            <th>₽ / сутки</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminCarsBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Блок 3: Журнал бронирований -->
             <div class="admin-panel-box">
                 <h3 style="margin-bottom: 14px;">Журнал бронирований клиентов</h3>
                 <table>
@@ -86,6 +180,7 @@
                 </table>
             </div>
 
+            <!-- Блок 4: Модерация отзывов -->
             <div class="admin-panel-box">
                 <h3 style="margin-bottom: 14px;">Редактирование и модерация отзывов</h3>
                 <table>
@@ -109,6 +204,76 @@
         const BOOKINGS_KEY = 'melldrive_bookings_v1';
         const REVIEWS_KEY = 'melldrive_reviews_v1';
 
+        const DEFAULT_CARS = [
+            { id: 1, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceDay: 2400, img: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80' },
+            { id: 2, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Камеры 360', priceMin: 15.5, priceDay: 3500, img: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=800&q=80' },
+            { id: 3, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Премиум', priceMin: 25.0, priceDay: 6900, img: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=800&q=80' },
+            { id: 4, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceDay: 39000, img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80' },
+            { id: 5, name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Полный привод', priceMin: 75.0, priceDay: 55000, img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=800&q=80' },
+            { id: 6, name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • 0-100 за 2.7 с', priceMin: 90.0, priceDay: 72000, img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80' }
+        ];
+
+        function showToast(msg) {
+            const el = document.getElementById('adminToast');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+        }
+
+        function getCmsState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    return {
+                        texts: parsed.texts || {},
+                        cars: Array.isArray(parsed.cars) && parsed.cars.length ? parsed.cars : [...DEFAULT_CARS]
+                    };
+                }
+            } catch (e) {}
+            return { texts: {}, cars: [...DEFAULT_CARS] };
+        }
+
+        function saveCmsCars(cars) {
+            const state = getCmsState();
+            state.cars = cars;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function saveCarRow(idx) {
+            const cars = getCmsState().cars;
+            if (!cars[idx]) return;
+
+            const name = document.getElementById(`carName_${idx}`).value.trim();
+            const category = document.getElementById(`carCat_${idx}`).value;
+            const specs = document.getElementById(`carSpecs_${idx}`).value.trim();
+            const priceMin = Number(document.getElementById(`carMin_${idx}`).value);
+            const priceDay = Number(document.getElementById(`carDay_${idx}`).value);
+
+            if (!name || !specs || priceMin <= 0 || priceDay <= 0 || Number.isNaN(priceMin) || Number.isNaN(priceDay)) {
+                showToast('Ошибка: проверьте название и положительную цену (BUG-009).');
+                return;
+            }
+
+            cars[idx] = { ...cars[idx], name, category, specs, priceMin, priceDay };
+            saveCmsCars(cars);
+            renderAdmin();
+            showToast(`Тарифы и данные для «${name}» сохранены.`);
+        }
+
+        function deleteCarRow(idx) {
+            const cars = getCmsState().cars;
+            if (cars.length <= 1) {
+                showToast('Нельзя удалить последний автомобиль из парка.');
+                return;
+            }
+            const removed = cars.splice(idx, 1)[0];
+            saveCmsCars(cars);
+            renderAdmin();
+            showToast(`Автомобиль «${removed.name}» удалён из каталога.`);
+        }
+
         function getBookings() {
             try {
                 const list = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
@@ -122,6 +287,7 @@
                 list[idx].status = newStatus;
                 localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
                 renderAdmin();
+                showToast(`Статус заказа ${list[idx].id} изменён на «${newStatus}».`);
             }
         }
 
@@ -143,6 +309,7 @@
             if (statusEl) list[idx].status = statusEl.value;
             localStorage.setItem(REVIEWS_KEY, JSON.stringify(list));
             renderAdmin();
+            showToast('Отзыв обновлён.');
         }
 
         function deleteReview(idx) {
@@ -150,15 +317,32 @@
             list.splice(idx, 1);
             localStorage.setItem(REVIEWS_KEY, JSON.stringify(list));
             renderAdmin();
+            showToast('Отзыв удалён.');
         }
 
         function renderAdmin() {
-            try {
-                const cms = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-                if (Array.isArray(cms.cars) && cms.cars.length) {
-                    document.getElementById('statCars').textContent = cms.cars.length;
-                }
-            } catch (e) {}
+            const cars = getCmsState().cars;
+            document.getElementById('statCars').textContent = cars.length;
+
+            const categories = ['Эконом', 'Комфорт', 'Электро', 'Бизнес', 'Спорт'];
+            document.getElementById('adminCarsBody').innerHTML = cars.map((c, idx) => `
+                <tr>
+                    <td><strong>#${c.id}</strong></td>
+                    <td><input id="carName_${idx}" class="edit-input" type="text" value="${(c.name || '').replace(/"/g, '&quot;')}"></td>
+                    <td>
+                        <select id="carCat_${idx}" class="status-select">
+                            ${categories.map(cat => `<option value="${cat}" ${c.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td><input id="carSpecs_${idx}" class="edit-input" type="text" value="${(c.specs || '').replace(/"/g, '&quot;')}"></td>
+                    <td><input id="carMin_${idx}" class="edit-input num-input" type="number" step="0.5" min="1" value="${c.priceMin}"></td>
+                    <td><input id="carDay_${idx}" class="edit-input num-input" type="number" step="50" min="100" value="${c.priceDay}"></td>
+                    <td style="white-space:nowrap; display:flex; gap:6px;">
+                        <button type="button" class="btn btn--primary btn--sm" onclick="saveCarRow(${idx})">Сохранить</button>
+                        <button type="button" class="btn btn--danger btn--sm" onclick="deleteCarRow(${idx})">✕</button>
+                    </td>
+                </tr>
+            `).join('');
 
             const list = getBookings();
             document.getElementById('statOrders').textContent = list.length;
@@ -220,9 +404,51 @@
             }
         }
 
+        document.getElementById('adminAddCarForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('admCarName').value.trim();
+            const category = document.getElementById('admCarCat').value;
+            const specs = document.getElementById('admCarSpecs').value.trim();
+            const priceMin = Number(document.getElementById('admCarMin').value);
+            const priceDay = Number(document.getElementById('admCarDay').value);
+            const imgInput = document.getElementById('admCarImg').value.trim();
+
+            if (!name || !specs || priceMin <= 0 || priceDay <= 0) {
+                showToast('Укажите корректные данные и положительные цены.');
+                return;
+            }
+
+            const cars = getCmsState().cars;
+            const nextId = Math.max(0, ...cars.map(c => Number(c.id) || 0)) + 1;
+            cars.push({
+                id: nextId,
+                name,
+                category,
+                specs,
+                priceMin,
+                priceDay,
+                img: imgInput || 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80'
+            });
+            saveCmsCars(cars);
+            e.target.reset();
+            renderAdmin();
+            showToast(`Автомобиль «${name}» добавлен в автопарк.`);
+        });
+
+        document.getElementById('resetFleetBtn').addEventListener('click', () => {
+            if (confirm('Вернуть исходный список из 6 автомобилей и базовые тарифы?')) {
+                saveCmsCars([...DEFAULT_CARS]);
+                renderAdmin();
+                showToast('Базовый автопарк восстановлен.');
+            }
+        });
+
+        window.saveCarRow = saveCarRow;
+        window.deleteCarRow = deleteCarRow;
         window.updateStatus = updateStatus;
         window.saveReviewEdit = saveReviewEdit;
         window.deleteReview = deleteReview;
+
         renderAdmin();
     </script>
 </body>
