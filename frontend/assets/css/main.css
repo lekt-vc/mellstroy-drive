@@ -476,3 +476,41 @@ body.light-theme .header { background: rgba(255, 255, 255, 0.9); }
     border-radius: 10px;
     font-size: 0.9rem;
 }
+
+/* Fix BUG-045: стабильное отображение верхней навигации на всех страницах */
+.header__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.header .nav {
+    display: flex !important;
+    align-items: center;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: static !important;
+    transform: none !important;
+    width: auto !important;
+    background: transparent !important;
+}
+.header .nav__list {
+    display: flex !important;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.header .nav__link {
+    display: inline-block;
+    white-space: nowrap;
+}
+@media (max-width: 640px) {
+    .header .nav__list {
+        gap: 10px;
+        font-size: 0.88rem;
+    }
+}
