@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MELLDRIVE — UI-кит и дизайн-система (Этап 3)</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <style>
+        .uikit-section { padding: 48px 0; border-bottom: 1px solid var(--border); }
+        .uikit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+        .swatch { padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+        .btn-demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+        .btn--disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+        .field-demo { display: grid; gap: 12px; max-width: 420px; margin-top: 16px; }
+        .field-demo input {
+            width: 100%; padding: 10px 12px; border-radius: 8px;
+            background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border);
+        }
+        .field-demo input.input-error { border-color: var(--danger); }
+        .field-error-msg { color: var(--danger); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header__container">
+            <a href="../index.html" class="logo">
+                <span class="logo__highlight">MELL</span>DRIVE
+            </a>
+            <nav class="nav">
+                <ul class="nav__list">
+                    <li><a href="../index.html" class="nav__link">Главная</a></li>
+                    <li><a href="ui-kit.html" class="nav__link active">UI-кит</a></li>
+                </ul>
+            </nav>
+            <div class="header__actions">
+                <a href="../index.html" class="btn btn--primary btn--sm">← На сайт</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="uikit-section">
+            <h1>UI-кит проекта «MELLDRIVE»</h1>
+            <p style="color: var(--text-muted); margin-top: 8px;">Команда MellSquad • Этап 3: цветовая палитра, типографика, состояния кнопок и полей ввода (320–1920 px).</p>
+
+            <div class="uikit-grid">
+                <div class="swatch" style="background:#09090d;"><strong>Background</strong><br><small>#09090d</small></div>
+                <div class="swatch" style="background:#161622;"><strong>Surface Card</strong><br><small>#161622</small></div>
+                <div class="swatch" style="background:#9333ea; color:#fff;"><strong>Primary Neon</strong><br><small>#9333ea</small></div>
+                <div class="swatch" style="background:#eab308; color:#000;"><strong>Gold Accent</strong><br><small>#eab308</small></div>
+            </div>
+        </section>
+
+        <section class="uikit-section">
+            <h2>Состояния кнопок</h2>
+            <div class="btn-demo-row">
+                <button type="button" class="btn btn--primary">Primary</button>
+                <button type="button" class="btn btn--secondary">Secondary</button>
+                <button type="button" class="btn btn--outline">Outline</button>
+                <button type="button" class="btn btn--danger">Danger</button>
+                <button type="button" class="btn btn--primary btn--disabled" disabled>Disabled</button>
+            </div>
+        </section>
+
+        <section class="uikit-section">
+            <h2>Поля ввода и валидация</h2>
+            <div class="field-demo">
+                <label>Обычное поле ввода
+                    <input type="text" placeholder="Например: Алексей Навроцкий">
+                </label>
+                <label>Поле с ошибкой валидации
+                    <input type="text" class="input-error" value="некорректный-email">
+                    <span class="field-error-msg">Введите корректный e-mail адрес</span>
+                </label>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
