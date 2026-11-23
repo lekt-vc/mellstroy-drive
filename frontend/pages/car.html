@@ -1,0 +1,213 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карточка автомобиля — MELLDRIVE</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <style>
+        .car-detail {
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+        .car-detail__photo {
+            width: 100%;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            object-fit: cover;
+            max-height: 440px;
+        }
+        .booking-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px;
+        }
+        .tariff-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 16px 0;
+        }
+        .tariff-pill {
+            padding: 12px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-main);
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+        .tariff-pill.active {
+            border-color: var(--gold);
+            background: var(--gold-soft);
+            color: var(--gold);
+        }
+        .extra-list { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; font-size: 0.92rem; }
+        .total-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 0; border-top: 1px solid var(--border); margin-top: 14px;
+            font-size: 1.25rem; font-weight: 800;
+        }
+        @media (max-width: 860px) {
+            .car-detail { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header__container">
+            <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
+            <nav class="nav">
+                <ul class="nav__list">
+                    <li><a href="../index.html" class="nav__link">Главная</a></li>
+                    <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
+                    <li><a href="profile.html" class="nav__link">Кабинет</a></li>
+                </ul>
+            </nav>
+            <div class="header__actions">
+                <a href="profile.html" class="btn btn--outline btn--sm">Мои брони</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="section">
+        <div class="container">
+            <div class="car-detail">
+                <div>
+                    <img id="carPhoto" class="car-detail__photo" src="" alt="Фото автомобиля">
+                    <div style="margin-top: 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;">
+                        <h3 style="margin-bottom: 10px;">Отзывы водителей</h3>
+                        <p style="color: var(--text-muted); font-size: 0.92rem;">⭐⭐⭐⭐⭐ <strong>Алексей Н.:</strong> Отличное состояние салона, подача заняла 7 минут, полный бак.</p>
+                    </div>
+                </div>
+
+                <div class="booking-box">
+                    <span class="hero__badge" id="carCategory">Класс</span>
+                    <h1 id="carTitle" style="font-size: 2rem; margin-bottom: 10px;">Загрузка...</h1>
+                    <p id="carSpecs" style="color: var(--text-muted); margin-bottom: 18px;"></p>
+
+                    <label style="font-size: 0.9rem; color: var(--text-muted);">Выберите формат тарифа:</label>
+                    <div class="tariff-options" id="tariffGroup">
+                        <button type="button" class="tariff-pill active" data-mode="minute" data-label="Минуты (30 мин)">Минуты (30 мин)</button>
+                        <button type="button" class="tariff-pill" data-mode="hour" data-label="Пакет 3 часа">Пакет 3 часа</button>
+                        <button type="button" class="tariff-pill" data-mode="day" data-label="Сутки (24 ч)">Сутки (24 ч)</button>
+                    </div>
+
+                    <div class="extra-list">
+                        <label><input type="checkbox" id="optCasco"> Полное КАСКО без франшизы (+490 ₽)</label>
+                        <label><input type="checkbox" id="optChild"> Детское кресло / бустер (+250 ₽)</label>
+                    </div>
+
+                    <div class="total-bar">
+                        <span>Итого к оплате:</span>
+                        <span id="totalPrice" style="color: var(--gold);">0 ₽</span>
+                    </div>
+
+                    <button type="button" id="confirmBookingBtn" class="btn btn--primary btn--large btn--block">Оформить бронирование</button>
+                    <p id="bookingSuccessMsg" class="hidden" style="margin-top: 14px; color: var(--success); font-weight: 600;"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const STORAGE_KEY = 'melldrive_cms_v2';
+        const BOOKINGS_KEY = 'melldrive_bookings_v1';
+        const DEFAULT_CAR = {
+            id: 1,
+            name: 'BMW M5 Competition',
+            category: 'Спорт',
+            specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с',
+            priceMin: 55,
+            priceDay: 39000,
+            img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80'
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const carId = Number(params.get('id')) || 1;
+        let car = DEFAULT_CAR;
+
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                const found = (parsed.cars || []).find(c => Number(c.id) === carId);
+                if (found) car = found;
+            }
+        } catch (e) {}
+
+        document.getElementById('carPhoto').src = car.img;
+        document.getElementById('carPhoto').alt = car.name;
+        document.getElementById('carCategory').textContent = car.category;
+        document.getElementById('carTitle').textContent = car.name;
+        document.getElementById('carSpecs').textContent = car.specs;
+        document.title = `${car.name} — Аренда в MELLDRIVE`;
+
+        let mode = 'minute';
+        let tariffLabel = 'Минуты (30 мин)';
+        let currentTotal = 0;
+
+        function recalc() {
+            let base = 0;
+            if (mode === 'minute') base = Number(car.priceMin) * 30;
+            if (mode === 'hour') base = Number(car.priceMin) * 140;
+            if (mode === 'day') base = Number(car.priceDay);
+
+            if (document.getElementById('optCasco').checked) base += 490;
+            if (document.getElementById('optChild').checked) base += 250;
+
+            currentTotal = Math.round(base);
+            document.getElementById('totalPrice').textContent = `${currentTotal.toLocaleString('ru-RU')} ₽`;
+        }
+
+        document.querySelectorAll('.tariff-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tariff-pill').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                mode = btn.dataset.mode;
+                tariffLabel = btn.dataset.label;
+                recalc();
+            });
+        });
+        document.getElementById('optCasco').addEventListener('change', recalc);
+        document.getElementById('optChild').addEventListener('change', recalc);
+
+        document.getElementById('confirmBookingBtn').addEventListener('click', () => {
+            const code = 'MD-' + Math.floor(100000 + Math.random() * 900000);
+            const options = [];
+            if (document.getElementById('optCasco').checked) options.push('КАСКО');
+            if (document.getElementById('optChild').checked) options.push('Детское кресло');
+
+            const booking = {
+                id: code,
+                carName: car.name,
+                category: car.category,
+                tariff: tariffLabel,
+                options: options.length ? options.join(', ') : 'Без доп. опций',
+                total: currentTotal,
+                status: 'Активна',
+                createdAt: new Date().toLocaleString('ru-RU')
+            };
+
+            let list = [];
+            try {
+                list = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+                if (!Array.isArray(list)) list = [];
+            } catch (e) { list = []; }
+            list.unshift(booking);
+            localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
+
+            const msg = document.getElementById('bookingSuccessMsg');
+            msg.innerHTML = `✅ Бронь <strong>${code}</strong> сохранена в личном кабинете! <a href="profile.html" style="color:var(--gold); text-decoration:underline;">Перейти в кабинет →</a>`;
+            msg.classList.remove('hidden');
+        });
+
+        recalc();
+    </script>
+</body>
+</html>
