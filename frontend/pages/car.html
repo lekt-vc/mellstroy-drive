@@ -54,6 +54,32 @@
             background: var(--gold-soft);
             color: var(--gold);
         }
+        .hours-picker {
+            display: none;
+            margin: 12px 0;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-main);
+        }
+        .hours-picker.open { display: block; }
+        .hours-picker input {
+            width: 100%;
+            margin-top: 6px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+        .auth-gate {
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            background: rgba(239, 68, 68, 0.1);
+            margin-bottom: 14px;
+        }
         .extra-list { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; font-size: 0.92rem; }
         .promo-row { display: flex; gap: 8px; margin-top: 12px; }
         .promo-row input {
@@ -88,39 +114,19 @@
             .car-detail { grid-template-columns: 1fr; }
         }
     </style>
-<style id="force-nav-visible">
-  .header, .header .container, .header__container { overflow: visible !important; }
-  .header .nav, .header nav {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: static !important;
-    transform: none !important;
-    max-height: none !important;
-    width: auto !important;
-    background: transparent !important;
-  }
-  .header .nav__list {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 16px !important;
-  }
-  .header .nav__link { display: inline-block !important; white-space: nowrap !important; }
-</style>
 </head>
 <body>
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
-                                                <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
+            <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
                 <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
-                    <li><a href="../index.html" class="nav__link" style="white-space:nowrap;">Главная</a></li>
-                    <li><a href="catalog.html" class="nav__link " style="white-space:nowrap;">Автопарк</a></li>
-                    <li><a href="map.html" class="nav__link " style="white-space:nowrap;">Карта зон</a></li>
-                    <li><a href="profile.html" class="nav__link " style="white-space:nowrap;">Кабинет</a></li>
-                    <li><a href="admin.html" class="nav__link " style="white-space:nowrap;">Админка</a></li>
-                    <li><a href="ui-kit.html" class="nav__link " style="white-space:nowrap;">UI-кит</a></li>
+                    <li><a href="../index.html" class="nav__link">Главная</a></li>
+                    <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
+                    <li><a href="map.html" class="nav__link">Карта зон</a></li>
+                    <li><a href="profile.html" class="nav__link">Кабинет</a></li>
+                    <li><a href="admin.html" class="nav__link">Админка</a></li>
+                    <li><a href="ui-kit.html" class="nav__link">UI-кит</a></li>
                 </ul>
             </nav>
             <div class="header__actions">
@@ -170,13 +176,22 @@
                 <div class="booking-box">
                     <span class="hero__badge" id="carCategory">Класс</span>
                     <h1 id="carTitle" style="font-size: 2rem; margin-bottom: 10px;">Загрузка...</h1>
-                    <p id="carSpecs" style="color: var(--text-muted); margin-bottom: 18px;"></p>
+                    <p id="carSpecs" style="color: var(--text-muted); margin-bottom: 14px;"></p>
+                    <div id="driverSessionBadge" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;"></div>
 
                     <label style="font-size: 0.9rem; color: var(--text-muted);">Выберите формат тарифа:</label>
                     <div class="tariff-options" id="tariffGroup">
                         <button type="button" class="tariff-pill active" data-mode="minute" data-label="Минуты (30 мин)">Минуты (30 мин)</button>
-                        <button type="button" class="tariff-pill" data-mode="hour" data-label="Пакет 3 часа">Пакет 3 часа</button>
+                        <button type="button" class="tariff-pill" data-mode="hours" data-label="По часам">Нужное число часов</button>
                         <button type="button" class="tariff-pill" data-mode="day" data-label="Сутки (24 ч)">Сутки (24 ч)</button>
+                    </div>
+
+                    <div class="hours-picker" id="hoursPicker">
+                        <label style="font-size:0.88rem; color:var(--text-main); display:block;">
+                            Количество часов аренды (от 1 до 72 ч):
+                            <input type="number" id="hoursCountInput" min="1" max="72" value="3">
+                        </label>
+                        <div id="hourlyRateHint" style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;"></div>
                     </div>
 
                     <div class="extra-list">
@@ -195,6 +210,17 @@
                         <span id="totalPrice" style="color: var(--gold);">0 ₽</span>
                     </div>
 
+                    <div id="authGateBox" class="auth-gate" style="display:none;">
+                        <strong style="color:var(--danger); display:block; margin-bottom:6px;">Требуется оформленный аккаунт</strong>
+                        <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:10px;">
+                            Аренда автомобиля доступна только после регистрации и входа в аккаунт водителя (BUG-047).
+                        </p>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <a href="login.html" class="btn btn--primary btn--sm">Войти в аккаунт</a>
+                            <a href="register.html" class="btn btn--outline btn--sm">Зарегистрироваться</a>
+                        </div>
+                    </div>
+
                     <button type="button" id="confirmBookingBtn" class="btn btn--primary btn--large btn--block">Оформить бронирование</button>
                     <p id="bookingSuccessMsg" class="hidden" style="margin-top: 14px; color: var(--success); font-weight: 600;"></p>
                 </div>
@@ -206,6 +232,7 @@
         const STORAGE_KEY = 'melldrive_cms_v2';
         const BOOKINGS_KEY = 'melldrive_bookings_v1';
         const REVIEWS_KEY = 'melldrive_reviews_v1';
+        const SESSION_KEY = 'melldrive_active_session_v1';
 
         const DEFAULT_CAR = {
             id: 1,
@@ -230,6 +257,16 @@
             }
         } catch (e) {}
 
+        const zoneParam = params.get('zone');
+        if (zoneParam) {
+            try {
+                const zones = JSON.parse(localStorage.getItem('melldrive_zones_v1') || '[]');
+                const z = zones.find(item => item.id === zoneParam);
+                const zCar = (z?.cars || []).find(c => Number(c.id) === carId);
+                if (zCar) car = zCar;
+            } catch (e) {}
+        }
+
         document.getElementById('carPhoto').src = car.img;
         document.getElementById('carPhoto').alt = car.name;
         document.getElementById('carCategory').textContent = car.category;
@@ -237,16 +274,52 @@
         document.getElementById('carSpecs').textContent = car.specs;
         document.title = `${car.name} — Аренда в MELLDRIVE`;
 
-        // Тарифы, опции и промокод
+        // Проверка оформленного аккаунта перед арендой
+        let activeSession = null;
+        try {
+            activeSession = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+        } catch (e) {}
+
+        const isAccountReady = Boolean(activeSession && activeSession.loggedIn && activeSession.email);
+        const confirmBtn = document.getElementById('confirmBookingBtn');
+        const authGateBox = document.getElementById('authGateBox');
+        const driverBadge = document.getElementById('driverSessionBadge');
+
+        if (!isAccountReady) {
+            authGateBox.style.display = 'block';
+            confirmBtn.disabled = true;
+            confirmBtn.style.opacity = '0.5';
+            driverBadge.innerHTML = 'Статус водителя: <strong style="color:var(--danger);">не авторизован</strong>';
+        } else {
+            authGateBox.style.display = 'none';
+            confirmBtn.disabled = false;
+            driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${activeSession.name || activeSession.email}</strong> (аккаунт подтверждён)`;
+        }
+
+        // Тарифы, количество часов, опции и промокод
         let mode = 'minute';
         let tariffLabel = 'Минуты (30 мин)';
         let currentTotal = 0;
         let activePromo = '';
 
+        function getHourlyPrice() {
+            const rawHour = Number(car.priceMin) * 45;
+            return Math.max(250, Math.round(rawHour / 10) * 10);
+        }
+
+        function getHoursCount() {
+            const val = Math.floor(Number(document.getElementById('hoursCountInput').value) || 1);
+            return Math.min(72, Math.max(1, val));
+        }
+
         function recalc() {
+            const hourlyRate = getHourlyPrice();
+            const hours = getHoursCount();
+            document.getElementById('hourlyRateHint').textContent = `Ставка: ${hourlyRate.toLocaleString('ru-RU')} ₽ / час × ${hours} ч = ${(hourlyRate * hours).toLocaleString('ru-RU')} ₽`;
+
             let base = 0;
             if (mode === 'minute') base = Number(car.priceMin) * 30;
-            if (mode === 'hour') base = Number(car.priceMin) * 140;
+            if (mode === 'hours') base = hourlyRate * hours;
             if (mode === 'day') base = Number(car.priceDay);
 
             if (document.getElementById('optCasco').checked) base += 490;
@@ -259,15 +332,30 @@
             document.getElementById('totalPrice').textContent = `${currentTotal.toLocaleString('ru-RU')} ₽`;
         }
 
+        const hoursPicker = document.getElementById('hoursPicker');
         document.querySelectorAll('.tariff-pill').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tariff-pill').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 mode = btn.dataset.mode;
-                tariffLabel = btn.dataset.label;
+                if (mode === 'hours') {
+                    hoursPicker.classList.add('open');
+                    tariffLabel = `Аренда на ${getHoursCount()} ч`;
+                } else {
+                    hoursPicker.classList.remove('open');
+                    tariffLabel = btn.dataset.label;
+                }
                 recalc();
             });
         });
+
+        document.getElementById('hoursCountInput').addEventListener('input', () => {
+            const h = getHoursCount();
+            document.getElementById('hoursCountInput').value = h;
+            if (mode === 'hours') tariffLabel = `Аренда на ${h} ч`;
+            recalc();
+        });
+
         document.getElementById('optCasco').addEventListener('change', recalc);
         document.getElementById('optChild').addEventListener('change', recalc);
 
@@ -284,9 +372,14 @@
             recalc();
         });
 
-        document.getElementById('confirmBookingBtn').addEventListener('click', () => {
+        confirmBtn.addEventListener('click', () => {
+            if (!isAccountReady) {
+                authGateBox.style.display = 'block';
+                return;
+            }
             const code = 'MD-' + Math.floor(100000 + Math.random() * 900000);
             const options = [];
+            if (mode === 'hours') options.push(`${getHoursCount()} ч`);
             if (document.getElementById('optCasco').checked) options.push('КАСКО');
             if (document.getElementById('optChild').checked) options.push('Детское кресло');
             if (activePromo) options.push(`Промокод ${activePromo}`);
@@ -298,6 +391,7 @@
                 tariff: tariffLabel,
                 options: options.length ? options.join(', ') : 'Без доп. опций',
                 total: currentTotal,
+                driverEmail: activeSession.email,
                 status: 'Активна',
                 createdAt: new Date().toLocaleString('ru-RU')
             };
@@ -311,11 +405,11 @@
             localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
 
             const msg = document.getElementById('bookingSuccessMsg');
-            msg.innerHTML = `✅ Бронь <strong>${code}</strong> сохранена! <a href="profile.html" style="color:var(--gold); text-decoration:underline;">Перейти в кабинет →</a>`;
+            msg.innerHTML = `✅ Бронь <strong>${code}</strong> оформлена для ${activeSession.name || activeSession.email}! <a href="profile.html" style="color:var(--gold); text-decoration:underline;">Перейти в кабинет →</a>`;
             msg.classList.remove('hidden');
         });
 
-        // Отзывы (с поддержкой редактирования и статуса из админки)
+        // Отзывы
         function loadReviews() {
             try {
                 const raw = localStorage.getItem(REVIEWS_KEY);
@@ -325,7 +419,7 @@
                 }
             } catch (e) {}
             const seed = [
-                { id: 1, carId: car.id, author: 'Алексей Н.', rating: 5, text: 'Отличное состояние салона, подача заняла 7 минут, полный бак.', status: 'Опубликован', date: '22.11.2026' }
+                { id: 1, carId: car.id, author: 'Водитель MELLDRIVE', rating: 5, text: 'Отличное состояние салона, подача заняла 7 минут, полный бак.', status: 'Опубликован', date: '22.11.2026' }
             ];
             localStorage.setItem(REVIEWS_KEY, JSON.stringify(seed));
             return seed;
@@ -380,43 +474,21 @@
         recalc();
         renderReviews();
     </script>
-<script>
-(function() {
-    let loggedIn = false;
-    try {
-        const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
-        loggedIn = Boolean(s && s.loggedIn);
-    } catch (e) {}
-    if (!loggedIn) {
-        document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-})();
-</script>
-<script>
-(function() {
-    let isAdmin = false;
-    try {
-        const a = JSON.parse(localStorage.getItem('melldrive_admin_session_v1') || 'null');
-        isAdmin = Boolean(a && a.isAdmin === true);
-    } catch (e) {}
-    if (!isAdmin) {
-        document.querySelectorAll('header a[href*="admin.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-})();
-</script>
+    <script>
+    (function() {
+        let loggedIn = false;
+        try {
+            const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+            loggedIn = Boolean(s && s.loggedIn);
+        } catch (e) {}
+        if (!loggedIn) {
+            document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
+                const li = a.closest('li');
+                if (li) li.remove();
+                else a.remove();
+            });
+        }
+    })();
+    </script>
 </body>
 </html>
-
-
-
-
-
-
