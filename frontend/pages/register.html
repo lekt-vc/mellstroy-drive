@@ -17,8 +17,8 @@
             <label>Дата рождения (от 18 лет)
                 <input type="date" id="birthDate" required style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
             </label>
-            <label>Серия и номер ВУ
-                <input type="text" required placeholder="99 01 123456" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+            <label>Серия и номер ВУ (строго 10 цифр)
+                <input type="text" id="driverLicense" inputmode="numeric" maxlength="14" required placeholder="9901123456" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
             </label>
             <p id="regError" class="hidden" style="color:var(--danger); font-size:0.88rem;"></p>
             <button type="submit" class="btn btn--primary btn--block">Создать аккаунт</button>
@@ -31,7 +31,10 @@
         document.getElementById('regForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const val = document.getElementById('birthDate').value;
+            const rawLicense = document.getElementById('driverLicense').value;
+            const digitsOnly = rawLicense.replace(/\D/g, '');
             const err = document.getElementById('regError');
+
             if (!val) return;
             const birth = new Date(val);
             const age = (Date.now() - birth.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
@@ -40,6 +43,12 @@
                 err.classList.remove('hidden');
                 return;
             }
+            if (digitsOnly.length !== 10) {
+                err.textContent = 'Серия и номер водительского удостоверения должны содержать ровно 10 цифр (исправление BUG-035).';
+                err.classList.remove('hidden');
+                return;
+            }
+
             err.classList.add('hidden');
             window.location.href = 'profile.html';
         });
