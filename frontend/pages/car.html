@@ -35,12 +35,7 @@
             gap: 12px;
             flex-wrap: wrap;
         }
-        .rating-badge {
-            font-size: 1rem;
-            font-weight: 800;
-            color: #f59e0b;
-            white-space: nowrap;
-        }
+        .rating-badge { font-size: 1rem; font-weight: 800; color: #f59e0b; white-space: nowrap; }
         .rate-summary {
             display: flex;
             gap: 16px;
@@ -83,7 +78,7 @@
             background: var(--bg-main);
         }
         .hours-picker.open { display: block; }
-        .hours-picker input {
+        .hours-picker input, .plate-select {
             width: 100%;
             margin-top: 6px;
             padding: 9px 12px;
@@ -144,7 +139,7 @@
             <nav class="nav" id="mainNav">
                 <ul class="nav__list">
                     <li><a href="../index.html" class="nav__link">Главная</a></li>
-                    <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
+                    <li><a href="catalog.html" class="nav__link">Автопарк (39)</a></li>
                     <li><a href="map.html" class="nav__link">Карта зон</a></li>
                     <li><a href="profile.html" class="nav__link">Кабинет</a></li>
                     <li><a href="admin.html" class="nav__link">Админка</a></li>
@@ -198,8 +193,13 @@
                     <div class="rate-summary">
                         <div><strong>Минута:</strong> <span id="rateMinText" style="color:var(--gold);">—</span></div>
                         <div><strong>Час:</strong> <span id="rateHourText" style="color:var(--gold);">—</span></div>
-                        <div><strong>Сутки:</strong> <span id="rateDayText">—</span></div>
+                        <div><strong>День:</strong> <span id="rateDayText">—</span></div>
                     </div>
+
+                    <label style="display:block; font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
+                        Выберите экземпляр (госномер из 3 доступных):
+                        <select id="unitPlateSelect" class="plate-select"></select>
+                    </label>
 
                     <div id="driverSessionBadge" style="font-size:0.86rem; color:var(--text-muted); margin-bottom:12px;"></div>
 
@@ -207,7 +207,7 @@
                     <div class="tariff-options" id="tariffGroup">
                         <button type="button" class="tariff-pill active" data-mode="minute" data-label="Минуты (30 мин)">Минуты (30 мин)</button>
                         <button type="button" class="tariff-pill" data-mode="hours" data-label="По часам">Нужное число часов</button>
-                        <button type="button" class="tariff-pill" data-mode="day" data-label="Сутки (24 ч)">Сутки (24 ч)</button>
+                        <button type="button" class="tariff-pill" data-mode="day" data-label="День (24 ч)">День (24 ч)</button>
                     </div>
 
                     <div class="hours-picker" id="hoursPicker">
@@ -252,62 +252,75 @@
         </div>
     </main>
 
+    <script src="../assets/js/fleet-data.js"></script>
     <script>
         const STORAGE_KEY = 'melldrive_cms_v2';
         const BOOKINGS_KEY = 'melldrive_bookings_v1';
         const REVIEWS_KEY = 'melldrive_reviews_v1';
         const SESSION_KEY = 'melldrive_active_session_v1';
 
-        const BASE_FLEET = [
-            { id: 1, plate: 'А777МР77', name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceHour: 520, priceDay: 2400, img: '../assets/img/cars/solaris.jpg' },
-            { id: 2, plate: 'Е304КХ190', name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Камеры 360', priceMin: 15.5, priceHour: 700, priceDay: 3500, img: '../assets/img/cars/haval-jolion.jpg' },
-            { id: 3, plate: 'О512ТТ777', name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Премиум', priceMin: 25.0, priceHour: 1150, priceDay: 6900, img: '../assets/img/cars/tesla-model-3.jpg' },
-            { id: 4, plate: 'М005АА99', name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceHour: 2500, priceDay: 39000, img: '../assets/img/cars/bmw-m5.jpg' },
-            { id: 5, plate: 'А001МР77', name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Полный привод', priceMin: 75.0, priceHour: 3400, priceDay: 55000, img: '../assets/img/cars/maybach-s580.jpg' },
-            { id: 6, plate: 'К911ТУ777', name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • 0-100 за 2.7 с', priceMin: 90.0, priceHour: 4100, priceDay: 72000, img: '../assets/img/cars/porsche-911.jpg' }
-        ];
-
+        const allUnits = window.buildMellFleetUnits(true);
         const params = new URLSearchParams(window.location.search);
         const carIdParam = params.get('id');
-        const zoneParam = params.get('zone');
 
-        function resolveSelectedCar() {
-            const candidatePool = [];
-            try {
-                const zones = JSON.parse(localStorage.getItem('melldrive_zones_v1') || '[]');
-                if (zoneParam) {
-                    const z = zones.find(item => item.id === zoneParam);
-                    if (z && Array.isArray(z.cars)) candidatePool.push(...z.cars);
-                }
-                zones.forEach(z => { if (Array.isArray(z.cars)) candidatePool.push(...z.cars); });
-            } catch (e) {}
-
+        function resolveCar() {
+            if (carIdParam) {
+                const found = allUnits.find(u => String(u.id) === String(carIdParam));
+                if (found) return found;
+            }
             try {
                 const cms = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-                if (Array.isArray(cms.cars)) candidatePool.push(...cms.cars);
+                if (Array.isArray(cms.cars) && carIdParam) {
+                    const custom = cms.cars.find(c => String(c.id) === String(carIdParam));
+                    if (custom) {
+                        return {
+                            ...custom,
+                            modelId: custom.modelId || ('custom-' + custom.id),
+                            plate: custom.plate || `Н${200 + (Number(custom.id) % 700)}ММ77`,
+                            priceHour: custom.priceHour || Math.round((Number(custom.priceMin) * 50) / 10) * 10,
+                            img: (custom.img && custom.img.startsWith('assets/')) ? ('../' + custom.img) : (custom.img || '../assets/img/cars/porsche-911.jpg')
+                        };
+                    }
+                }
             } catch (e) {}
-
-            candidatePool.push(...BASE_FLEET);
-
-            if (carIdParam) {
-                const matched = candidatePool.find(c => String(c.id) === String(carIdParam));
-                if (matched) return { ...matched, plate: matched.plate || `М${100 + Number(matched.id) % 899}АА77` };
-            }
-            return BASE_FLEET[0];
+            return allUnits[0];
         }
 
-        const car = resolveSelectedCar();
-        const hourPrice = car.priceHour || Math.round((Number(car.priceMin) * 45) / 10) * 10;
+        let car = resolveCar();
+        const sameModelUnits = allUnits.filter(u => u.modelId === car.modelId);
+        const unitSelect = document.getElementById('unitPlateSelect');
 
-        document.getElementById('carPhoto').src = car.img;
-        document.getElementById('carPhoto').alt = car.name;
-        document.getElementById('carCategory').textContent = `${car.category} • Госномер ${car.plate}`;
-        document.getElementById('carTitle').textContent = car.name;
-        document.getElementById('carSpecs').textContent = car.specs;
-        document.getElementById('rateMinText').textContent = `${Number(car.priceMin).toFixed(2)} ₽/мин`;
-        document.getElementById('rateHourText').textContent = `${hourPrice.toLocaleString('ru-RU')} ₽/час`;
-        document.getElementById('rateDayText').textContent = `${Number(car.priceDay).toLocaleString('ru-RU')} ₽/сут`;
-        document.title = `${car.name} (${car.plate}) — Аренда в MELLDRIVE`;
+        if (sameModelUnits.length) {
+            unitSelect.innerHTML = sameModelUnits.map(u => `
+                <option value="${u.id}" ${String(u.id) === String(car.id) ? 'selected' : ''}>Экземпляр #${u.copyNumber} — Госномер ${u.plate}</option>
+            `).join('');
+            unitSelect.addEventListener('change', () => {
+                const chosen = sameModelUnits.find(u => String(u.id) === String(unitSelect.value));
+                if (chosen) {
+                    car = chosen;
+                    updateHeaderAndBadges();
+                }
+            });
+        } else {
+            unitSelect.innerHTML = `<option value="${car.id}" selected>Госномер ${car.plate}</option>`;
+        }
+
+        const hourPrice = Number(car.priceHour) || Math.round((Number(car.priceMin) * 50) / 10) * 10;
+
+        function updateHeaderAndBadges() {
+            const photoEl = document.getElementById('carPhoto');
+            photoEl.onerror = () => window.mellCarPlaceholder(photoEl, car.name, car.category);
+            photoEl.src = car.img;
+            photoEl.alt = car.name;
+            document.getElementById('carCategory').textContent = `${car.category} • Госномер ${car.plate}`;
+            document.getElementById('carTitle').textContent = car.name;
+            document.getElementById('carSpecs').textContent = car.specs;
+            document.getElementById('rateMinText').textContent = `${Number(car.priceMin)} ₽/мин`;
+            document.getElementById('rateHourText').textContent = `${hourPrice.toLocaleString('ru-RU')} ₽/час`;
+            document.getElementById('rateDayText').textContent = `${Number(car.priceDay).toLocaleString('ru-RU')} ₽/день`;
+            document.title = `${car.name} (${car.plate}) — Аренда в MELLDRIVE`;
+        }
+        updateHeaderAndBadges();
 
         // Проверка оформленного аккаунта
         let activeSession = null;
@@ -331,7 +344,6 @@
             driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${activeSession.name || activeSession.email}</strong>`;
         }
 
-        // Расчёт стоимости
         let mode = 'minute';
         let tariffLabel = 'Минуты (30 мин)';
         let currentTotal = 0;
@@ -416,6 +428,7 @@
             const booking = {
                 id: code,
                 carId: car.id,
+                modelId: car.modelId,
                 plate: car.plate,
                 carName: car.name,
                 category: car.category,
@@ -445,8 +458,7 @@
         function paintStarPicker(val) {
             selectedStars = val;
             document.querySelectorAll('#starPicker .star-btn').forEach(b => {
-                const starVal = Number(b.dataset.val);
-                b.classList.toggle('active', starVal <= val);
+                b.classList.toggle('active', Number(b.dataset.val) <= val);
             });
         }
         document.querySelectorAll('#starPicker .star-btn').forEach(btn => {
@@ -466,7 +478,7 @@
 
         function renderReviews() {
             const all = loadReviews();
-            const visible = all.filter(r => String(r.carId) === String(car.id) && r.status === 'Опубликован');
+            const visible = all.filter(r => (r.modelId === car.modelId || String(r.carId) === String(car.id)) && r.status === 'Опубликован');
             document.getElementById('reviewsCount').textContent = visible.length;
 
             const avgBadge = document.getElementById('carAvgRating');
@@ -508,6 +520,7 @@
             all.unshift({
                 id: Date.now(),
                 carId: car.id,
+                modelId: car.modelId,
                 author,
                 rating: selectedStars,
                 text,

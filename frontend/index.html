@@ -3,8 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MELLDRIVE — Каршеринг нового поколения</title>
+    <title>MELLDRIVE — Каршеринг Москвы и Подмосковья</title>
     <link rel="stylesheet" href="assets/css/main.css">
+    <style>
+        .filter-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+        .filter-pill {
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-main);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .filter-pill.active {
+            border-color: var(--gold);
+            background: var(--gold-soft);
+            color: var(--gold);
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -15,7 +33,7 @@
             <nav class="nav" id="mainNav">
                 <ul class="nav__list">
                     <li><a href="index.html" class="nav__link active">Главная</a></li>
-                    <li><a href="pages/catalog.html" class="nav__link">Автопарк</a></li>
+                    <li><a href="pages/catalog.html" class="nav__link">Автопарк (39)</a></li>
                     <li><a href="pages/map.html" class="nav__link">Карта зон</a></li>
                     <li><a href="pages/profile.html" class="nav__link">Кабинет</a></li>
                     <li><a href="pages/admin.html" class="nav__link">Админка</a></li>
@@ -32,12 +50,12 @@
     <main>
         <section class="hero">
             <div class="container">
-                <span class="hero__badge">Мгновенная аренда без залога • 24/7</span>
-                <h1 class="hero__title">Каршеринг <span class="text-gradient">MELLDRIVE</span> по Москве и области</h1>
-                <p class="hero__subtitle">Выбирайте авто под поездку, смотрите стоимость за минуту и за час, проверяйте статус по госномеру и бронируйте онлайн.</p>
+                <span class="hero__badge">13 моделей • 39 автомобилей в парке • 24/7</span>
+                <h1 class="hero__title">Каршеринг <span class="text-gradient">MELLDRIVE</span>: Эконом, Комфорт и Суприм</h1>
+                <p class="hero__subtitle">От классики ВАЗ 2107 и Приоры до Porsche 911 Turbo S и Audi RS7. Честные тарифы за минуту, час и сутки.</p>
                 <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:22px;">
-                    <a href="pages/catalog.html" class="btn btn--primary btn--large">Выбрать автомобиль</a>
-                    <a href="pages/map.html" class="btn btn--outline btn--large">Карта зон</a>
+                    <a href="pages/catalog.html" class="btn btn--primary btn--large">Все 39 машин парка</a>
+                    <a href="pages/map.html" class="btn btn--outline btn--large">Карта зон и проверка номера</a>
                     <a href="pages/register.html" class="btn btn--outline btn--large">Регистрация</a>
                 </div>
             </div>
@@ -47,11 +65,19 @@
             <div class="container">
                 <div class="section__header">
                     <div>
-                        <h2 class="section__title">Автопарк в наличии</h2>
-                        <p class="section__subtitle">Поминутный и почасовой тариф указаны для каждой машины</p>
+                        <h2 class="section__title">Модельный ряд MELLDRIVE (13 моделей по 3 шт.)</h2>
+                        <p class="section__subtitle">Выберите класс автомобиля и перейдите к бронированию</p>
                     </div>
-                    <a href="pages/catalog.html" class="btn btn--outline btn--sm">Весь каталог →</a>
+                    <a href="pages/catalog.html" class="btn btn--outline btn--sm">Открыть полный список 39 авто →</a>
                 </div>
+
+                <div class="filter-pills" id="homeCatFilters">
+                    <button type="button" class="filter-pill active" data-cat="all">Все классы (13)</button>
+                    <button type="button" class="filter-pill" data-cat="Эконом">Эконом (4)</button>
+                    <button type="button" class="filter-pill" data-cat="Комфорт">Комфорт (5)</button>
+                    <button type="button" class="filter-pill" data-cat="Суприм">Суприм (4)</button>
+                </div>
+
                 <div class="cars-grid" id="homeCarsGrid"></div>
             </div>
         </section>
@@ -69,35 +95,48 @@
         </div>
     </footer>
 
+    <script src="assets/js/fleet-data.js"></script>
     <script>
-        const DEFAULT_CARS = [
-            { id: 1, plate: 'А777МР77', name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceHour: 520, priceDay: 2400, img: 'assets/img/cars/solaris.jpg' },
-            { id: 2, plate: 'Е304КХ190', name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Камеры 360', priceMin: 15.5, priceHour: 700, priceDay: 3500, img: 'assets/img/cars/haval-jolion.jpg' },
-            { id: 3, plate: 'О512ТТ777', name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Премиум', priceMin: 25.0, priceHour: 1150, priceDay: 6900, img: 'assets/img/cars/tesla-model-3.jpg' },
-            { id: 4, plate: 'М005АА99', name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceHour: 2500, priceDay: 39000, img: 'assets/img/cars/bmw-m5.jpg' },
-            { id: 5, plate: 'А001МР77', name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Полный привод', priceMin: 75.0, priceHour: 3400, priceDay: 55000, img: 'assets/img/cars/maybach-s580.jpg' },
-            { id: 6, plate: 'К911ТУ777', name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • 0-100 за 2.7 с', priceMin: 90.0, priceHour: 4100, priceDay: 72000, img: 'assets/img/cars/porsche-911.jpg' }
-        ];
+        let activeCat = 'all';
+        const allUnits = window.buildMellFleetUnits(false);
 
-        const grid = document.getElementById('homeCarsGrid');
-        grid.innerHTML = DEFAULT_CARS.map(car => {
-            const hourPrice = car.priceHour || Math.round((Number(car.priceMin) * 45) / 10) * 10;
-            return `
-                <article class="car-card">
-                    <div class="car-card__badge">${car.category} • ${car.plate}</div>
-                    <img class="car-card__img" src="${car.img}" alt="${car.name}">
-                    <div class="car-card__body">
-                        <h3 class="car-card__title">${car.name}</h3>
-                        <div class="car-card__specs">${car.specs}</div>
-                        <div class="car-card__pricing">
-                            <span class="car-card__price">${Number(car.priceMin).toFixed(2)} ₽ / мин • ${hourPrice.toLocaleString('ru-RU')} ₽ / час</span>
-                            <span class="car-card__price-sub">или ${Number(car.priceDay).toLocaleString('ru-RU')} ₽ / сутки</span>
+        function renderHomeModels() {
+            const list = activeCat === 'all'
+                ? window.MELLDRIVE_MODELS
+                : window.MELLDRIVE_MODELS.filter(m => m.category === activeCat);
+
+            const grid = document.getElementById('homeCarsGrid');
+            grid.innerHTML = list.map(m => {
+                const firstUnit = allUnits.find(u => u.modelId === m.modelId) || { id: 1 };
+                return `
+                    <article class="car-card">
+                        <div class="car-card__badge">${m.category} • в наличии ${m.plates.length} шт.</div>
+                        <img class="car-card__img" src="${m.img}" alt="${m.name}" onerror="window.mellCarPlaceholder(this, '${m.name}', '${m.category}')">
+                        <div class="car-card__body">
+                            <h3 class="car-card__title">${m.name}</h3>
+                            <div class="car-card__specs">${m.specs}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">Госномера: ${m.plates.join(', ')}</div>
+                            <div class="car-card__pricing">
+                                <span class="car-card__price">${m.priceMin} ₽ / мин • ${m.priceHour.toLocaleString('ru-RU')} ₽ / час</span>
+                                <span class="car-card__price-sub">или ${m.priceDay.toLocaleString('ru-RU')} ₽ / день</span>
+                            </div>
+                            <a href="pages/car.html?id=${firstUnit.id}" class="btn btn--primary btn--block" style="margin-top:8px;">Забронировать</a>
                         </div>
-                        <a href="pages/car.html?id=${car.id}" class="btn btn--primary btn--block" style="margin-top:8px;">Забронировать</a>
-                    </div>
-                </article>
-            `;
-        }).join('');
+                    </article>
+                `;
+            }).join('');
+        }
+
+        document.querySelectorAll('#homeCatFilters .filter-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#homeCatFilters .filter-pill').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeCat = btn.dataset.cat;
+                renderHomeModels();
+            });
+        });
+
+        renderHomeModels();
     </script>
     <script src="assets/js/theme-session.js"></script>
 </body>

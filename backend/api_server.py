@@ -1,50 +1,38 @@
 ﻿from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 
-ZONES = [
-    {
-        "id": "center",
-        "region": "moscow",
-        "title": "Центр и ТТК",
-        "parking": "Бесплатно на платных парковках города",
-        "cars": [
-            {"id": 101, "name": "Hyundai Solaris", "category": "Эконом", "price_min": 11.5, "price_day": 2400, "available": True},
-            {"id": 102, "name": "Mercedes-Maybach S 580", "category": "Бизнес", "price_min": 75.0, "price_day": 55000, "available": True},
-            {"id": 103, "name": "Porsche 911 Turbo S", "category": "Спорт", "price_min": 90.0, "price_day": 72000, "available": True},
-        ],
-    },
-    {
-        "id": "north",
-        "region": "moscow",
-        "title": "Север и ВДНХ",
-        "parking": "Разрешено в зелёной зоне",
-        "cars": [
-            {"id": 201, "name": "Haval Jolion 4WD", "category": "Комфорт", "price_min": 15.5, "price_day": 3500, "available": True},
-            {"id": 202, "name": "Tesla Model 3", "category": "Электро", "price_min": 25.0, "price_day": 6900, "available": True},
-        ],
-    },
-    {
-        "id": "korolev",
-        "region": "mo",
-        "title": "Королёв и Мытищи",
-        "parking": "Разрешено в границах зоны МО",
-        "cars": [
-            {"id": 401, "name": "Hyundai Solaris", "category": "Эконом", "price_min": 11.5, "price_day": 2400, "available": True},
-            {"id": 402, "name": "Haval Jolion 4WD", "category": "Комфорт", "price_min": 15.5, "price_day": 3500, "available": True},
-        ],
-    },
+MODELS = [
+    {"model_id": "priora", "name": "Lada Priora", "category": "Эконом", "price_min": 9, "price_hour": 500, "price_day": 10000, "plates": ["А101МР77", "В102МР77", "Е103МР190"]},
+    {"model_id": "vaz-2107", "name": "ВАЗ 2107", "category": "Эконом", "price_min": 6, "price_hour": 300, "price_day": 7000, "plates": ["К207ТТ77", "М208ТТ190", "Н209ТТ777"]},
+    {"model_id": "vaz-2114", "name": "ВАЗ 2114", "category": "Эконом", "price_min": 8, "price_hour": 400, "price_day": 11000, "plates": ["О214АА77", "Р215АА190", "С216АА777"]},
+    {"model_id": "granta-sport", "name": "Lada Granta Sport", "category": "Эконом", "price_min": 9, "price_hour": 500, "price_day": 10000, "plates": ["Т301СП77", "У302СП190", "Х303СП777"]},
+    {"model_id": "rapid", "name": "Skoda Rapid", "category": "Комфорт", "price_min": 12, "price_hour": 600, "price_day": 16000, "plates": ["А401КМ77", "В402КМ190", "Е403КМ777"]},
+    {"model_id": "solaris", "name": "Hyundai Solaris", "category": "Комфорт", "price_min": 13, "price_hour": 700, "price_day": 18000, "plates": ["К411КМ77", "М412КМ190", "Н413КМ777"]},
+    {"model_id": "haval-jolion", "name": "Haval Jolion", "category": "Комфорт", "price_min": 12, "price_hour": 600, "price_day": 16000, "plates": ["О421КМ77", "Р422КМ190", "С423КМ777"]},
+    {"model_id": "omoda-c5", "name": "Omoda C5", "category": "Комфорт", "price_min": 12, "price_hour": 600, "price_day": 16000, "plates": ["Т431КМ77", "У432КМ190", "Х433КМ777"]},
+    {"model_id": "geely-coolray", "name": "Geely Coolray", "category": "Комфорт", "price_min": 11, "price_hour": 550, "price_day": 15000, "plates": ["А441КМ77", "В442КМ190", "Е443КМ777"]},
+    {"model_id": "audi-rs7", "name": "Audi RS7", "category": "Суприм", "price_min": 40, "price_hour": 2200, "price_day": 55000, "plates": ["А701СУ77", "В702СУ190", "Е703СУ777"]},
+    {"model_id": "bmw-m8", "name": "BMW M8", "category": "Суприм", "price_min": 40, "price_hour": 2200, "price_day": 55000, "plates": ["К801СУ77", "М802СУ190", "Н803СУ777"]},
+    {"model_id": "porsche-911-turbo-s", "name": "Porsche 911 Turbo S", "category": "Суприм", "price_min": 45, "price_hour": 2600, "price_day": 60000, "plates": ["О911СУ77", "Р912СУ190", "С913СУ777"]},
+    {"model_id": "mercedes-e63-amg", "name": "Mercedes E63 AMG", "category": "Суприм", "price_min": 35, "price_hour": 2000, "price_day": 50000, "plates": ["Т631СУ77", "У632СУ190", "Х633СУ777"]},
 ]
 
-CARS = [
-    {"id": 1, "name": "Hyundai Solaris", "category": "Эконом", "price_min": 11.5, "price_day": 2400, "available": True},
-    {"id": 2, "name": "Haval Jolion 4WD", "category": "Комфорт", "price_min": 15.5, "price_day": 3500, "available": True},
-    {"id": 3, "name": "Tesla Model 3", "category": "Электро", "price_min": 25.0, "price_day": 6900, "available": True},
-    {"id": 4, "name": "BMW M5 Competition", "category": "Спорт", "price_min": 55.0, "price_day": 39000, "available": True},
-] + [car for z in ZONES for car in z["cars"]]
-
-USERS = [
-    {"id": 1, "email": "admin@melldrive.ru", "name": "Водитель (lekt-vc)", "role": "admin", "age": 19}
-]
+CARS = []
+cid = 1
+for m in MODELS:
+    for plate in m["plates"]:
+        CARS.append({
+            "id": cid,
+            "model_id": m["model_id"],
+            "plate": plate,
+            "name": m["name"],
+            "category": m["category"],
+            "price_min": m["price_min"],
+            "price_hour": m["price_hour"],
+            "price_day": m["price_day"],
+            "available": True,
+        })
+        cid += 1
 
 BOOKINGS = []
 
@@ -52,7 +40,7 @@ BOOKINGS = []
 class MellDriveHandler(BaseHTTPRequestHandler):
     def _set_cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
 
     def _send_json(self, status_code: int, payload: dict | list):
@@ -71,72 +59,17 @@ class MellDriveHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/api/cars":
-            self._send_json(200, {"cars": CARS})
-        elif self.path == "/api/zones":
-            self._send_json(200, {"zones": ZONES})
-        elif self.path == "/api/bookings":
-            self._send_json(200, {"bookings": BOOKINGS})
-        elif self.path == "/api/health":
-            self._send_json(200, {"status": "ok", "service": "MELLDRIVE API"})
-        else:
-            self._send_json(404, {"error": "Endpoint not found"})
-
-    def do_POST(self):
-        length = int(self.headers.get("Content-Length", 0))
-        raw = self.rfile.read(length) if length else b"{}"
-        try:
-            data = json.loads(raw.decode("utf-8"))
-        except json.JSONDecodeError:
-            self._send_json(400, {"error": "Invalid JSON"})
-            return
-
-        if self.path == "/api/auth/register":
-            try:
-                age = int(data.get("age", 0))
-            except (TypeError, ValueError):
-                self._send_json(400, {"error": "Некорректный формат возраста"})
-                return
-            if age < 18:
-                self._send_json(400, {"error": "Регистрация доступна только с 18 лет (BUG-001)"})
-                return
-            user = {
-                "id": len(USERS) + 1,
-                "email": data.get("email", ""),
-                "name": data.get("name", "Водитель"),
-                "role": "user",
-                "age": age,
-            }
-            USERS.append(user)
-            self._send_json(201, {"user": user})
-
-        elif self.path == "/api/auth/login":
-            email = data.get("email", "")
-            user = next((u for u in USERS if u["email"] == email), None)
-            if not user:
-                self._send_json(401, {"error": "Пользователь не найден"})
-                return
-            self._send_json(200, {"user": user, "token": f"token-{user['id']}"})
-
-        elif self.path == "/api/bookings":
-            car_id = data.get("car_id")
-            car = next((c for c in CARS if c["id"] == car_id), None)
+            self._send_json(200, {"total": len(CARS), "cars": CARS})
+        elif self.path.startswith("/api/cars/plate/"):
+            plate = self.path.split("/api/cars/plate/", 1)[1].strip().upper()
+            car = next((c for c in CARS if c["plate"] == plate), None)
             if not car:
-                self._send_json(404, {"error": "Автомобиль не найден"})
+                self._send_json(404, {"error": "Автомобиль с таким госномером не найден"})
                 return
-            already_active = any(b["car_id"] == car_id and b["status"] == "active" for b in BOOKINGS)
-            if already_active:
-                self._send_json(409, {"error": "Автомобиль уже забронирован другим водителем"})
-                return
-            booking = {
-                "id": f"MD-{100100 + len(BOOKINGS)}",
-                "car_id": car_id,
-                "car_name": car["name"],
-                "zone_id": data.get("zone_id", "center"),
-                "tariff": data.get("tariff", "minute"),
-                "status": "active",
-            }
-            BOOKINGS.append(booking)
-            self._send_json(201, {"booking": booking})
+            busy = any(b["plate"] == plate and b["status"] == "active" for b in BOOKINGS)
+            self._send_json(200, {"car": car, "in_rent": busy})
+        elif self.path == "/api/health":
+            self._send_json(200, {"status": "ok", "fleet_size": len(CARS)})
         else:
             self._send_json(404, {"error": "Endpoint not found"})
 
@@ -145,4 +78,3 @@ if __name__ == "__main__":
     server = HTTPServer(("127.0.0.1", 8080), MellDriveHandler)
     print("MELLDRIVE API running on http://127.0.0.1:8080")
     server.serve_forever()
-
