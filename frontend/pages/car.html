@@ -9,7 +9,7 @@
         .car-detail {
             display: grid;
             grid-template-columns: 1.15fr 1fr;
-            gap: 32px;
+            gap: 28px;
             align-items: start;
         }
         .car-detail__photo {
@@ -17,37 +17,57 @@
             border-radius: var(--radius);
             border: 1px solid var(--border);
             object-fit: cover;
-            max-height: 420px;
+            height: 360px;
+            display: block;
+            background: var(--bg-elevated);
         }
-        .panel-card {
+        .panel-card, .booking-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 22px;
-            margin-top: 20px;
+            padding: 24px;
         }
-        .booking-box {
-            background: var(--bg-card);
+        .panel-card { margin-top: 20px; }
+        .car-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .rating-badge {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #f59e0b;
+            white-space: nowrap;
+        }
+        .rate-summary {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: var(--bg-main);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 26px;
+            margin-bottom: 14px;
+            font-size: 0.92rem;
         }
         .tariff-options {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin: 14px 0;
+            margin: 12px 0;
         }
         .tariff-pill {
-            padding: 11px 8px;
+            padding: 10px 8px;
             border-radius: 10px;
             border: 1px solid var(--border);
             background: var(--bg-main);
             color: var(--text-main);
             cursor: pointer;
             text-align: center;
-            font-weight: 600;
-            font-size: 0.86rem;
+            font-weight: 700;
+            font-size: 0.85rem;
         }
         .tariff-pill.active {
             border-color: var(--gold);
@@ -71,14 +91,6 @@
             border: 1px solid var(--border);
             background: var(--bg-card);
             color: var(--text-main);
-            font-size: 0.95rem;
-        }
-        .auth-gate {
-            padding: 14px 16px;
-            border-radius: 10px;
-            border: 1px solid rgba(239, 68, 68, 0.45);
-            background: rgba(239, 68, 68, 0.1);
-            margin-bottom: 14px;
         }
         .extra-list { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; font-size: 0.92rem; }
         .promo-row { display: flex; gap: 8px; margin-top: 12px; }
@@ -91,17 +103,26 @@
             color: var(--text-main);
         }
         .total-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 0; border-top: 1px solid var(--border); margin-top: 14px;
-            font-size: 1.25rem; font-weight: 800;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-top: 1px solid var(--border);
+            margin-top: 14px;
+            font-size: 1.25rem;
+            font-weight: 800;
         }
-        .review-item {
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
+        .auth-gate {
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            background: rgba(239, 68, 68, 0.1);
+            margin-bottom: 14px;
         }
+        .review-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
         .review-item:last-child { border-bottom: none; }
         .review-form { display: grid; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-        .review-form input, .review-form select, .review-form textarea {
+        .review-form input, .review-form textarea {
             width: 100%;
             padding: 9px 12px;
             border-radius: 8px;
@@ -110,8 +131,9 @@
             color: var(--text-main);
             font-family: inherit;
         }
-        @media (max-width: 860px) {
+        @media (max-width: 900px) {
             .car-detail { grid-template-columns: 1fr; }
+            .car-detail__photo { height: 260px; }
         }
     </style>
 </head>
@@ -119,8 +141,8 @@
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
-            <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
-                <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
+            <nav class="nav" id="mainNav">
+                <ul class="nav__list">
                     <li><a href="../index.html" class="nav__link">Главная</a></li>
                     <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
                     <li><a href="map.html" class="nav__link">Карта зон</a></li>
@@ -130,7 +152,8 @@
                 </ul>
             </nav>
             <div class="header__actions">
-                <a href="profile.html" class="btn btn--outline btn--sm">Мои брони</a>
+                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Сменить тему">🌙</button>
+                <a href="login.html" class="btn btn--outline btn--sm">Войти</a>
             </div>
         </div>
     </header>
@@ -142,31 +165,22 @@
                     <img id="carPhoto" class="car-detail__photo" src="" alt="Фото автомобиля">
 
                     <div class="panel-card">
-                        <h3 style="margin-bottom: 10px;">Осмотр авто перед поездкой</h3>
-                        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 10px;">Отметьте состояние перед стартом аренды (фиксация для защиты водителя):</p>
-                        <div style="display:flex; flex-wrap:wrap; gap:12px; font-size:0.88rem;">
-                            <label><input type="checkbox" class="inspection-cb" checked> Кузов без новых повреждений</label>
-                            <label><input type="checkbox" class="inspection-cb" checked> Салон чистый, бак > 1/4</label>
-                            <label><input type="checkbox" class="inspection-cb"> Есть мелкий скол / царапина</label>
-                        </div>
-                    </div>
-
-                    <div class="panel-card">
-                        <h3 style="margin-bottom: 8px;">Отзывы водителей (<span id="reviewsCount">0</span>)</h3>
+                        <h3 style="margin:0 0 8px;">Отзывы водителей (<span id="reviewsCount">0</span>)</h3>
                         <div id="reviewsList"></div>
 
                         <form class="review-form" id="reviewForm">
                             <strong>Оставить отзыв об автомобиле</strong>
-                            <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap:10px;">
-                                <input type="text" id="revAuthor" required placeholder="Ваше имя (например, Артём)">
-                                <select id="revRating">
-                                    <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-                                    <option value="4">⭐⭐⭐⭐☆ (4/5)</option>
-                                    <option value="3">⭐⭐⭐☆☆ (3/5)</option>
-                                    <option value="2">⭐⭐☆☆☆ (2/5)</option>
-                                    <option value="1">⭐☆☆☆☆ (1/5)</option>
-                                </select>
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                                <span style="font-size:0.9rem; color:var(--text-muted);">Выберите оценку (кликните по звезде):</span>
+                                <div class="star-picker" id="starPicker" role="radiogroup" aria-label="Оценка от 1 до 5">
+                                    <button type="button" class="star-btn active" data-val="1">★</button>
+                                    <button type="button" class="star-btn active" data-val="2">★</button>
+                                    <button type="button" class="star-btn active" data-val="3">★</button>
+                                    <button type="button" class="star-btn active" data-val="4">★</button>
+                                    <button type="button" class="star-btn active" data-val="5">★</button>
+                                </div>
                             </div>
+                            <input type="text" id="revAuthor" required placeholder="Ваше имя">
                             <textarea id="revText" rows="2" required placeholder="Как едет авто, состояние салона, подача..."></textarea>
                             <button type="submit" class="btn btn--outline btn--sm">Опубликовать отзыв</button>
                         </form>
@@ -174,10 +188,20 @@
                 </div>
 
                 <div class="booking-box">
-                    <span class="hero__badge" id="carCategory">Класс</span>
-                    <h1 id="carTitle" style="font-size: 2rem; margin-bottom: 10px;">Загрузка...</h1>
-                    <p id="carSpecs" style="color: var(--text-muted); margin-bottom: 14px;"></p>
-                    <div id="driverSessionBadge" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;"></div>
+                    <span class="hero__badge" id="carCategory">Класс • Госномер</span>
+                    <div class="car-title-row" style="margin-top:10px;">
+                        <h1 id="carTitle" style="font-size:1.9rem; margin:0;">Загрузка...</h1>
+                        <span class="rating-badge" id="carAvgRating">★ —</span>
+                    </div>
+                    <p id="carSpecs" style="color: var(--text-muted); margin:8px 0 12px;"></p>
+
+                    <div class="rate-summary">
+                        <div><strong>Минута:</strong> <span id="rateMinText" style="color:var(--gold);">—</span></div>
+                        <div><strong>Час:</strong> <span id="rateHourText" style="color:var(--gold);">—</span></div>
+                        <div><strong>Сутки:</strong> <span id="rateDayText">—</span></div>
+                    </div>
+
+                    <div id="driverSessionBadge" style="font-size:0.86rem; color:var(--text-muted); margin-bottom:12px;"></div>
 
                     <label style="font-size: 0.9rem; color: var(--text-muted);">Выберите формат тарифа:</label>
                     <div class="tariff-options" id="tariffGroup">
@@ -213,7 +237,7 @@
                     <div id="authGateBox" class="auth-gate" style="display:none;">
                         <strong style="color:var(--danger); display:block; margin-bottom:6px;">Требуется оформленный аккаунт</strong>
                         <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:10px;">
-                            Аренда автомобиля доступна только после регистрации и входа в аккаунт водителя (BUG-047).
+                            Аренда автомобиля доступна только после регистрации и входа в аккаунт водителя.
                         </p>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
                             <a href="login.html" class="btn btn--primary btn--sm">Войти в аккаунт</a>
@@ -234,53 +258,64 @@
         const REVIEWS_KEY = 'melldrive_reviews_v1';
         const SESSION_KEY = 'melldrive_active_session_v1';
 
-        const DEFAULT_CAR = {
-            id: 1,
-            name: 'Hyundai Solaris',
-            category: 'Эконом',
-            specs: 'АКПП • Бензин • Кондиционер',
-            priceMin: 11.5,
-            priceDay: 2400,
-            img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg/960px-2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg'
-        };
+        const BASE_FLEET = [
+            { id: 1, plate: 'А777МР77', name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceHour: 520, priceDay: 2400, img: '../assets/img/cars/solaris.jpg' },
+            { id: 2, plate: 'Е304КХ190', name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Камеры 360', priceMin: 15.5, priceHour: 700, priceDay: 3500, img: '../assets/img/cars/haval-jolion.jpg' },
+            { id: 3, plate: 'О512ТТ777', name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Премиум', priceMin: 25.0, priceHour: 1150, priceDay: 6900, img: '../assets/img/cars/tesla-model-3.jpg' },
+            { id: 4, plate: 'М005АА99', name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceHour: 2500, priceDay: 39000, img: '../assets/img/cars/bmw-m5.jpg' },
+            { id: 5, plate: 'А001МР77', name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Полный привод', priceMin: 75.0, priceHour: 3400, priceDay: 55000, img: '../assets/img/cars/maybach-s580.jpg' },
+            { id: 6, plate: 'К911ТУ777', name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • 0-100 за 2.7 с', priceMin: 90.0, priceHour: 4100, priceDay: 72000, img: '../assets/img/cars/porsche-911.jpg' }
+        ];
 
         const params = new URLSearchParams(window.location.search);
-        const carId = Number(params.get('id')) || 1;
-        let car = DEFAULT_CAR;
-
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                const found = (parsed.cars || []).find(c => Number(c.id) === carId);
-                if (found) car = found;
-            }
-        } catch (e) {}
-
+        const carIdParam = params.get('id');
         const zoneParam = params.get('zone');
-        if (zoneParam) {
+
+        function resolveSelectedCar() {
+            const candidatePool = [];
             try {
                 const zones = JSON.parse(localStorage.getItem('melldrive_zones_v1') || '[]');
-                const z = zones.find(item => item.id === zoneParam);
-                const zCar = (z?.cars || []).find(c => Number(c.id) === carId);
-                if (zCar) car = zCar;
+                if (zoneParam) {
+                    const z = zones.find(item => item.id === zoneParam);
+                    if (z && Array.isArray(z.cars)) candidatePool.push(...z.cars);
+                }
+                zones.forEach(z => { if (Array.isArray(z.cars)) candidatePool.push(...z.cars); });
             } catch (e) {}
+
+            try {
+                const cms = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+                if (Array.isArray(cms.cars)) candidatePool.push(...cms.cars);
+            } catch (e) {}
+
+            candidatePool.push(...BASE_FLEET);
+
+            if (carIdParam) {
+                const matched = candidatePool.find(c => String(c.id) === String(carIdParam));
+                if (matched) return { ...matched, plate: matched.plate || `М${100 + Number(matched.id) % 899}АА77` };
+            }
+            return BASE_FLEET[0];
         }
+
+        const car = resolveSelectedCar();
+        const hourPrice = car.priceHour || Math.round((Number(car.priceMin) * 45) / 10) * 10;
 
         document.getElementById('carPhoto').src = car.img;
         document.getElementById('carPhoto').alt = car.name;
-        document.getElementById('carCategory').textContent = car.category;
+        document.getElementById('carCategory').textContent = `${car.category} • Госномер ${car.plate}`;
         document.getElementById('carTitle').textContent = car.name;
         document.getElementById('carSpecs').textContent = car.specs;
-        document.title = `${car.name} — Аренда в MELLDRIVE`;
+        document.getElementById('rateMinText').textContent = `${Number(car.priceMin).toFixed(2)} ₽/мин`;
+        document.getElementById('rateHourText').textContent = `${hourPrice.toLocaleString('ru-RU')} ₽/час`;
+        document.getElementById('rateDayText').textContent = `${Number(car.priceDay).toLocaleString('ru-RU')} ₽/сут`;
+        document.title = `${car.name} (${car.plate}) — Аренда в MELLDRIVE`;
 
-        // Проверка оформленного аккаунта перед арендой
+        // Проверка оформленного аккаунта
         let activeSession = null;
         try {
             activeSession = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
         } catch (e) {}
 
-        const isAccountReady = Boolean(activeSession && activeSession.loggedIn && activeSession.email);
+        const isAccountReady = Boolean(activeSession && activeSession.loggedIn === true && activeSession.email);
         const confirmBtn = document.getElementById('confirmBookingBtn');
         const authGateBox = document.getElementById('authGateBox');
         const driverBadge = document.getElementById('driverSessionBadge');
@@ -293,19 +328,14 @@
         } else {
             authGateBox.style.display = 'none';
             confirmBtn.disabled = false;
-            driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${activeSession.name || activeSession.email}</strong> (аккаунт подтверждён)`;
+            driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${activeSession.name || activeSession.email}</strong>`;
         }
 
-        // Тарифы, количество часов, опции и промокод
+        // Расчёт стоимости
         let mode = 'minute';
         let tariffLabel = 'Минуты (30 мин)';
         let currentTotal = 0;
         let activePromo = '';
-
-        function getHourlyPrice() {
-            const rawHour = Number(car.priceMin) * 45;
-            return Math.max(250, Math.round(rawHour / 10) * 10);
-        }
 
         function getHoursCount() {
             const val = Math.floor(Number(document.getElementById('hoursCountInput').value) || 1);
@@ -313,13 +343,12 @@
         }
 
         function recalc() {
-            const hourlyRate = getHourlyPrice();
             const hours = getHoursCount();
-            document.getElementById('hourlyRateHint').textContent = `Ставка: ${hourlyRate.toLocaleString('ru-RU')} ₽ / час × ${hours} ч = ${(hourlyRate * hours).toLocaleString('ru-RU')} ₽`;
+            document.getElementById('hourlyRateHint').textContent = `Тариф: ${hourPrice.toLocaleString('ru-RU')} ₽/час × ${hours} ч = ${(hourPrice * hours).toLocaleString('ru-RU')} ₽`;
 
             let base = 0;
             if (mode === 'minute') base = Number(car.priceMin) * 30;
-            if (mode === 'hours') base = hourlyRate * hours;
+            if (mode === 'hours') base = hourPrice * hours;
             if (mode === 'day') base = Number(car.priceDay);
 
             if (document.getElementById('optCasco').checked) base += 490;
@@ -386,6 +415,8 @@
 
             const booking = {
                 id: code,
+                carId: car.id,
+                plate: car.plate,
                 carName: car.name,
                 category: car.category,
                 tariff: tariffLabel,
@@ -405,11 +436,23 @@
             localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
 
             const msg = document.getElementById('bookingSuccessMsg');
-            msg.innerHTML = `✅ Бронь <strong>${code}</strong> оформлена для ${activeSession.name || activeSession.email}! <a href="profile.html" style="color:var(--gold); text-decoration:underline;">Перейти в кабинет →</a>`;
+            msg.innerHTML = `✅ Забронировано: <strong>${car.name} (${car.plate})</strong>, заказ <strong>${code}</strong>. <a href="profile.html" style="color:var(--gold); text-decoration:underline;">В кабинет →</a>`;
             msg.classList.remove('hidden');
         });
 
-        // Отзывы
+        // Кликабельные звёзды и средний рейтинг рядом с маркой авто
+        let selectedStars = 5;
+        function paintStarPicker(val) {
+            selectedStars = val;
+            document.querySelectorAll('#starPicker .star-btn').forEach(b => {
+                const starVal = Number(b.dataset.val);
+                b.classList.toggle('active', starVal <= val);
+            });
+        }
+        document.querySelectorAll('#starPicker .star-btn').forEach(btn => {
+            btn.addEventListener('click', () => paintStarPicker(Number(btn.dataset.val)));
+        });
+
         function loadReviews() {
             try {
                 const raw = localStorage.getItem(REVIEWS_KEY);
@@ -418,31 +461,37 @@
                     if (Array.isArray(parsed)) return parsed;
                 }
             } catch (e) {}
-            const seed = [
-                { id: 1, carId: car.id, author: 'Водитель MELLDRIVE', rating: 5, text: 'Отличное состояние салона, подача заняла 7 минут, полный бак.', status: 'Опубликован', date: '22.11.2026' }
-            ];
-            localStorage.setItem(REVIEWS_KEY, JSON.stringify(seed));
-            return seed;
+            return [];
         }
 
         function renderReviews() {
             const all = loadReviews();
-            const visible = all.filter(r => Number(r.carId) === Number(car.id) && r.status === 'Опубликован');
+            const visible = all.filter(r => String(r.carId) === String(car.id) && r.status === 'Опубликован');
             document.getElementById('reviewsCount').textContent = visible.length;
+
+            const avgBadge = document.getElementById('carAvgRating');
+            if (visible.length) {
+                const avg = (visible.reduce((sum, item) => sum + (Number(item.rating) || 5), 0) / visible.length).toFixed(1);
+                avgBadge.textContent = `★ ${avg} (${visible.length})`;
+            } else {
+                avgBadge.textContent = '★ 5.0 (новый)';
+            }
+
             const box = document.getElementById('reviewsList');
             if (!visible.length) {
-                box.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Опубликованных отзывов пока нет. Оставьте первый отзыв ниже.</p>';
+                box.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Опубликованных отзывов пока нет. Выберите звёзды и оставьте отзыв ниже.</p>';
                 return;
             }
             box.innerHTML = visible.map(r => {
-                const stars = '★'.repeat(Number(r.rating) || 5) + '☆'.repeat(Math.max(0, 5 - (Number(r.rating) || 5)));
+                const cnt = Math.min(5, Math.max(1, Number(r.rating) || 5));
+                const stars = '★'.repeat(cnt) + '☆'.repeat(5 - cnt);
                 return `
                     <div class="review-item">
                         <div style="display:flex; justify-content:space-between; gap:8px;">
                             <strong>${r.author}</strong>
-                            <span style="color:var(--gold);">${stars}</span>
+                            <span style="color:#f59e0b;">${stars}</span>
                         </div>
-                        <p style="margin-top:6px; font-size:0.92rem;">${r.text}</p>
+                        <p style="margin:6px 0 0; font-size:0.92rem;">${r.text}</p>
                         <small style="color:var(--text-muted);">${r.date}</small>
                     </div>
                 `;
@@ -452,7 +501,6 @@
         document.getElementById('reviewForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const author = document.getElementById('revAuthor').value.trim();
-            const rating = Number(document.getElementById('revRating').value) || 5;
             const text = document.getElementById('revText').value.trim();
             if (!author || !text) return;
 
@@ -461,72 +509,20 @@
                 id: Date.now(),
                 carId: car.id,
                 author,
-                rating,
+                rating: selectedStars,
                 text,
                 status: 'Опубликован',
                 date: new Date().toLocaleDateString('ru-RU')
             });
             localStorage.setItem(REVIEWS_KEY, JSON.stringify(all));
             e.target.reset();
+            paintStarPicker(5);
             renderReviews();
         });
 
         recalc();
         renderReviews();
     </script>
-    
-<script>
-(function() {
-    const SESSION_KEY = 'melldrive_active_session_v1';
-    const DB_KEY = 'melldrive_accounts_db_v1';
-
-    // Удаляем старые демо-записи, если остались в localStorage
-    try {
-        const rawDb = localStorage.getItem(DB_KEY);
-        if (rawDb) {
-            const parsedDb = JSON.parse(rawDb);
-            if (Array.isArray(parsedDb)) {
-                const filtered = parsedDb.filter(acc => acc && acc.email && acc.email.toLowerCase() !== 'demo@melldrive.ru');
-                localStorage.setItem(DB_KEY, JSON.stringify(filtered));
-            }
-        }
-    } catch (e) {}
-
-    function hasActiveSession() {
-        try {
-            const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-            return Boolean(s && s.loggedIn === true && s.email);
-        } catch (e) {
-            return false;
-        }
-    }
-
-    window.mellLogout = function() {
-        localStorage.removeItem(SESSION_KEY);
-        const isInPages = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
-        window.location.href = isInPages ? '../index.html' : 'index.html';
-    };
-
-    const loggedIn = hasActiveSession();
-
-    // Если сессии нет — убираем ссылки на кабинет из меню
-    if (!loggedIn) {
-        document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-
-    // Навешиваем выход на любые кнопки/ссылки с data-logout или #logoutBtn
-    document.querySelectorAll('[data-logout], #logoutBtn').forEach(el => {
-        el.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.mellLogout();
-        });
-    });
-})();
-</script>
+    <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
-

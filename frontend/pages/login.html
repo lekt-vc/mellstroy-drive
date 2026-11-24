@@ -8,7 +8,10 @@
 </head>
 <body style="display:flex; min-height:100vh; align-items:center; justify-content:center; padding:20px;">
     <div style="width:100%; max-width:430px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px;">
-        <a href="../index.html" class="logo" style="justify-content:center; margin-bottom:18px;"><span class="logo__highlight">MELL</span>DRIVE</a>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
+            <button type="button" class="theme-toggle" id="themeToggle" aria-label="Сменить тему">🌙</button>
+        </div>
         <h1 style="font-size:1.5rem; margin-bottom:12px; text-align:center;">Вход в аккаунт</h1>
         <p id="regNotice" class="hidden" style="margin-bottom:14px; padding:10px 12px; border-radius:8px; background:rgba(34,197,94,0.14); color:var(--success); font-size:0.86rem; text-align:center;">
             Аккаунт зарегистрирован. Введите пароль для входа.
@@ -37,9 +40,7 @@
                 const raw = localStorage.getItem(DB_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) {
-                        return parsed.filter(a => a && a.email && a.email.toLowerCase() !== '');
-                    }
+                    if (Array.isArray(parsed)) return parsed;
                 }
             } catch (e) {}
             return [];
@@ -89,61 +90,10 @@
                 license: matched.license,
                 licenseConfirmed: matched.licenseConfirmed
             }));
+            document.cookie = `melldrive_account_cookie=${encodeURIComponent(JSON.stringify({ email: matched.email, name: matched.name, license: matched.license }))}; path=/; max-age=${14 * 86400}; SameSite=Lax`;
             window.location.href = 'profile.html';
         });
     </script>
-<script>
-(function() {
-    const SESSION_KEY = 'melldrive_active_session_v1';
-    const DB_KEY = 'melldrive_accounts_db_v1';
-
-    // Удаляем старые демо-записи, если остались в localStorage
-    try {
-        const rawDb = localStorage.getItem(DB_KEY);
-        if (rawDb) {
-            const parsedDb = JSON.parse(rawDb);
-            if (Array.isArray(parsedDb)) {
-                const filtered = parsedDb.filter(acc => acc && acc.email && acc.email.toLowerCase() !== 'demo@melldrive.ru');
-                localStorage.setItem(DB_KEY, JSON.stringify(filtered));
-            }
-        }
-    } catch (e) {}
-
-    function hasActiveSession() {
-        try {
-            const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-            return Boolean(s && s.loggedIn === true && s.email);
-        } catch (e) {
-            return false;
-        }
-    }
-
-    window.mellLogout = function() {
-        localStorage.removeItem(SESSION_KEY);
-        const isInPages = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
-        window.location.href = isInPages ? '../index.html' : 'index.html';
-    };
-
-    const loggedIn = hasActiveSession();
-
-    // Если сессии нет — убираем ссылки на кабинет из меню
-    if (!loggedIn) {
-        document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-
-    // Навешиваем выход на любые кнопки/ссылки с data-logout или #logoutBtn
-    document.querySelectorAll('[data-logout], #logoutBtn').forEach(el => {
-        el.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.mellLogout();
-        });
-    });
-})();
-</script>
+    <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
-

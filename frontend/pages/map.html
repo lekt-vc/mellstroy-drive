@@ -8,37 +8,52 @@
     <style>
         .map-layout {
             display: grid;
-            grid-template-columns: 1.55fr 1fr;
+            grid-template-columns: 1.5fr 1fr;
             gap: 24px;
             align-items: start;
         }
         .map-frame-wrap {
             width: 100%;
-            height: 500px;
+            height: 480px;
             border-radius: var(--radius);
             border: 1px solid var(--border);
             overflow: hidden;
             background: var(--bg-card);
         }
-        .map-frame-wrap iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-            display: block;
-        }
-        .zone-card {
+        .map-frame-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+        .zone-card, .plate-checker-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 22px;
         }
+        .plate-checker-box { margin-top: 24px; }
+        .plate-form { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+        .plate-form input {
+            flex: 1;
+            min-width: 210px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-main);
+            color: var(--text-main);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .plate-result {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-main);
+            font-size: 0.92rem;
+        }
         .zone-list {
             display: grid;
             gap: 9px;
             margin-top: 16px;
-            max-height: 260px;
+            max-height: 240px;
             overflow-y: auto;
-            padding-right: 4px;
         }
         .zone-item {
             padding: 11px 14px;
@@ -52,25 +67,18 @@
             gap: 10px;
         }
         .zone-item.active { border-color: var(--gold); }
-        .zone-cars-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 8px;
-        }
+        .zone-cars-preview { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
         .zone-car-chip {
             font-size: 0.78rem;
-            padding: 4px 8px;
+            padding: 5px 9px;
             border-radius: 8px;
             background: var(--bg-main);
             border: 1px solid var(--border);
-            color: var(--text-main);
-            text-decoration: none;
         }
         .zone-car-chip:hover { border-color: var(--gold); color: var(--gold); }
         @media (max-width: 900px) {
             .map-layout { grid-template-columns: 1fr; }
-            .map-frame-wrap { height: 380px; }
+            .map-frame-wrap { height: 360px; }
         }
     </style>
 </head>
@@ -78,8 +86,8 @@
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
-            <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
-                <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
+            <nav class="nav" id="mainNav">
+                <ul class="nav__list">
                     <li><a href="../index.html" class="nav__link">Главная</a></li>
                     <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
                     <li><a href="map.html" class="nav__link active">Карта зон</a></li>
@@ -89,6 +97,7 @@
                 </ul>
             </nav>
             <div class="header__actions">
+                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Сменить тему">🌙</button>
                 <a href="catalog.html" class="btn btn--primary btn--sm">Найти авто</a>
             </div>
         </div>
@@ -97,7 +106,7 @@
     <main class="section">
         <div class="container">
             <h1 class="section__title">Карта работы каршеринга: Москва и Подмосковье</h1>
-            <p class="section__subtitle">Яндекс.Карты с точками подачи и зонами завершения аренды в Москве и ближайшем Подмосковье</p>
+            <p class="section__subtitle">Распределение автомобилей по зонам и проверка статуса машины по госномеру</p>
 
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
                 <button type="button" class="btn btn--primary btn--sm" onclick="setZoneFilter('all', this)">Все зоны</button>
@@ -113,7 +122,7 @@
                 <div class="zone-card">
                     <span class="hero__badge" id="selectedBadge">Москва • Зелёная зона</span>
                     <h2 id="selectedTitle" style="font-size:1.4rem; margin:8px 0;">Центр и ТТК</h2>
-                    <p id="selectedDesc" style="color:var(--text-muted); font-size:0.92rem; line-height:1.5;"></p>
+                    <p id="selectedDesc" style="color:var(--text-muted); font-size:0.92rem; margin:0;"></p>
                     <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border); font-size:0.9rem; display:grid; gap:8px;">
                         <div><strong>Доступно в зоне:</strong> <span id="selectedCarsCount" style="color:var(--gold);">0 авто</span></div>
                         <div class="zone-cars-preview" id="selectedCarsChips"></div>
@@ -123,20 +132,32 @@
                     <div class="zone-list" id="zoneList"></div>
                 </div>
             </div>
+
+            <!-- Проверка свободы или аренды машины по госномеру -->
+            <div class="plate-checker-box">
+                <h2 style="margin:0 0 6px; font-size:1.35rem;">Проверка машины по государственному номеру</h2>
+                <p style="margin:0; color:var(--text-muted); font-size:0.9rem;">
+                    Введите госномер (например: <code>А777МР77</code>, <code>Е304КХ190</code>, <code>О512ТТ777</code>, <code>М005АА99</code>, <code>А001МР77</code>, <code>К911ТУ777</code>)
+                </p>
+                <form class="plate-form" id="plateCheckForm">
+                    <input type="text" id="plateQueryInput" placeholder="Например: А777МР77" required>
+                    <button type="submit" class="btn btn--primary">Проверить статус</button>
+                </form>
+                <div class="plate-result" id="plateCheckResult">Введите госномер и нажмите «Проверить статус».</div>
+            </div>
         </div>
     </main>
 
     <script>
-        const ZONES = [
+        const BASE_ZONES = [
             {
                 id: 'center', region: 'moscow', lat: 55.7558, lng: 37.6173, zoom: 12,
                 badge: 'Москва • Зелёная зона', title: 'Центр и ТТК',
                 parking: 'Бесплатно на городских парковках в пределах МКАД',
-                desc: 'Высокая плотность авто эконом-, комфорт- и бизнес-класса. Подача за 5–8 минут.',
+                desc: 'Высокая плотность авто эконом- и бизнес-класса. Подача за 5–8 минут.',
                 cars: [
-                    { id: 101, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Центр / ТТК', priceMin: 11.5, priceDay: 2400, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg/960px-2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg' },
-                    { id: 102, name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Центр / ТТК', priceMin: 75.0, priceDay: 55000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Mercedes-Maybach_S_580_4MATIC_X223_IMG_4266.jpg/960px-Mercedes-Maybach_S_580_4MATIC_X223_IMG_4266.jpg' },
-                    { id: 103, name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • Центр / ТТК', priceMin: 90.0, priceDay: 72000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg/960px-Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg' }
+                    { id: 101, plate: 'А777МР77', name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Центр / ТТК', priceMin: 11.5, priceHour: 520, priceDay: 2400, img: '../assets/img/cars/solaris.jpg' },
+                    { id: 102, plate: 'А001МР77', name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Центр / ТТК', priceMin: 75.0, priceHour: 3400, priceDay: 55000, img: '../assets/img/cars/maybach-s580.jpg' }
                 ]
             },
             {
@@ -145,18 +166,17 @@
                 parking: 'Разрешено в зелёной зоне Москвы',
                 desc: 'Удобный выезд на проспект Мира, Дмитровское и Ярославское шоссе.',
                 cars: [
-                    { id: 201, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • ВДНХ', priceMin: 15.5, priceDay: 3500, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Haval_Jolion_China_%282%29.jpg/960px-Haval_Jolion_China_%282%29.jpg' },
-                    { id: 202, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Север', priceMin: 25.0, priceDay: 6900, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/2019_Tesla_Model_3_Performance_AWD_Red_Front.jpg/960px-2019_Tesla_Model_3_Performance_AWD_Red_Front.jpg' }
+                    { id: 201, plate: 'Е304КХ190', name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • ВДНХ', priceMin: 15.5, priceHour: 700, priceDay: 3500, img: '../assets/img/cars/haval-jolion.jpg' }
                 ]
             },
             {
                 id: 'city', region: 'moscow', lat: 55.7495, lng: 37.5371, zoom: 13,
                 badge: 'Москва • ЗАО', title: 'Москва-Сити и Кутузовский',
                 parking: 'Спецзоны и городские парковки',
-                desc: 'Премиальные и электромобили для поездок по западу Москвы и ТТК.',
+                desc: 'Спорт- и электромобили для поездок по западу Москвы и ТТК.',
                 cars: [
-                    { id: 301, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • Москва-Сити', priceMin: 55.0, priceDay: 39000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/BMW_M5_F90_Competition_IMG_3602.jpg/960px-BMW_M5_F90_Competition_IMG_3602.jpg' },
-                    { id: 302, name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Кутузовский', priceMin: 75.0, priceDay: 55000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Mercedes-Maybach_S_580_4MATIC_X223_IMG_4266.jpg/960px-Mercedes-Maybach_S_580_4MATIC_X223_IMG_4266.jpg' }
+                    { id: 301, plate: 'М005АА99', name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • Москва-Сити', priceMin: 55.0, priceHour: 2500, priceDay: 39000, img: '../assets/img/cars/bmw-m5.jpg' },
+                    { id: 302, plate: 'О512ТТ777', name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Кутузовский', priceMin: 25.0, priceHour: 1150, priceDay: 6900, img: '../assets/img/cars/tesla-model-3.jpg' }
                 ]
             },
             {
@@ -165,8 +185,8 @@
                 parking: 'Разрешено в границах зоны МО',
                 desc: 'Работа по Ярославскому направлению с быстрым выездом на МКАД.',
                 cars: [
-                    { id: 401, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Королёв', priceMin: 11.5, priceDay: 2400, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg/960px-2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg' },
-                    { id: 402, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Королёв', priceMin: 15.5, priceDay: 3500, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Haval_Jolion_China_%282%29.jpg/960px-Haval_Jolion_China_%282%29.jpg' }
+                    { id: 401, plate: 'А777МР77', name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Королёв', priceMin: 11.5, priceHour: 520, priceDay: 2400, img: '../assets/img/cars/solaris.jpg' },
+                    { id: 402, plate: 'Е304КХ190', name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Королёв', priceMin: 15.5, priceHour: 700, priceDay: 3500, img: '../assets/img/cars/haval-jolion.jpg' }
                 ]
             },
             {
@@ -175,8 +195,7 @@
                 parking: 'Разрешено в границах зоны МО',
                 desc: 'Зона обслуживания у ж/д и выезда на Осташковское и Ярославское шоссе.',
                 cars: [
-                    { id: 451, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Мытищи', priceMin: 25.0, priceDay: 6900, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/2019_Tesla_Model_3_Performance_AWD_Red_Front.jpg/960px-2019_Tesla_Model_3_Performance_AWD_Red_Front.jpg' },
-                    { id: 452, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Мытищи', priceMin: 11.5, priceDay: 2400, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg/960px-2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg' }
+                    { id: 451, plate: 'О512ТТ777', name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Мытищи', priceMin: 25.0, priceHour: 1150, priceDay: 6900, img: '../assets/img/cars/tesla-model-3.jpg' }
                 ]
             },
             {
@@ -185,8 +204,7 @@
                 parking: 'Разрешено в границах зоны МО',
                 desc: 'Ленинградское направление и подъезд к северному кластеру области.',
                 cars: [
-                    { id: 501, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Химки', priceMin: 25.0, priceDay: 6900, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/2019_Tesla_Model_3_Performance_AWD_Red_Front.jpg/960px-2019_Tesla_Model_3_Performance_AWD_Red_Front.jpg' },
-                    { id: 502, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • Химки', priceMin: 55.0, priceDay: 39000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/BMW_M5_F90_Competition_IMG_3602.jpg/960px-BMW_M5_F90_Competition_IMG_3602.jpg' }
+                    { id: 501, plate: 'М005АА99', name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • Химки', priceMin: 55.0, priceHour: 2500, priceDay: 39000, img: '../assets/img/cars/bmw-m5.jpg' }
                 ]
             },
             {
@@ -195,8 +213,7 @@
                 parking: 'Разрешено в границах зоны МО',
                 desc: 'Западное направление: Можайское и Минское шоссе, выезд на МКАД.',
                 cars: [
-                    { id: 601, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Одинцово', priceMin: 15.5, priceDay: 3500, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Haval_Jolion_China_%282%29.jpg/960px-Haval_Jolion_China_%282%29.jpg' },
-                    { id: 602, name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Одинцово', priceMin: 75.0, priceDay: 55000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Mercedes-Maybach_S_580_4MATIC_X223_IMG_4266.jpg/960px-Mercedes-Maybach_S_580_4MATIC_X223_IMG_4266.jpg' }
+                    { id: 601, plate: 'К911ТУ777', name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • Одинцово', priceMin: 90.0, priceHour: 4100, priceDay: 72000, img: '../assets/img/cars/porsche-911.jpg' }
                 ]
             },
             {
@@ -205,14 +222,37 @@
                 parking: 'Разрешено в границах зоны МО',
                 desc: 'Южное направление с удобным выездом на МКАД и трассу М-4.',
                 cars: [
-                    { id: 701, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Видное', priceMin: 11.5, priceDay: 2400, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg/960px-2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg' },
-                    { id: 702, name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • Видное', priceMin: 90.0, priceDay: 72000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg/960px-Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg' }
+                    { id: 701, plate: 'А001МР77', name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Видное', priceMin: 75.0, priceHour: 3400, priceDay: 55000, img: '../assets/img/cars/maybach-s580.jpg' }
                 ]
             }
         ];
 
-        localStorage.setItem('melldrive_zones_v1', JSON.stringify(ZONES));
+        // Подмешиваем новые машины из админки/CMS в зоны по индексу, чтобы новые авто распределялись по карте
+        function buildDistributedZones() {
+            const zones = BASE_ZONES.map(z => ({ ...z, cars: [...z.cars] }));
+            try {
+                const cms = JSON.parse(localStorage.getItem('melldrive_cms_v2') || '{}');
+                const cmsCars = Array.isArray(cms.cars) ? cms.cars : [];
+                const extraCars = cmsCars.filter(c => Number(c.id) > 6);
+                extraCars.forEach((carItem, idx) => {
+                    const targetZone = zones[idx % zones.length];
+                    const plate = carItem.plate || `Н${200 + (idx * 37) % 700}ММ77`;
+                    const normalizedImg = (carItem.img && carItem.img.startsWith('assets/')) ? `../${carItem.img}` : (carItem.img || '../assets/img/cars/porsche-911.jpg');
+                    const alreadyInZone = targetZone.cars.some(existing => String(existing.id) === String(carItem.id));
+                    if (!alreadyInZone) {
+                        targetZone.cars.push({
+                            ...carItem,
+                            plate,
+                            img: normalizedImg
+                        });
+                    }
+                });
+            } catch (e) {}
+            localStorage.setItem('melldrive_zones_v1', JSON.stringify(zones));
+            return zones;
+        }
 
+        const ZONES = buildDistributedZones();
         let currentFilter = 'all';
         let activeZoneId = 'center';
 
@@ -246,7 +286,7 @@
                 document.getElementById('zoneCatalogLink').href = `catalog.html?zone=${active.id}`;
 
                 document.getElementById('selectedCarsChips').innerHTML = active.cars.map(c => `
-                    <a class="zone-car-chip" href="car.html?id=${c.id}&zone=${active.id}">${c.name} (${c.priceMin} ₽/мин)</a>
+                    <a class="zone-car-chip" href="car.html?id=${c.id}&zone=${active.id}">${c.name} • ${c.plate}</a>
                 `).join('');
             }
         }
@@ -269,78 +309,54 @@
             renderMap();
         };
 
+        // Проверка свободы или аренды машины по госномеру
+        document.getElementById('plateCheckForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const q = document.getElementById('plateQueryInput').value.trim().toUpperCase().replace(/\s+/g, '');
+            const resBox = document.getElementById('plateCheckResult');
+            if (!q) return;
+
+            let foundCar = null;
+            let foundZone = null;
+            for (const z of ZONES) {
+                const c = z.cars.find(item => (item.plate || '').toUpperCase().replace(/\s+/g, '') === q);
+                if (c) {
+                    foundCar = c;
+                    foundZone = z;
+                    break;
+                }
+            }
+
+            if (!foundCar) {
+                resBox.innerHTML = `<span style="color:var(--danger); font-weight:700;">Машина с госномром «${q}» не найдена в автопарке.</span>`;
+                return;
+            }
+
+            let bookings = [];
+            try {
+                bookings = JSON.parse(localStorage.getItem('melldrive_bookings_v1') || '[]');
+            } catch (err) {}
+
+            const activeBooking = Array.isArray(bookings)
+                ? bookings.find(b => b.status === 'Активна' && (String(b.carId) === String(foundCar.id) || (b.plate && b.plate.toUpperCase() === q) || b.carName === foundCar.name))
+                : null;
+
+            if (activeBooking) {
+                resBox.innerHTML = `
+                    <div><strong>${foundCar.name}</strong> • Госномер: <code>${foundCar.plate}</code> • Зона: ${foundZone ? foundZone.title : 'Москва'}</div>
+                    <div style="margin-top:6px; color:var(--danger); font-weight:700;">Статус: В АРЕНДЕ (заказ ${activeBooking.id}, оформлен ${activeBooking.createdAt})</div>
+                `;
+            } else {
+                resBox.innerHTML = `
+                    <div><strong>${foundCar.name}</strong> • Госномер: <code>${foundCar.plate}</code> • Зона: ${foundZone ? foundZone.title : 'Москва'}</div>
+                    <div style="margin-top:6px; color:var(--success); font-weight:700;">Статус: СВОБОДНА И ДОСТУПНА ДЛЯ АРЕНДЫ</div>
+                    <div style="margin-top:10px;"><a href="car.html?id=${foundCar.id}&zone=${foundZone ? foundZone.id : 'center'}" class="btn btn--primary btn--sm">Перейти к бронированию</a></div>
+                `;
+            }
+        });
+
         renderMap();
     </script>
-    
-<script>
-(function() {
-    let isAdmin = false;
-    try {
-        const a = JSON.parse(localStorage.getItem('melldrive_admin_session_v1') || 'null');
-        isAdmin = Boolean(a && a.isAdmin === true);
-    } catch (e) {}
-    if (!isAdmin) {
-        document.querySelectorAll('header a[href*="admin.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-})();
-</script>
-<script>
-(function() {
-    const SESSION_KEY = 'melldrive_active_session_v1';
-    const DB_KEY = 'melldrive_accounts_db_v1';
-
-    // Удаляем старые демо-записи, если остались в localStorage
-    try {
-        const rawDb = localStorage.getItem(DB_KEY);
-        if (rawDb) {
-            const parsedDb = JSON.parse(rawDb);
-            if (Array.isArray(parsedDb)) {
-                const filtered = parsedDb.filter(acc => acc && acc.email && acc.email.toLowerCase() !== 'demo@melldrive.ru');
-                localStorage.setItem(DB_KEY, JSON.stringify(filtered));
-            }
-        }
-    } catch (e) {}
-
-    function hasActiveSession() {
-        try {
-            const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-            return Boolean(s && s.loggedIn === true && s.email);
-        } catch (e) {
-            return false;
-        }
-    }
-
-    window.mellLogout = function() {
-        localStorage.removeItem(SESSION_KEY);
-        const isInPages = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
-        window.location.href = isInPages ? '../index.html' : 'index.html';
-    };
-
-    const loggedIn = hasActiveSession();
-
-    // Если сессии нет — убираем ссылки на кабинет из меню
-    if (!loggedIn) {
-        document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-
-    // Навешиваем выход на любые кнопки/ссылки с data-logout или #logoutBtn
-    document.querySelectorAll('[data-logout], #logoutBtn').forEach(el => {
-        el.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.mellLogout();
-        });
-    });
-})();
-</script>
+    <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
-
-

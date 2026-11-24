@@ -5,138 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MELLDRIVE — Каршеринг нового поколения</title>
     <link rel="stylesheet" href="assets/css/main.css">
-    <style>
-        .editor-bar {
-            display: none;
-            background: rgba(147, 51, 234, 0.14);
-            border-bottom: 1px solid rgba(147, 51, 234, 0.45);
-            padding: 10px 0;
-        }
-        body.edit-mode .editor-bar { display: block; }
-        .editor-bar__inner {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.9rem;
-        }
-        .editor-bar__actions { display: flex; flex-wrap: wrap; gap: 8px; }
-        .filter-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-        .filter-pill {
-            padding: 8px 14px;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text-main);
-            cursor: pointer;
-            font-size: 0.88rem;
-            font-weight: 600;
-        }
-        .filter-pill.active {
-            border-color: var(--gold);
-            background: var(--gold-soft);
-            color: var(--gold);
-        }
-        .add-car-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.75);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            z-index: 999;
-        }
-        .add-car-modal.open { display: flex; }
-        .add-car-card {
-            width: 100%;
-            max-width: 440px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
-            display: grid;
-            gap: 12px;
-        }
-        .add-car-card input, .add-car-card select {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg-main);
-            color: var(--text-main);
-            margin-top: 4px;
-        }
-    </style>
-
-<style id="force-nav-visible">
-  .header, .header .container, .header__container { overflow: visible !important; }
-  .header .nav, .header nav {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: static !important;
-    transform: none !important;
-    max-height: none !important;
-    width: auto !important;
-    background: transparent !important;
-  }
-  .header .nav__list {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 16px !important;
-  }
-  .header .nav__link { display: inline-block !important; white-space: nowrap !important; }
-</style>
 </head>
 <body>
-    <div class="editor-bar" id="editorBar">
-        <div class="container editor-bar__inner">
-            <span><strong>Режим редактора включён:</strong> кликайте по текстам на странице для правки — изменения сохраняются в браузере.</span>
-            <div class="editor-bar__actions">
-                <button type="button" class="btn btn--primary btn--sm" id="openAddCarBtn">+ Добавить авто</button>
-                <button type="button" class="btn btn--outline btn--sm" id="resetCmsBtn">Сбросить правки</button>
-            </div>
-        </div>
-    </div>
-
-            <header class="header">
+    <header class="header">
         <div class="container header__container">
             <a href="index.html" class="logo" id="brandLogo">
                 <span class="logo__highlight">MELL</span>DRIVE
             </a>
-            <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
-                <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
-                    <li><a href="index.html" class="nav__link active" style="white-space:nowrap;">Главная</a></li>
-                    <li><a href="pages/catalog.html" class="nav__link" style="white-space:nowrap;">Автопарк</a></li>
-                    <li><a href="pages/map.html" class="nav__link" style="white-space:nowrap;">Карта зон</a></li>
-                    <li><a href="pages/profile.html" class="nav__link" style="white-space:nowrap;">Кабинет</a></li>
-                    <li><a href="pages/admin.html" class="nav__link" style="white-space:nowrap;">Админка</a></li>
-                    <li><a href="pages/ui-kit.html" class="nav__link" style="white-space:nowrap;">UI-кит</a></li>
+            <nav class="nav" id="mainNav">
+                <ul class="nav__list">
+                    <li><a href="index.html" class="nav__link active">Главная</a></li>
+                    <li><a href="pages/catalog.html" class="nav__link">Автопарк</a></li>
+                    <li><a href="pages/map.html" class="nav__link">Карта зон</a></li>
+                    <li><a href="pages/profile.html" class="nav__link">Кабинет</a></li>
+                    <li><a href="pages/admin.html" class="nav__link">Админка</a></li>
+                    <li><a href="pages/ui-kit.html" class="nav__link">UI-кит</a></li>
                 </ul>
             </nav>
-            <div class="header__actions" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <div class="header__actions">
                 <button type="button" class="theme-toggle" id="themeToggle" aria-label="Сменить тему">🌙</button>
-                <button type="button" class="btn btn--outline btn--sm" id="toggleEditorBtn">Редактор</button>
                 <a href="pages/login.html" class="btn btn--primary btn--sm">Войти</a>
-                <button type="button" class="burger" id="burgerBtn" aria-label="Меню">
-                    <span></span><span></span><span></span>
-                </button>
             </div>
         </div>
     </header>
 
     <main>
-        <section class="hero section">
+        <section class="hero">
             <div class="container">
-                <span class="hero__badge" data-cms="badge">Мгновенная аренда без залога • 24/7</span>
-                <h1 class="hero__title" data-cms="heroTitle">Каршеринг <span class="text-gradient">MELLDRIVE</span> для города и трассы</h1>
-                <p class="hero__subtitle" data-cms="heroSubtitle">Выбирайте авто от эконома до спорткаров за пару кликов, рассчитывайте тариф онлайн и управляйте поездками в личном кабинете.</p>
-                <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;">
+                <span class="hero__badge">Мгновенная аренда без залога • 24/7</span>
+                <h1 class="hero__title">Каршеринг <span class="text-gradient">MELLDRIVE</span> по Москве и области</h1>
+                <p class="hero__subtitle">Выбирайте авто под поездку, смотрите стоимость за минуту и за час, проверяйте статус по госномеру и бронируйте онлайн.</p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:22px;">
                     <a href="pages/catalog.html" class="btn btn--primary btn--large">Выбрать автомобиль</a>
-                    <a href="pages/register.html" class="btn btn--outline btn--large">Регистрация водителя</a>
+                    <a href="pages/map.html" class="btn btn--outline btn--large">Карта зон</a>
+                    <a href="pages/register.html" class="btn btn--outline btn--large">Регистрация</a>
                 </div>
             </div>
         </section>
@@ -145,163 +47,58 @@
             <div class="container">
                 <div class="section__header">
                     <div>
-                        <h2 class="section__title" data-cms="catalogTitle">Популярные авто в парке</h2>
-                        <p class="section__subtitle">Нажмите на карточку или кнопку бронирования, чтобы перейти к расчёту тарифа</p>
+                        <h2 class="section__title">Автопарк в наличии</h2>
+                        <p class="section__subtitle">Поминутный и почасовой тариф указаны для каждой машины</p>
                     </div>
                     <a href="pages/catalog.html" class="btn btn--outline btn--sm">Весь каталог →</a>
                 </div>
-
-                <div class="filter-pills" id="homeFilters"></div>
                 <div class="cars-grid" id="homeCarsGrid"></div>
-            </div>
-        </section>
-
-        <section class="section" id="tariffs">
-            <div class="container">
-                <h2 class="section__title">Тарифы аренды</h2>
-                <p class="section__subtitle">Подберите формат под короткую поездку или долгий маршрут</p>
-                <div class="cars-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
-                    <div class="car-card" style="padding:22px;">
-                        <h3>Поминутный</h3>
-                        <p style="color:var(--text-muted); margin:10px 0 18px;">От 11,5 ₽/мин. Отлично для быстрых поездок по городу и делам.</p>
-                        <a href="pages/catalog.html" class="btn btn--outline btn--block">Подобрать авто</a>
-                    </div>
-                    <div class="car-card" style="padding:22px; border-color:var(--gold);">
-                        <h3>Часовые пакеты</h3>
-                        <p style="color:var(--text-muted); margin:10px 0 18px;">Пакеты на 3, 6 и 12 часов с включённым километражем и выгодной ставкой.</p>
-                        <a href="pages/catalog.html" class="btn btn--primary btn--block">Выбрать пакет</a>
-                    </div>
-                    <div class="car-card" style="padding:22px;">
-                        <h3>Суточный</h3>
-                        <p style="color:var(--text-muted); margin:10px 0 18px;">Фиксированная цена за 24 часа для поездок за город и в область.</p>
-                        <a href="pages/catalog.html" class="btn btn--outline btn--block">Арендовать на сутки</a>
-                    </div>
-                </div>
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <div class="footer__bottom">
-            <div class="container" style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px;">
-                <p>© 2026 MELLDRIVE (команда MellSquad)</p>
-                <div style="display:flex; gap:16px; flex-wrap:wrap;">
-                    <a href="pages/about.html">О сервисе</a>
-                    <a href="pages/contacts.html">Контакты</a>
-                    <a href="pages/privacy.html">Конфиденциальность</a>
-                    <a href="pages/404.html">404</a> <a href="pages/admin.html" style="opacity:0.75;">Для сотрудников</a>
-                </div>
+        <div class="container" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:14px;">
+            <p style="margin:0;">© 2026 MELLDRIVE (команда MellSquad)</p>
+            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                <a href="pages/map.html">Карта зон</a>
+                <a href="pages/catalog.html">Автопарк</a>
+                <a href="pages/login.html">Вход</a>
+                <a href="pages/admin.html" style="opacity:0.8;">Для сотрудников</a>
             </div>
         </div>
     </footer>
 
-    <div class="add-car-modal" id="addCarModal">
-        <form class="add-car-card" id="addCarForm">
-            <h3 style="margin-bottom:4px;">Добавить автомобиль в каталог</h3>
-            <label>Марка и модель
-                <input type="text" id="newCarName" required placeholder="Например: Zeekr 001">
-            </label>
-            <label>Класс авто
-                <select id="newCarCategory">
-                    <option value="Эконом">Эконом</option>
-                    <option value="Комфорт">Комфорт</option>
-                    <option value="Электро">Электро</option>
-                    <option value="Бизнес">Бизнес</option>
-                    <option value="Спорт">Спорт</option>
-                </select>
-            </label>
-            <label>Характеристики
-                <input type="text" id="newCarSpecs" required placeholder="АКПП • 544 л.с. • Полный привод">
-            </label>
-            <label>Цена за минуту (₽)
-                <input type="number" step="0.5" min="1" id="newCarMin" required value="28">
-            </label>
-            <label>Цена за сутки (₽)
-                <input type="number" min="100" id="newCarDay" required value="7900">
-            </label>
-            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
-                <button type="button" class="btn btn--outline btn--sm" id="closeAddCarBtn">Отмена</button>
-                <button type="submit" class="btn btn--primary btn--sm">Сохранить авто</button>
-            </div>
-        </form>
-    </div>
+    <script>
+        const DEFAULT_CARS = [
+            { id: 1, plate: 'А777МР77', name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceHour: 520, priceDay: 2400, img: 'assets/img/cars/solaris.jpg' },
+            { id: 2, plate: 'Е304КХ190', name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Камеры 360', priceMin: 15.5, priceHour: 700, priceDay: 3500, img: 'assets/img/cars/haval-jolion.jpg' },
+            { id: 3, plate: 'О512ТТ777', name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Премиум', priceMin: 25.0, priceHour: 1150, priceDay: 6900, img: 'assets/img/cars/tesla-model-3.jpg' },
+            { id: 4, plate: 'М005АА99', name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceHour: 2500, priceDay: 39000, img: 'assets/img/cars/bmw-m5.jpg' },
+            { id: 5, plate: 'А001МР77', name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Полный привод', priceMin: 75.0, priceHour: 3400, priceDay: 55000, img: 'assets/img/cars/maybach-s580.jpg' },
+            { id: 6, plate: 'К911ТУ777', name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • 0-100 за 2.7 с', priceMin: 90.0, priceHour: 4100, priceDay: 72000, img: 'assets/img/cars/porsche-911.jpg' }
+        ];
 
-    <script src="assets/js/app.js"></script>
-
-<script>
-(function() {
-    let isAdmin = false;
-    try {
-        const a = JSON.parse(localStorage.getItem('melldrive_admin_session_v1') || 'null');
-        isAdmin = Boolean(a && a.isAdmin === true);
-    } catch (e) {}
-    if (!isAdmin) {
-        document.querySelectorAll('header a[href*="admin.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-})();
-</script>
-<script>
-(function() {
-    const SESSION_KEY = 'melldrive_active_session_v1';
-    const DB_KEY = 'melldrive_accounts_db_v1';
-
-    // Удаляем старые демо-записи, если остались в localStorage
-    try {
-        const rawDb = localStorage.getItem(DB_KEY);
-        if (rawDb) {
-            const parsedDb = JSON.parse(rawDb);
-            if (Array.isArray(parsedDb)) {
-                const filtered = parsedDb.filter(acc => acc && acc.email && acc.email.toLowerCase() !== 'demo@melldrive.ru');
-                localStorage.setItem(DB_KEY, JSON.stringify(filtered));
-            }
-        }
-    } catch (e) {}
-
-    function hasActiveSession() {
-        try {
-            const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-            return Boolean(s && s.loggedIn === true && s.email);
-        } catch (e) {
-            return false;
-        }
-    }
-
-    window.mellLogout = function() {
-        localStorage.removeItem(SESSION_KEY);
-        const isInPages = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
-        window.location.href = isInPages ? '../index.html' : 'index.html';
-    };
-
-    const loggedIn = hasActiveSession();
-
-    // Если сессии нет — убираем ссылки на кабинет из меню
-    if (!loggedIn) {
-        document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-
-    // Навешиваем выход на любые кнопки/ссылки с data-logout или #logoutBtn
-    document.querySelectorAll('[data-logout], #logoutBtn').forEach(el => {
-        el.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.mellLogout();
-        });
-    });
-})();
-</script>
+        const grid = document.getElementById('homeCarsGrid');
+        grid.innerHTML = DEFAULT_CARS.map(car => {
+            const hourPrice = car.priceHour || Math.round((Number(car.priceMin) * 45) / 10) * 10;
+            return `
+                <article class="car-card">
+                    <div class="car-card__badge">${car.category} • ${car.plate}</div>
+                    <img class="car-card__img" src="${car.img}" alt="${car.name}">
+                    <div class="car-card__body">
+                        <h3 class="car-card__title">${car.name}</h3>
+                        <div class="car-card__specs">${car.specs}</div>
+                        <div class="car-card__pricing">
+                            <span class="car-card__price">${Number(car.priceMin).toFixed(2)} ₽ / мин • ${hourPrice.toLocaleString('ru-RU')} ₽ / час</span>
+                            <span class="car-card__price-sub">или ${Number(car.priceDay).toLocaleString('ru-RU')} ₽ / сутки</span>
+                        </div>
+                        <a href="pages/car.html?id=${car.id}" class="btn btn--primary btn--block" style="margin-top:8px;">Забронировать</a>
+                    </div>
+                </article>
+            `;
+        }).join('');
+    </script>
+    <script src="assets/js/theme-session.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
