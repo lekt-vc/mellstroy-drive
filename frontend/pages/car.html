@@ -466,12 +466,26 @@
         });
 
         const hoursInput = document.getElementById('hoursCountInput');
+        hoursInput.addEventListener('keydown', (e) => {
+            if (['e', 'E', '+', '-', '.', ','].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
         hoursInput.addEventListener('input', () => {
+            const digits = hoursInput.value.replace(/\D/g, '');
+            if (digits !== '') {
+                let num = parseInt(digits, 10);
+                if (num > 72) num = 72;
+                if (num < 1) num = 1;
+                hoursInput.value = String(num);
+            } else {
+                hoursInput.value = '';
+            }
             if (mode === 'hours') tariffLabel = `Аренда на ${getHoursCount()} ч`;
             recalc();
         });
         hoursInput.addEventListener('blur', () => {
-            hoursInput.value = getHoursCount();
+            hoursInput.value = String(getHoursCount());
             if (mode === 'hours') tariffLabel = `Аренда на ${getHoursCount()} ч`;
             recalc();
         });
@@ -619,3 +633,4 @@
     <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
+
