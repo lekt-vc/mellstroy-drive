@@ -10,7 +10,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 28px;
-            align-items: start;
+            align-items: stretch;
         }
         .car-detail__photo {
             width: 100%;
@@ -129,6 +129,18 @@
         @media (max-width: 900px) {
             .car-detail { grid-template-columns: 1fr; }
             .car-detail__photo { height: 260px; }
+        }
+            .car-detail > div:first-child {
+            display: flex;
+            flex-direction: column;
+        }
+        .car-detail > div:first-child > .panel-card {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .car-detail > div:first-child > .panel-card > .review-form {
+            margin-top: auto;
         }
     </style>
 </head>
@@ -539,4 +551,5 @@
     <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
+
 
