@@ -173,3 +173,95 @@
         });
     }
 })();
+
+/* MELLDRIVE_HEADER_SNOW_JS_START */
+(function() {
+    if (window.__mellHeaderSnowInit) return;
+    window.__mellHeaderSnowInit = true;
+
+    function initHeaderSnow() {
+        const header = document.querySelector('header.header');
+        if (!header || header.querySelector('.header-snow-canvas')) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.className = 'header-snow-canvas';
+        canvas.setAttribute('aria-hidden', 'true');
+        header.prepend(canvas);
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        let width = 0;
+        let height = 0;
+        let flakes = [];
+
+        function createFlake(randomY) {
+            return {
+                x: Math.random() * width,
+                y: randomY ? Math.random() * height : -4,
+                r: 1.1 + Math.random() * 2.1,
+                vy: 0.35 + Math.random() * 0.75,
+                vx: (Math.random() - 0.5) * 0.45,
+                phase: Math.random() * Math.PI * 2,
+                alpha: 0.35 + Math.random() * 0.55
+            };
+        }
+
+        function resize() {
+            const rect = header.getBoundingClientRect();
+            width = Math.max(1, Math.floor(rect.width));
+            height = Math.max(1, Math.floor(rect.height));
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.floor(width * dpr);
+            canvas.height = Math.floor(height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            const targetCount = Math.max(28, Math.min(95, Math.floor(width / 16)));
+            while (flakes.length < targetCount) flakes.push(createFlake(true));
+            if (flakes.length > targetCount) flakes.length = targetCount;
+        }
+
+        resize();
+        window.addEventListener('resize', resize);
+        if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(resize).observe(header);
+        }
+
+        function tick() {
+            ctx.clearRect(0, 0, width, height);
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light' ||
+                            (document.body && document.body.classList.contains('light-theme'));
+            const rgb = isLight ? '17, 24, 39' : '255, 255, 255';
+
+            for (let i = 0; i < flakes.length; i++) {
+                const f = flakes[i];
+                f.phase += 0.025;
+                f.y += f.vy;
+                f.x += f.vx + Math.sin(f.phase) * 0.25;
+
+                if (f.y - f.r > height) {
+                    f.y = -f.r;
+                    f.x = Math.random() * width;
+                }
+                if (f.x < -f.r) f.x = width + f.r;
+                if (f.x > width + f.r) f.x = -f.r;
+
+                const opacity = isLight ? (f.alpha * 0.72).toFixed(2) : f.alpha.toFixed(2);
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${rgb}, ${opacity})`;
+                ctx.fill();
+            }
+            requestAnimationFrame(tick);
+        }
+
+        requestAnimationFrame(tick);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHeaderSnow);
+    } else {
+        initHeaderSnow();
+    }
+})();
+/* MELLDRIVE_HEADER_SNOW_JS_END */
