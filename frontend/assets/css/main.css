@@ -401,3 +401,16 @@ body.light-theme .footer {
     }
 }
 /* MELLDRIVE_HERO_SUBTITLE_FIX_END */
+
+/* MELLDRIVE_HEADER_RHYTHM_START */
+.section > .container > .section__title {
+    margin: 0 0 16px 0;
+}
+.section > .container > .section__subtitle {
+    margin: 0 0 22px 0;
+    line-height: 1.55;
+}
+.section__header .section__subtitle {
+    margin: 10px 0 0 0;
+}
+/* MELLDRIVE_HEADER_RHYTHM_END */
