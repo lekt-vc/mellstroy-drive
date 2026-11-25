@@ -31,6 +31,15 @@
             font-size: 0.75rem;
             font-weight: 700;
         }
+        .car-card__rating {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #f59e0b;
+        }
+        .car-card__rating--empty {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
         @media (max-width: 768px) {
             .catalog-toolbar { grid-template-columns: 1fr; }
         }
@@ -77,8 +86,10 @@
                 </select>
                 <select id="sortFilter">
                     <option value="default">Без сортировки</option>
-                    <option value="price-asc">Сначала дешевле (минута)</option>
-                    <option value="price-desc">Сначала дороже (минута)</option>
+                    <option value="price-asc">Цена: сначала дешевле</option>
+                    <option value="price-desc">Цена: сначала дороже</option>
+                    <option value="rating-desc">Рейтинг: по убыванию</option>
+                    <option value="rating-asc">Рейтинг: по возрастанию</option>
                 </select>
             </div>
 
@@ -103,7 +114,6 @@
         }
 
         if (activeZone && Array.isArray(activeZone.cars) && activeZone.cars.length) {
-            // Синхронизируем актуальные цены из fleet-data по plate
             const byPlate = new Map(cars.map(c => [c.plate, c]));
             cars = activeZone.cars.map(zc => byPlate.get(window.normalizePlate(zc.plate)) || zc);
             document.getElementById('catalogHeading').textContent = `Авто в зоне: ${activeZone.title}`;
@@ -118,28 +128,42 @@
             const cat = document.getElementById('catFilter').value;
             const sort = document.getElementById('sortFilter').value;
 
-            let list = cars.filter(c =>
-                (!cat || cat === 'all' || c.category === cat) &&
-                (!q || c.name.toLowerCase().includes(q) || c.specs.toLowerCase().includes(q) || window.normalizePlate(c.plate).includes(qPlate))
-            );
+            let curEmail = '';
+            try {
+                const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+                if (s && s.loggedIn && s.email) curEmail = s.email.toLowerCase();
+            } catch (e) {}
+
+            let list = cars
+                .filter(c =>
+                    (!cat || cat === 'all' || c.category === cat) &&
+                    (!q || c.name.toLowerCase().includes(q) || c.specs.toLowerCase().includes(q) || window.normalizePlate(c.plate).includes(qPlate))
+                )
+                .map(c => {
+                    const st = window.getModelRatingStats(c.modelId, c.id);
+                    return { ...c, _ratingAvg: st.avg, _ratingCount: st.count };
+                });
+
             if (sort === 'price-asc') list.sort((a, b) => a.priceMin - b.priceMin);
             if (sort === 'price-desc') list.sort((a, b) => b.priceMin - a.priceMin);
+            if (sort === 'rating-desc') list.sort((a, b) => (b._ratingAvg - a._ratingAvg) || (b._ratingCount - a._ratingCount) || (a.id - b.id));
+            if (sort === 'rating-asc') list.sort((a, b) => (a._ratingAvg - b._ratingAvg) || (a._ratingCount - b._ratingCount) || (a.id - b.id));
 
             document.getElementById('carsCount').textContent = list.length;
             document.getElementById('catalogGrid').innerHTML = list.map(car => {
                 const zoneSuffix = activeZone ? `&zone=${encodeURIComponent(activeZone.id)}` : '';
-                let curEmail = '';
-                try {
-                    const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
-                    if (s && s.loggedIn && s.email) curEmail = s.email.toLowerCase();
-                } catch (e) {}
                 const activeB = window.getActiveBookingForPlate(car.plate);
                 const isOwn = Boolean(activeB && curEmail && activeB.driverEmail && activeB.driverEmail.toLowerCase() === curEmail);
                 const busy = Boolean(activeB && !isOwn);
+
                 const safeName = window.escapeHtml(car.name);
                 const safeCat = window.escapeHtml(car.category);
                 const safeSpecs = window.escapeHtml(car.specs);
                 const safePlate = window.escapeHtml(car.plate);
+                const ratingHtml = car._ratingCount > 0
+                    ? `<div class="car-card__rating">★ ${car._ratingAvg.toFixed(1)} (${car._ratingCount})</div>`
+                    : `<div class="car-card__rating car-card__rating--empty">☆ 0.0 (нет оценок)</div>`;
+
                 return `
                     <article class="car-card">
                         <div class="car-card__badge">${safeCat} • ${safePlate}</div>
@@ -147,15 +171,16 @@
                         <div class="car-card__body">
                             <h3 class="car-card__title">
                                 ${safeName} <small style="font-weight:500; color:var(--text-muted); font-size:0.84rem;">(#${car.copyNumber || 1})</small>
-                                ${isOwn ? `<span class="status-tag-busy" style="background:rgba(34,197,94,0.18); color:var(--success);">Ваша аренда</span>` : (busy ? `<span class="status-tag-busy">В аренде</span>` : ``)}
+                                ${isOwn ? '<span class="status-tag-busy" style="background:rgba(34,197,94,0.18); color:var(--success);">Ваша аренда</span>' : (busy ? '<span class="status-tag-busy">В аренде</span>' : '')}
                             </h3>
+                            ${ratingHtml}
                             <div class="car-card__specs">${safeSpecs}</div>
                             <div class="car-card__pricing">
                                 <span class="car-card__price">${Number(car.priceMin)} ₽ / мин • ${Number(car.priceHour).toLocaleString('ru-RU')} ₽ / час</span>
                                 <span class="car-card__price-sub">или ${Number(car.priceDay).toLocaleString('ru-RU')} ₽ / день</span>
                             </div>
                             <a href="car.html?id=${car.id}${zoneSuffix}" class="btn ${busy ? 'btn--outline' : 'btn--primary'} btn--block" style="margin-top:8px;">
-                                ${isOwn ? `Управлять вашей арендой` : (busy ? `Посмотреть (занята)` : `Забронировать`)}
+                                ${isOwn ? 'Управлять вашей арендой' : (busy ? 'Посмотреть (занята)' : 'Забронировать')}
                             </a>
                         </div>
                     </article>
@@ -171,4 +196,3 @@
     <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
-

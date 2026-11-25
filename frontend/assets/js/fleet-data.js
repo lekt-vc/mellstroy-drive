@@ -258,3 +258,31 @@ window.mellCarPlaceholder = function(imgEl, title, category) {
     </svg>`;
     imgEl.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 };
+
+/* MELLDRIVE_RATING_HELPER_START */
+window.getModelRatingStats = function(modelId, carId) {
+    let reviews = [];
+    try {
+        const raw = localStorage.getItem('melldrive_reviews_v1');
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) reviews = parsed;
+        }
+    } catch (e) {}
+
+    const matched = reviews.filter(r =>
+        r &&
+        r.status === 'Опубликован' &&
+        ((modelId && r.modelId === modelId) || (carId != null && String(r.carId) === String(carId)))
+    );
+
+    if (!matched.length) {
+        return { count: 0, avg: 0 };
+    }
+    const sum = matched.reduce((acc, item) => acc + Math.min(5, Math.max(1, Number(item.rating) || 5)), 0);
+    return {
+        count: matched.length,
+        avg: Number((sum / matched.length).toFixed(1))
+    };
+};
+/* MELLDRIVE_RATING_HELPER_END */

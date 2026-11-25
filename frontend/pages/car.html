@@ -37,7 +37,7 @@
             display: flex;
             flex-direction: column;
         }
-        .panel-card > .review-form { margin-top: auto; }
+        .panel-card > .review-bottom { margin-top: auto; }
         .car-title-row {
             display: flex;
             justify-content: space-between;
@@ -124,6 +124,13 @@
             background: rgba(239, 68, 68, 0.1);
             margin-bottom: 14px;
         }
+        .review-gate {
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            background: var(--bg-main);
+            margin-top: 12px;
+        }
         .own-rental-box {
             padding: 14px 16px;
             border-radius: 10px;
@@ -180,22 +187,33 @@
                         <h3 style="margin:0 0 8px;">Отзывы водителей (<span id="reviewsCount">0</span>)</h3>
                         <div id="reviewsList" style="margin-bottom:16px;"></div>
 
-                        <form class="review-form" id="reviewForm">
-                            <strong>Оставить отзыв об автомобиле</strong>
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
-                                <span style="font-size:0.9rem; color:var(--text-muted);">Выберите оценку (кликните по звезде):</span>
-                                <div class="star-picker" id="starPicker" role="radiogroup" aria-label="Оценка от 1 до 5">
-                                    <button type="button" class="star-btn active" data-val="1">★</button>
-                                    <button type="button" class="star-btn active" data-val="2">★</button>
-                                    <button type="button" class="star-btn active" data-val="3">★</button>
-                                    <button type="button" class="star-btn active" data-val="4">★</button>
-                                    <button type="button" class="star-btn active" data-val="5">★</button>
+                        <div class="review-bottom">
+                            <div id="reviewGateBox" class="review-gate" style="display:none;">
+                                <strong id="reviewGateTitle" style="display:block; margin-bottom:6px; color:var(--gold);">Оставить отзыв</strong>
+                                <p id="reviewGateText" style="font-size:0.88rem; color:var(--text-muted); margin:0;"></p>
+                                <div id="reviewGateActions" style="display:none; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                                    <a href="login.html" class="btn btn--primary btn--sm">Войти в кабинет</a>
+                                    <a href="register.html" class="btn btn--outline btn--sm">Регистрация</a>
                                 </div>
                             </div>
-                            <input type="text" id="revAuthor" required placeholder="Ваше имя">
-                            <textarea id="revText" rows="2" required placeholder="Как едет авто, состояние салона, подача..."></textarea>
-                            <button type="submit" class="btn btn--outline btn--sm">Опубликовать отзыв</button>
-                        </form>
+
+                            <form class="review-form" id="reviewForm" style="display:none;">
+                                <strong>Оставить отзыв об автомобиле</strong>
+                                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                                    <span style="font-size:0.9rem; color:var(--text-muted);">Выберите оценку (кликните по звезде):</span>
+                                    <div class="star-picker" id="starPicker" role="radiogroup" aria-label="Оценка от 1 до 5">
+                                        <button type="button" class="star-btn active" data-val="1">★</button>
+                                        <button type="button" class="star-btn active" data-val="2">★</button>
+                                        <button type="button" class="star-btn active" data-val="3">★</button>
+                                        <button type="button" class="star-btn active" data-val="4">★</button>
+                                        <button type="button" class="star-btn active" data-val="5">★</button>
+                                    </div>
+                                </div>
+                                <input type="text" id="revAuthor" required readonly style="opacity:0.85; cursor:default;">
+                                <textarea id="revText" rows="2" required placeholder="Как едет авто, состояние салона, подача..."></textarea>
+                                <button type="submit" class="btn btn--outline btn--sm">Опубликовать отзыв</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -203,7 +221,7 @@
                     <span class="hero__badge" id="carCategory">Класс • Госномер</span>
                     <div class="car-title-row" style="margin-top:10px;">
                         <h1 id="carTitle" style="font-size:1.9rem; margin:0;">Загрузка...</h1>
-                        <span class="rating-badge" id="carAvgRating">★ —</span>
+                        <span class="rating-badge" id="carAvgRating">☆ Нет оценок</span>
                     </div>
                     <p id="carSpecs" style="color: var(--text-muted); margin:8px 0 12px;"></p>
 
@@ -302,12 +320,60 @@
         const isAccountReady = Boolean(activeSession && activeSession.loggedIn === true && activeSession.email);
         const currentUserEmail = isAccountReady ? activeSession.email.toLowerCase() : '';
 
-        if (isAccountReady && activeSession.name) {
-            document.getElementById('revAuthor').value = activeSession.name;
-        }
-
         function isUsersOwnBooking(booking) {
             return Boolean(booking && currentUserEmail && booking.driverEmail && booking.driverEmail.toLowerCase() === currentUserEmail);
+        }
+
+        function hasUserRentedCurrentCar() {
+            if (!isAccountReady) return false;
+            let list = [];
+            try {
+                list = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+                if (!Array.isArray(list)) list = [];
+            } catch (e) { list = []; }
+
+            return list.some(b =>
+                b &&
+                b.status !== 'Отменена' &&
+                b.driverEmail &&
+                b.driverEmail.toLowerCase() === currentUserEmail &&
+                (
+                    (b.modelId && b.modelId === car.modelId) ||
+                    String(b.carId) === String(car.id) ||
+                    (b.carName && b.carName === car.name)
+                )
+            );
+        }
+
+        function updateReviewGate() {
+            const form = document.getElementById('reviewForm');
+            const gateBox = document.getElementById('reviewGateBox');
+            const gateTitle = document.getElementById('reviewGateTitle');
+            const gateText = document.getElementById('reviewGateText');
+            const gateActions = document.getElementById('reviewGateActions');
+            const authorInput = document.getElementById('revAuthor');
+
+            if (!isAccountReady) {
+                form.style.display = 'none';
+                gateBox.style.display = 'block';
+                gateTitle.textContent = 'Отзывы доступны авторизованным водителям';
+                gateText.textContent = 'Войдите в личный кабинет и арендуйте этот автомобиль, чтобы оставить отзыв.';
+                gateActions.style.display = 'flex';
+                return;
+            }
+
+            if (!hasUserRentedCurrentCar()) {
+                form.style.display = 'none';
+                gateBox.style.display = 'block';
+                gateTitle.textContent = 'Вы ещё не арендовали этот автомобиль';
+                gateText.textContent = 'Оставить отзыв можно только после оформления аренды данной модели с вашего аккаунта.';
+                gateActions.style.display = 'none';
+                return;
+            }
+
+            gateBox.style.display = 'none';
+            form.style.display = 'grid';
+            authorInput.value = activeSession.name || activeSession.email;
         }
 
         function renderUnitOptions() {
@@ -327,6 +393,7 @@
                 car = chosen;
                 document.getElementById('bookingSuccessMsg').classList.add('hidden');
                 updateHeaderAndAvailability();
+                updateReviewGate();
                 recalc();
             }
         });
@@ -414,6 +481,7 @@
             msg.textContent = `Аренда заказа ${currentOwnBookingId} завершена. Автомобиль ${car.plate} снова свободен.`;
             msg.classList.remove('hidden');
             updateHeaderAndAvailability();
+            updateReviewGate();
         });
 
         let mode = 'minute';
@@ -544,6 +612,7 @@
 
             document.getElementById('bookingSuccessMsg').classList.add('hidden');
             updateHeaderAndAvailability();
+            updateReviewGate();
         });
 
         // Кликабельные звёзды и отзывы
@@ -574,17 +643,13 @@
             const visible = all.filter(r => (r.modelId === car.modelId || String(r.carId) === String(car.id)) && r.status === 'Опубликован');
             document.getElementById('reviewsCount').textContent = visible.length;
 
+            const stats = window.getModelRatingStats(car.modelId, car.id);
             const avgBadge = document.getElementById('carAvgRating');
-            if (visible.length) {
-                const avg = (visible.reduce((sum, item) => sum + (Number(item.rating) || 5), 0) / visible.length).toFixed(1);
-                avgBadge.textContent = `★ ${avg} (${visible.length})`;
-            } else {
-                avgBadge.textContent = '★ 5.0 (новый)';
-            }
+            avgBadge.textContent = stats.count ? `★ ${stats.avg.toFixed(1)} (${stats.count})` : '☆ Нет оценок';
 
             const box = document.getElementById('reviewsList');
             if (!visible.length) {
-                box.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Опубликованных отзывов пока нет. Выберите звёзды и оставьте отзыв ниже.</p>';
+                box.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Опубликованных отзывов пока нет.</p>';
                 return;
             }
             box.innerHTML = visible.map(r => {
@@ -605,7 +670,11 @@
 
         document.getElementById('reviewForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const author = document.getElementById('revAuthor').value.trim();
+            if (!isAccountReady || !hasUserRentedCurrentCar()) {
+                updateReviewGate();
+                return;
+            }
+            const author = (activeSession.name || activeSession.email).trim();
             const text = document.getElementById('revText').value.trim();
             if (!author || !text) return;
 
@@ -615,6 +684,7 @@
                 carId: car.id,
                 modelId: car.modelId,
                 author,
+                authorEmail: activeSession.email,
                 rating: selectedStars,
                 text,
                 status: 'Опубликован',
@@ -627,10 +697,10 @@
         });
 
         updateHeaderAndAvailability();
+        updateReviewGate();
         recalc();
         renderReviews();
     </script>
     <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
-
