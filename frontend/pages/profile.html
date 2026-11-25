@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Личный кабинет — MELLDRIVE</title>
     <link rel="stylesheet" href="../assets/css/main.css">
+    <style>
+        .live-meter {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(234, 179, 8, 0.4);
+            background: var(--gold-soft);
+            display: grid;
+            gap: 4px;
+            font-size: 0.88rem;
+        }
+        .live-meter__row {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            margin-right: 6px;
+        }
+    </style>
     <script>
         (function() {
             try {
@@ -51,7 +76,7 @@
             </div>
 
             <h2 style="font-size:1.35rem; margin-bottom:14px;">Мои бронирования</h2>
-            <div id="myBookingsList" class="cars-grid" style="grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));"></div>
+            <div id="myBookingsList" class="cars-grid" style="grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));"></div>
         </div>
     </main>
 
@@ -69,12 +94,24 @@
             document.getElementById('driverLicenseInfo').textContent = sess.license ? ('ВУ: ' + sess.license + (sess.licenseConfirmed ? ' (подтверждено)' : '')) : '';
         }
 
+        function loadUserBookings() {
+            let list = [];
+            try {
+                list = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+                if (!Array.isArray(list)) list = [];
+            } catch (e) { list = []; }
+
+            return sess && sess.email
+                ? list.filter(b => b.driverEmail && b.driverEmail.toLowerCase() === sess.email.toLowerCase())
+                : [];
+        }
+
         function finishBooking(bookingId) {
             let list = [];
             try { list = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]'); } catch (e) {}
             const target = list.find(b => b.id === bookingId);
             if (target && target.status === 'Активна') {
-                target.status = 'Завершена';
+                window.finalizeBookingRecord(target, 'Завершена');
                 localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
                 renderBookings();
             }
@@ -82,38 +119,77 @@
 
         function renderBookings() {
             const box = document.getElementById('myBookingsList');
-            let list = [];
-            try {
-                list = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
-                if (!Array.isArray(list)) list = [];
-            } catch (e) { list = []; }
-
-            const mine = sess && sess.email
-                ? list.filter(b => b.driverEmail && b.driverEmail.toLowerCase() === sess.email.toLowerCase())
-                : [];
+            const mine = loadUserBookings();
 
             if (!mine.length) {
                 box.innerHTML = '<div class="car-card" style="padding:20px;"><p style="color:var(--text-muted); margin:0;">У вас пока нет оформленных бронирований. <a href="catalog.html" style="color:var(--gold);">Выбрать автомобиль →</a></p></div>';
                 return;
             }
 
-            box.innerHTML = mine.map(b => `
-                <div class="car-card" style="padding:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                        <strong>${window.escapeHtml(b.id)}</strong>
-                        <span style="color:${b.status === 'Активна' ? 'var(--gold)' : 'var(--text-muted)'}; font-weight:700;">${window.escapeHtml(b.status)}</span>
+            const now = Date.now();
+            box.innerHTML = mine.map(b => {
+                const isLiveMinute = Boolean(b.isMinuteTariff && b.status === 'Активна');
+                const live = isLiveMinute ? window.calcLiveMinuteBooking(b, now) : null;
+                const displayTotal = isLiveMinute ? live.total : Number(b.total);
+
+                const liveMeterHtml = isLiveMinute
+                    ? `
+                        <div class="live-meter" data-live-id="${window.escapeHtml(b.id)}">
+                            <div class="live-meter__row">
+                                <span><span class="live-dot"></span>Идёт поминутная аренда</span>
+                                <strong>${Number(b.priceMin)} ₽/мин</strong>
+                            </div>
+                            <div class="live-meter__row">
+                                <span style="color:var(--text-muted);">Время старта:</span>
+                                <span>${window.escapeHtml(b.createdAt)}</span>
+                            </div>
+                            <div class="live-meter__row">
+                                <span style="color:var(--text-muted);">Прошло времени:</span>
+                                <strong data-live-time="${window.escapeHtml(b.id)}">${live.formattedTime} (${live.billedMinutes} мин)</strong>
+                            </div>
+                            <div class="live-meter__row">
+                                <span style="color:var(--text-muted);">Накапало сейчас:</span>
+                                <strong style="color:var(--gold); font-size:1.05rem;" data-live-sum="${window.escapeHtml(b.id)}">${live.total.toLocaleString('ru-RU')} ₽</strong>
+                            </div>
+                        </div>
+                    `
+                    : `
+                        <p style="margin:10px 0 4px; font-weight:800; color:var(--gold);">${displayTotal.toLocaleString('ru-RU')} ₽</p>
+                        <small style="color:var(--text-muted);">Начало: ${window.escapeHtml(b.createdAt)}${b.endedAt ? ` • Завершено: ${window.escapeHtml(b.endedAt)}` : ''}</small>
+                    `;
+
+                return `
+                    <div class="car-card" style="padding:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <strong>${window.escapeHtml(b.id)}</strong>
+                            <span style="color:${b.status === 'Активна' ? 'var(--gold)' : 'var(--text-muted)'}; font-weight:700;">${window.escapeHtml(b.status)}</span>
+                        </div>
+                        <h3 style="margin:8px 0 4px;">${window.escapeHtml(b.carName)} ${b.plate ? `<small style="color:var(--text-muted);">(${window.escapeHtml(b.plate)})</small>` : ''}</h3>
+                        <p style="color:var(--text-muted); font-size:0.88rem; margin:0;">${window.escapeHtml(b.tariff)} • ${window.escapeHtml(b.options)}</p>
+                        ${liveMeterHtml}
+                        ${b.status === 'Активна' ? `<button type="button" class="btn btn--outline btn--sm" style="margin-top:12px;" onclick="finishBooking('${window.escapeHtml(b.id)}')">Завершить аренду и освободить авто</button>` : ''}
                     </div>
-                    <h3 style="margin:8px 0 4px;">${window.escapeHtml(b.carName)} ${b.plate ? `<small style="color:var(--text-muted);">(${window.escapeHtml(b.plate)})</small>` : ''}</h3>
-                    <p style="color:var(--text-muted); font-size:0.88rem; margin:0;">${window.escapeHtml(b.tariff)} • ${window.escapeHtml(b.options)}</p>
-                    <p style="margin:10px 0 4px; font-weight:800; color:var(--gold);">${Number(b.total).toLocaleString('ru-RU')} ₽</p>
-                    <small style="color:var(--text-muted);">${window.escapeHtml(b.createdAt)}</small>
-                    ${b.status === 'Активна' ? `<button type="button" class="btn btn--outline btn--sm" style="margin-top:12px;" onclick="finishBooking('${window.escapeHtml(b.id)}')">Завершить аренду и освободить авто</button>` : ''}
-                </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+
+        function tickLiveMeters() {
+            const mine = loadUserBookings();
+            const now = Date.now();
+            mine.forEach(b => {
+                if (!b.isMinuteTariff || b.status !== 'Активна') return;
+                const timeEl = document.querySelector(`[data-live-time="${CSS.escape(b.id)}"]`);
+                const sumEl = document.querySelector(`[data-live-sum="${CSS.escape(b.id)}"]`);
+                if (!timeEl || !sumEl) return;
+                const live = window.calcLiveMinuteBooking(b, now);
+                timeEl.textContent = `${live.formattedTime} (${live.billedMinutes} мин)`;
+                sumEl.textContent = `${live.total.toLocaleString('ru-RU')} ₽`;
+            });
         }
 
         window.finishBooking = finishBooking;
         renderBookings();
+        setInterval(tickLiveMeters, 1000);
     </script>
     <script src="../assets/js/theme-session.js"></script>
 </body>

@@ -322,7 +322,7 @@
         function updateStatus(idx, newStatus) {
             const list = getBookings();
             if (list[idx]) {
-                list[idx].status = newStatus;
+                window.finalizeBookingRecord(list[idx], newStatus);
                 localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
                 renderAll();
                 showToast(`Статус заказа ${list[idx].id} изменён на «${newStatus}».`);
@@ -395,7 +395,7 @@
             const list = getBookings();
             document.getElementById('statOrders').textContent = list.length;
             document.getElementById('statActive').textContent = list.filter(b => b.status === 'Активна').length;
-            const sum = list.filter(b => b.status !== 'Отменена').reduce((acc, b) => acc + (Number(b.total) || 0), 0);
+            const sum = list.filter(b => b.status !== 'Отменена').reduce((acc, b) => acc + (b.isMinuteTariff && b.status === 'Активна' ? window.calcLiveMinuteBooking(b, Date.now()).total : (Number(b.total) || 0)), 0);
             document.getElementById('statRevenue').textContent = `${sum.toLocaleString('ru-RU')} ₽`;
 
             const tbody = document.getElementById('adminOrdersBody');
@@ -407,7 +407,7 @@
                         <td>${window.escapeHtml(b.carName)}<br><small style="color:var(--gold);">${window.escapeHtml(b.plate || '—')}</small></td>
                         <td>${window.escapeHtml(b.driverEmail || '—')}</td>
                         <td>${window.escapeHtml(b.tariff)} (${window.escapeHtml(b.options)})</td>
-                        <td><strong style="color:var(--gold);">${Number(b.total).toLocaleString('ru-RU')} ₽</strong></td>
+                        <td><strong style="color:var(--gold);">${(b.isMinuteTariff && b.status === 'Активна' ? window.calcLiveMinuteBooking(b, Date.now()).total : Number(b.total)).toLocaleString('ru-RU')} ₽</strong>${b.isMinuteTariff && b.status === 'Активна' ? '<br><small style="color:var(--success);">идёт счётчик</small>' : ''}</td>
                         <td>
                             <select class="status-select" onchange="updateStatus(${idx}, this.value)">
                                 <option value="Активна" ${b.status === 'Активна' ? 'selected' : ''}>Активна</option>
@@ -552,4 +552,5 @@
     <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
+
 

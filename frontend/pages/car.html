@@ -79,6 +79,15 @@
             background: var(--gold-soft);
             color: var(--gold);
         }
+        .minute-info-box {
+            margin: 12px 0;
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-main);
+            font-size: 0.84rem;
+            color: var(--text-muted);
+        }
         .hours-picker {
             display: none;
             margin: 12px 0;
@@ -111,10 +120,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             padding: 16px 0;
             border-top: 1px solid var(--border);
             margin-top: 14px;
-            font-size: 1.25rem;
+            font-size: 1.18rem;
             font-weight: 800;
         }
         .auth-gate, .busy-gate {
@@ -240,9 +250,13 @@
 
                     <label style="font-size: 0.9rem; color: var(--text-muted);">Выберите формат тарифа:</label>
                     <div class="tariff-options" id="tariffGroup">
-                        <button type="button" class="tariff-pill active" data-mode="minute" data-label="Минуты (30 мин)">Минуты (30 мин)</button>
+                        <button type="button" class="tariff-pill active" data-mode="minute" data-label="Поминутный">Поминутный</button>
                         <button type="button" class="tariff-pill" data-mode="hours" data-label="По часам">Нужное число часов</button>
                         <button type="button" class="tariff-pill" data-mode="day" data-label="День (24 ч)">День (24 ч)</button>
+                    </div>
+
+                    <div class="minute-info-box" id="minuteInfoBox">
+                        Таймер запускается в момент нажатия <strong>«Арендовать поминутно»</strong>. Списание считается по реальному времени в пути в личном кабинете до завершения аренды.
                     </div>
 
                     <div class="hours-picker" id="hoursPicker">
@@ -265,8 +279,8 @@
                     <div id="promoStatus" style="font-size:0.82rem; color:var(--gold); margin-top:6px;"></div>
 
                     <div class="total-bar">
-                        <span>Итого к оплате:</span>
-                        <span id="totalPrice" style="color: var(--gold);">0 ₽</span>
+                        <span id="totalLabel">Тариф к старту:</span>
+                        <span id="totalPrice" style="color: var(--gold); text-align:right;">0 ₽</span>
                     </div>
 
                     <div id="authGateBox" class="auth-gate" style="display:none;">
@@ -294,7 +308,7 @@
                         <p id="busyGateText" style="font-size:0.86rem; color:var(--text-muted); margin:0;"></p>
                     </div>
 
-                    <button type="button" id="confirmBookingBtn" class="btn btn--primary btn--large btn--block">Оформить бронирование</button>
+                    <button type="button" id="confirmBookingBtn" class="btn btn--primary btn--large btn--block">Арендовать поминутно</button>
                     <p id="bookingSuccessMsg" class="hidden" style="margin-top: 14px; color: var(--success); font-weight: 600;"></p>
                 </div>
             </div>
@@ -407,7 +421,21 @@
         const busyGateText = document.getElementById('busyGateText');
         const driverBadge = document.getElementById('driverSessionBadge');
 
-        let currentOwnBookingId = null;
+        let currentOwnBooking = null;
+        let mode = 'minute';
+        let tariffLabel = 'Поминутный';
+        let currentTotal = 0;
+        let activePromo = '';
+
+        function renderOwnRentalSummary() {
+            if (!currentOwnBooking) return;
+            if (currentOwnBooking.isMinuteTariff) {
+                const live = window.calcLiveMinuteBooking(currentOwnBooking, Date.now());
+                ownRentalText.textContent = `Заказ ${currentOwnBooking.id} • ${car.name} (${car.plate}) • Старт: ${currentOwnBooking.createdAt} • В аренде: ${live.formattedTime} (${live.billedMinutes} мин) • Накапало: ${live.total.toLocaleString('ru-RU')} ₽`;
+            } else {
+                ownRentalText.textContent = `Заказ ${currentOwnBooking.id} • ${car.name} (${car.plate}) • ${currentOwnBooking.tariff} (${Number(currentOwnBooking.total).toLocaleString('ru-RU')} ₽). Вы можете управлять арендой в личном кабинете или завершить её прямо здесь.`;
+            }
+        }
 
         function updateHeaderAndAvailability() {
             const photoEl = document.getElementById('carPhoto');
@@ -428,7 +456,9 @@
 
             const activeBooking = window.getActiveBookingForPlate(car.plate);
             const ownBooking = isUsersOwnBooking(activeBooking);
-            currentOwnBookingId = ownBooking ? activeBooking.id : null;
+            currentOwnBooking = ownBooking ? activeBooking : null;
+
+            const actionBtnLabel = mode === 'minute' ? 'Арендовать поминутно' : 'Оформить бронирование';
 
             if (!isAccountReady) {
                 authGateBox.style.display = 'block';
@@ -437,13 +467,13 @@
                 confirmBtn.style.display = 'inline-flex';
                 confirmBtn.disabled = true;
                 confirmBtn.style.opacity = '0.5';
-                confirmBtn.textContent = 'Оформить бронирование';
+                confirmBtn.textContent = actionBtnLabel;
                 driverBadge.innerHTML = 'Статус водителя: <strong style="color:var(--danger);">не авторизован</strong>';
             } else if (ownBooking) {
                 authGateBox.style.display = 'none';
                 busyGateBox.style.display = 'none';
                 ownRentalBox.style.display = 'block';
-                ownRentalText.textContent = `Заказ ${activeBooking.id} • ${car.name} (${car.plate}) • ${activeBooking.tariff} (${Number(activeBooking.total).toLocaleString('ru-RU')} ₽). Вы можете управлять арендой в личном кабинете или завершить её прямо здесь.`;
+                renderOwnRentalSummary();
                 confirmBtn.style.display = 'none';
                 driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${window.escapeHtml(activeSession.name || activeSession.email)}</strong>`;
             } else if (activeBooking) {
@@ -463,31 +493,35 @@
                 confirmBtn.style.display = 'inline-flex';
                 confirmBtn.disabled = false;
                 confirmBtn.style.opacity = '1';
-                confirmBtn.textContent = 'Оформить бронирование';
+                confirmBtn.textContent = actionBtnLabel;
                 driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${window.escapeHtml(activeSession.name || activeSession.email)}</strong>`;
             }
         }
 
+        setInterval(() => {
+            if (currentOwnBooking && currentOwnBooking.isMinuteTariff && currentOwnBooking.status === 'Активна') {
+                renderOwnRentalSummary();
+            }
+        }, 1000);
+
         finishOwnRentalBtn.addEventListener('click', () => {
-            if (!currentOwnBookingId) return;
+            if (!currentOwnBooking) return;
+            const finishingId = currentOwnBooking.id;
             let list = [];
             try { list = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]'); } catch (e) {}
-            const target = list.find(b => b.id === currentOwnBookingId);
+            const target = list.find(b => b.id === finishingId);
+            let finalSumText = '';
             if (target) {
-                target.status = 'Завершена';
+                window.finalizeBookingRecord(target, 'Завершена');
+                finalSumText = ` Итого к оплате: ${Number(target.total).toLocaleString('ru-RU')} ₽.`;
                 localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
             }
             const msg = document.getElementById('bookingSuccessMsg');
-            msg.textContent = `Аренда заказа ${currentOwnBookingId} завершена. Автомобиль ${car.plate} снова свободен.`;
+            msg.textContent = `Аренда заказа ${finishingId} завершена.${finalSumText} Автомобиль ${car.plate} снова свободен.`;
             msg.classList.remove('hidden');
             updateHeaderAndAvailability();
             updateReviewGate();
         });
-
-        let mode = 'minute';
-        let tariffLabel = 'Минуты (30 мин)';
-        let currentTotal = 0;
-        let activePromo = '';
 
         function getHoursCount() {
             const raw = document.getElementById('hoursCountInput').value;
@@ -496,27 +530,50 @@
             return Math.min(72, Math.max(1, parsed));
         }
 
+        function getExtrasCost() {
+            let extra = 0;
+            if (document.getElementById('optCasco').checked) extra += 490;
+            if (document.getElementById('optChild').checked) extra += 250;
+            return extra;
+        }
+
         function recalc() {
             const hours = getHoursCount();
             const hourPrice = Number(car.priceHour);
+            const extras = getExtrasCost();
             document.getElementById('hourlyRateHint').textContent = `Тариф: ${hourPrice.toLocaleString('ru-RU')} ₽/час × ${hours} ч = ${(hourPrice * hours).toLocaleString('ru-RU')} ₽`;
 
-            let base = 0;
-            if (mode === 'minute') base = Number(car.priceMin) * 30;
-            if (mode === 'hours') base = hourPrice * hours;
-            if (mode === 'day') base = Number(car.priceDay);
+            const totalLabel = document.getElementById('totalLabel');
+            const totalPriceEl = document.getElementById('totalPrice');
 
-            if (document.getElementById('optCasco').checked) base += 490;
-            if (document.getElementById('optChild').checked) base += 250;
+            if (mode === 'minute') {
+                let firstMinTotal = Number(car.priceMin) + extras;
+                if (activePromo === 'MELL10') firstMinTotal = firstMinTotal * 0.9;
+                if (activePromo === 'START300') firstMinTotal = Math.max(0, firstMinTotal - 300);
+                currentTotal = Math.round(firstMinTotal);
 
-            if (activePromo === 'MELL10') base = base * 0.9;
-            if (activePromo === 'START300') base = Math.max(0, base - 300);
+                totalLabel.textContent = 'Поминутный расчёт:';
+                const extraNote = extras > 0 ? ` + ${extras} ₽ опции` : '';
+                const promoNote = activePromo ? ` (${activePromo})` : '';
+                totalPriceEl.textContent = `${Number(car.priceMin)} ₽/мин${extraNote}${promoNote}`;
+            } else {
+                let base = mode === 'hours' ? (hourPrice * hours) : Number(car.priceDay);
+                base += extras;
+                if (activePromo === 'MELL10') base = base * 0.9;
+                if (activePromo === 'START300') base = Math.max(0, base - 300);
+                currentTotal = Math.round(base);
 
-            currentTotal = Math.round(base);
-            document.getElementById('totalPrice').textContent = `${currentTotal.toLocaleString('ru-RU')} ₽`;
+                totalLabel.textContent = 'Итого к оплате:';
+                totalPriceEl.textContent = `${currentTotal.toLocaleString('ru-RU')} ₽`;
+            }
+
+            if (isAccountReady && !currentOwnBooking && !window.getActiveBookingForPlate(car.plate)) {
+                confirmBtn.textContent = mode === 'minute' ? 'Арендовать поминутно' : 'Оформить бронирование';
+            }
         }
 
         const hoursPicker = document.getElementById('hoursPicker');
+        const minuteInfoBox = document.getElementById('minuteInfoBox');
         document.querySelectorAll('.tariff-pill').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tariff-pill').forEach(b => b.classList.remove('active'));
@@ -524,9 +581,15 @@
                 mode = btn.dataset.mode;
                 if (mode === 'hours') {
                     hoursPicker.classList.add('open');
+                    minuteInfoBox.style.display = 'none';
                     tariffLabel = `Аренда на ${getHoursCount()} ч`;
+                } else if (mode === 'minute') {
+                    hoursPicker.classList.remove('open');
+                    minuteInfoBox.style.display = 'block';
+                    tariffLabel = 'Поминутный';
                 } else {
                     hoursPicker.classList.remove('open');
+                    minuteInfoBox.style.display = 'none';
                     tariffLabel = btn.dataset.label;
                 }
                 recalc();
@@ -580,6 +643,7 @@
                 updateHeaderAndAvailability();
                 return;
             }
+            const nowMs = Date.now();
             const code = 'MD-' + Math.floor(100000 + Math.random() * 900000);
             const options = [];
             if (mode === 'hours') options.push(`${getHoursCount()} ч`);
@@ -587,6 +651,7 @@
             if (document.getElementById('optChild').checked) options.push('Детское кресло');
             if (activePromo) options.push(`Промокод ${activePromo}`);
 
+            const isMinMode = mode === 'minute';
             const booking = {
                 id: code,
                 carId: car.id,
@@ -594,12 +659,18 @@
                 plate: car.plate,
                 carName: car.name,
                 category: car.category,
-                tariff: tariffLabel,
+                tariff: isMinMode ? `Поминутный (${Number(car.priceMin)} ₽/мин)` : tariffLabel,
+                isMinuteTariff: isMinMode,
+                priceMin: Number(car.priceMin),
+                extrasCost: getExtrasCost(),
+                promoCode: activePromo,
+                startedAtMs: nowMs,
+                endedAtMs: null,
                 options: options.length ? options.join(', ') : 'Без доп. опций',
                 total: currentTotal,
                 driverEmail: activeSession.email,
                 status: 'Активна',
-                createdAt: new Date().toLocaleString('ru-RU')
+                createdAt: new Date(nowMs).toLocaleString('ru-RU')
             };
 
             let list = [];

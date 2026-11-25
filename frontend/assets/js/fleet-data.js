@@ -286,3 +286,68 @@ window.getModelRatingStats = function(modelId, carId) {
     };
 };
 /* MELLDRIVE_RATING_HELPER_END */
+
+/* MELLDRIVE_MINUTE_BILLING_START */
+window.formatDurationHms = function(totalSeconds) {
+    const sec = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    const pad = n => String(n).padStart(2, '0');
+    return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+};
+
+window.calcLiveMinuteBooking = function(booking, nowMs) {
+    if (!booking || !booking.isMinuteTariff) {
+        return {
+            isMinute: false,
+            total: Number(booking && booking.total) || 0,
+            elapsedSec: 0,
+            billedMinutes: 0,
+            formattedTime: ''
+        };
+    }
+
+    const start = Number(booking.startedAtMs) || Date.now();
+    const isFinished = booking.status !== 'Активна';
+    const end = isFinished
+        ? (Number(booking.endedAtMs) || start)
+        : (Number(nowMs) || Date.now());
+
+    const elapsedSec = Math.max(0, Math.floor((end - start) / 1000));
+    const billedMinutes = isFinished && booking.billedMinutes
+        ? Number(booking.billedMinutes)
+        : Math.max(1, Math.ceil(elapsedSec / 60));
+
+    const rateMin = Number(booking.priceMin) || 0;
+    const extras = Number(booking.extrasCost) || 0;
+    let total = billedMinutes * rateMin + extras;
+
+    if (booking.promoCode === 'MELL10') total = total * 0.9;
+    if (booking.promoCode === 'START300') total = Math.max(0, total - 300);
+
+    return {
+        isMinute: true,
+        total: Math.round(total),
+        elapsedSec,
+        billedMinutes,
+        formattedTime: window.formatDurationHms(elapsedSec)
+    };
+};
+
+window.finalizeBookingRecord = function(booking, newStatus) {
+    if (!booking) return booking;
+    if (booking.isMinuteTariff && booking.status === 'Активна' && newStatus !== 'Активна') {
+        const now = Date.now();
+        const live = window.calcLiveMinuteBooking(booking, now);
+        booking.endedAtMs = now;
+        booking.endedAt = new Date(now).toLocaleString('ru-RU');
+        booking.elapsedSeconds = live.elapsedSec;
+        booking.billedMinutes = live.billedMinutes;
+        booking.total = live.total;
+        booking.tariff = `Поминутный (${live.billedMinutes} мин • ${live.formattedTime})`;
+    }
+    booking.status = newStatus;
+    return booking;
+};
+/* MELLDRIVE_MINUTE_BILLING_END */
