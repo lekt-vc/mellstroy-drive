@@ -351,3 +351,17 @@ window.finalizeBookingRecord = function(booking, newStatus) {
     return booking;
 };
 /* MELLDRIVE_MINUTE_BILLING_END */
+
+/* MELLDRIVE_ONE_CAR_LIMIT_START */
+window.getUserActiveBooking = function(email) {
+    const target = String(email || '').trim().toLowerCase();
+    if (!target) return null;
+    try {
+        const list = JSON.parse(localStorage.getItem('melldrive_bookings_v1') || '[]');
+        if (!Array.isArray(list)) return null;
+        return list.find(b => b && b.status === 'Активна' && b.driverEmail && b.driverEmail.toLowerCase() === target) || null;
+    } catch (e) {
+        return null;
+    }
+};
+/* MELLDRIVE_ONE_CAR_LIMIT_END */

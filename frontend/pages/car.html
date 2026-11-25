@@ -134,6 +134,13 @@
             background: rgba(239, 68, 68, 0.1);
             margin-bottom: 14px;
         }
+        .limit-gate {
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1.5px solid rgba(234, 179, 8, 0.55);
+            background: var(--gold-soft);
+            margin-bottom: 14px;
+        }
         .review-gate {
             padding: 14px 16px;
             border-radius: 10px;
@@ -303,6 +310,14 @@
                         </div>
                     </div>
 
+                    <div id="userLimitBox" class="limit-gate" style="display:none;">
+                        <strong style="color:var(--gold); display:block; margin-bottom:6px;">У вас уже есть активная аренда</strong>
+                        <p id="userLimitText" style="font-size:0.86rem; color:var(--text-main); margin:0 0 10px;"></p>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <a href="profile.html" class="btn btn--primary btn--sm">Завершить в кабинете</a>
+                        </div>
+                    </div>
+
                     <div id="busyGateBox" class="busy-gate" style="display:none;">
                         <strong style="color:var(--danger); display:block; margin-bottom:4px;">Этот экземпляр занят другим водителем</strong>
                         <p id="busyGateText" style="font-size:0.86rem; color:var(--text-muted); margin:0;"></p>
@@ -417,6 +432,8 @@
         const ownRentalBox = document.getElementById('ownRentalBox');
         const ownRentalText = document.getElementById('ownRentalText');
         const finishOwnRentalBtn = document.getElementById('finishOwnRentalBtn');
+        const userLimitBox = document.getElementById('userLimitBox');
+        const userLimitText = document.getElementById('userLimitText');
         const busyGateBox = document.getElementById('busyGateBox');
         const busyGateText = document.getElementById('busyGateText');
         const driverBadge = document.getElementById('driverSessionBadge');
@@ -456,6 +473,7 @@
 
             const activeBooking = window.getActiveBookingForPlate(car.plate);
             const ownBooking = isUsersOwnBooking(activeBooking);
+            const anotherOwnActive = isAccountReady ? window.getUserActiveBooking(currentUserEmail) : null;
             currentOwnBooking = ownBooking ? activeBooking : null;
 
             const actionBtnLabel = mode === 'minute' ? 'Арендовать поминутно' : 'Оформить бронирование';
@@ -463,6 +481,7 @@
             if (!isAccountReady) {
                 authGateBox.style.display = 'block';
                 ownRentalBox.style.display = 'none';
+                userLimitBox.style.display = 'none';
                 busyGateBox.style.display = 'none';
                 confirmBtn.style.display = 'inline-flex';
                 confirmBtn.disabled = true;
@@ -471,14 +490,27 @@
                 driverBadge.innerHTML = 'Статус водителя: <strong style="color:var(--danger);">не авторизован</strong>';
             } else if (ownBooking) {
                 authGateBox.style.display = 'none';
+                userLimitBox.style.display = 'none';
                 busyGateBox.style.display = 'none';
                 ownRentalBox.style.display = 'block';
                 renderOwnRentalSummary();
                 confirmBtn.style.display = 'none';
                 driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${window.escapeHtml(activeSession.name || activeSession.email)}</strong>`;
+            } else if (anotherOwnActive) {
+                authGateBox.style.display = 'none';
+                ownRentalBox.style.display = 'none';
+                busyGateBox.style.display = 'none';
+                userLimitBox.style.display = 'block';
+                userLimitText.textContent = `Сейчас за вами закреплён автомобиль ${anotherOwnActive.carName} (${anotherOwnActive.plate || 'без номера'}), заказ ${anotherOwnActive.id}. Одновременно можно арендовать только одну машину — завершите текущую аренду, чтобы взять другую.`;
+                confirmBtn.style.display = 'inline-flex';
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.5';
+                confirmBtn.textContent = 'Сначала завершите текущую аренду';
+                driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${window.escapeHtml(activeSession.name || activeSession.email)}</strong>`;
             } else if (activeBooking) {
                 authGateBox.style.display = 'none';
                 ownRentalBox.style.display = 'none';
+                userLimitBox.style.display = 'none';
                 busyGateBox.style.display = 'block';
                 busyGateText.textContent = `Госномер ${car.plate} сейчас занят по заказу ${activeBooking.id}. Выберите другой свободный экземпляр из списка выше.`;
                 confirmBtn.style.display = 'inline-flex';
@@ -489,6 +521,7 @@
             } else {
                 authGateBox.style.display = 'none';
                 ownRentalBox.style.display = 'none';
+                userLimitBox.style.display = 'none';
                 busyGateBox.style.display = 'none';
                 confirmBtn.style.display = 'inline-flex';
                 confirmBtn.disabled = false;
@@ -567,7 +600,7 @@
                 totalPriceEl.textContent = `${currentTotal.toLocaleString('ru-RU')} ₽`;
             }
 
-            if (isAccountReady && !currentOwnBooking && !window.getActiveBookingForPlate(car.plate)) {
+            if (isAccountReady && !currentOwnBooking && !window.getUserActiveBooking(currentUserEmail) && !window.getActiveBookingForPlate(car.plate)) {
                 confirmBtn.textContent = mode === 'minute' ? 'Арендовать поминутно' : 'Оформить бронирование';
             }
         }
@@ -639,7 +672,7 @@
 
         confirmBtn.addEventListener('click', () => {
             if (!isAccountReady) return;
-            if (window.getActiveBookingForPlate(car.plate)) {
+            if (window.getUserActiveBooking(currentUserEmail) || window.getActiveBookingForPlate(car.plate)) {
                 updateHeaderAndAvailability();
                 return;
             }
@@ -686,7 +719,6 @@
             updateReviewGate();
         });
 
-        // Кликабельные звёзды и отзывы
         let selectedStars = 5;
         function paintStarPicker(val) {
             selectedStars = val;

@@ -265,3 +265,14 @@
     }
 })();
 /* MELLDRIVE_HEADER_SNOW_JS_END */
+
+/* MELLDRIVE_HIDE_REG_AUTHED_START */
+(function() {
+    try {
+        const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+        if (s && s.loggedIn === true && s.email) {
+            document.querySelectorAll('a[href*="register.html"]').forEach(a => a.remove());
+        }
+    } catch (e) {}
+})();
+/* MELLDRIVE_HIDE_REG_AUTHED_END */
