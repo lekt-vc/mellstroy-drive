@@ -137,33 +137,34 @@
                     <h3 style="margin:0;">Добавить модель в автопарк (сразу 3 авто с госномерами)</h3>
                 </div>
                 <form class="add-car-grid" id="adminAddCarForm">
-                    <label>Марка и модель
+                    <label>Марка и модель *
                         <input class="edit-input" type="text" id="admCarName" required placeholder="Например: Zeekr 001">
                     </label>
-                    <label>Класс
-                        <select class="status-select" id="admCarCat">
+                    <label>Класс *
+                        <select class="status-select" id="admCarCat" required>
+                            <option value="" disabled selected>Выберите класс</option>
                             <option value="Эконом">Эконом</option>
                             <option value="Комфорт">Комфорт</option>
                             <option value="Суприм">Суприм</option>
                         </select>
                     </label>
-                    <label>Характеристики
+                    <label>Характеристики *
                         <input class="edit-input" type="text" id="admCarSpecs" required placeholder="АКПП • 544 л.с. • Полный привод">
                     </label>
-                    <label>₽ / мин
-                        <input class="edit-input" type="number" id="admCarMin" step="1" min="1" required value="30">
+                    <label>₽ / мин *
+                        <input class="edit-input" type="number" id="admCarMin" step="1" min="1" required placeholder="Например: 30">
                     </label>
-                    <label>₽ / час
-                        <input class="edit-input" type="number" id="admCarHour" step="50" min="50" required value="1600">
+                    <label>₽ / час *
+                        <input class="edit-input" type="number" id="admCarHour" step="1" min="1" required placeholder="Например: 1600">
                     </label>
-                    <label>₽ / день
-                        <input class="edit-input" type="number" id="admCarDay" step="500" min="500" required value="38000">
+                    <label>₽ / день *
+                        <input class="edit-input" type="number" id="admCarDay" step="1" min="1" required placeholder="Например: 38000">
                     </label>
-                    <label>Госномера (через запятую)
-                        <input class="edit-input" type="text" id="admCarPlates" placeholder="А901МД77, В902МД190, Е903МД777">
+                    <label>Госномера (через запятую) *
+                        <input class="edit-input" type="text" id="admCarPlates" required placeholder="А901МД77, В902МД190, Е903МД777">
                     </label>
-                    <label>Путь к фото (необязательно)
-                        <input class="edit-input" type="text" id="admCarImg" placeholder="assets/img/cars/zeekr.jpg">
+                    <label>Путь или URL фото *
+                        <input class="edit-input" type="text" id="admCarImg" required placeholder="assets/img/cars/zeekr.jpg">
                     </label>
                     <button type="submit" class="btn btn--primary">Добавить модель</button>
                 </form>
@@ -551,3 +552,4 @@
     <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
+
