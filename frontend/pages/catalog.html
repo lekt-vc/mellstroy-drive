@@ -128,7 +128,14 @@
             document.getElementById('carsCount').textContent = list.length;
             document.getElementById('catalogGrid').innerHTML = list.map(car => {
                 const zoneSuffix = activeZone ? `&zone=${encodeURIComponent(activeZone.id)}` : '';
-                const busy = Boolean(window.getActiveBookingForPlate(car.plate));
+                let curEmail = '';
+                try {
+                    const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+                    if (s && s.loggedIn && s.email) curEmail = s.email.toLowerCase();
+                } catch (e) {}
+                const activeB = window.getActiveBookingForPlate(car.plate);
+                const isOwn = Boolean(activeB && curEmail && activeB.driverEmail && activeB.driverEmail.toLowerCase() === curEmail);
+                const busy = Boolean(activeB && !isOwn);
                 const safeName = window.escapeHtml(car.name);
                 const safeCat = window.escapeHtml(car.category);
                 const safeSpecs = window.escapeHtml(car.specs);
@@ -140,7 +147,7 @@
                         <div class="car-card__body">
                             <h3 class="car-card__title">
                                 ${safeName} <small style="font-weight:500; color:var(--text-muted); font-size:0.84rem;">(#${car.copyNumber || 1})</small>
-                                ${busy ? '<span class="status-tag-busy">В аренде</span>' : ''}
+                                ${isOwn ? `<span class="status-tag-busy" style="background:rgba(34,197,94,0.18); color:var(--success);">Ваша аренда</span>` : (busy ? `<span class="status-tag-busy">В аренде</span>` : ``)}
                             </h3>
                             <div class="car-card__specs">${safeSpecs}</div>
                             <div class="car-card__pricing">
@@ -148,7 +155,7 @@
                                 <span class="car-card__price-sub">или ${Number(car.priceDay).toLocaleString('ru-RU')} ₽ / день</span>
                             </div>
                             <a href="car.html?id=${car.id}${zoneSuffix}" class="btn ${busy ? 'btn--outline' : 'btn--primary'} btn--block" style="margin-top:8px;">
-                                ${busy ? 'Посмотреть (в аренде)' : 'Забронировать'}
+                                ${isOwn ? `Управлять вашей арендой` : (busy ? `Посмотреть (занята)` : `Забронировать`)}
                             </a>
                         </div>
                     </article>
@@ -164,3 +171,4 @@
     <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
+

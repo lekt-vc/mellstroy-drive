@@ -124,6 +124,13 @@
             background: rgba(239, 68, 68, 0.1);
             margin-bottom: 14px;
         }
+        .own-rental-box {
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1.5px solid rgba(34, 197, 94, 0.55);
+            background: rgba(34, 197, 94, 0.12);
+            margin-bottom: 14px;
+        }
         .review-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
         .review-item:last-child { border-bottom: none; }
         .review-form { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--border); }
@@ -255,8 +262,17 @@
                         </div>
                     </div>
 
+                    <div id="ownRentalBox" class="own-rental-box" style="display:none;">
+                        <strong style="color:var(--success); display:block; margin-bottom:6px;">Автомобиль уже в вашей аренде</strong>
+                        <p id="ownRentalText" style="font-size:0.86rem; color:var(--text-main); margin:0 0 10px;"></p>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <a href="profile.html" class="btn btn--primary btn--sm">Перейти в кабинет</a>
+                            <button type="button" id="finishOwnRentalBtn" class="btn btn--outline btn--sm">Завершить аренду</button>
+                        </div>
+                    </div>
+
                     <div id="busyGateBox" class="busy-gate" style="display:none;">
-                        <strong style="color:var(--danger); display:block; margin-bottom:4px;">Этот экземпляр сейчас в аренде (BUG-050)</strong>
+                        <strong style="color:var(--danger); display:block; margin-bottom:4px;">Этот экземпляр занят другим водителем</strong>
                         <p id="busyGateText" style="font-size:0.86rem; color:var(--text-muted); margin:0;"></p>
                     </div>
 
@@ -281,10 +297,27 @@
         const sameModelUnits = allUnits.filter(u => u.modelId === car.modelId);
         const unitSelect = document.getElementById('unitPlateSelect');
 
+        let activeSession = null;
+        try { activeSession = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) {}
+        const isAccountReady = Boolean(activeSession && activeSession.loggedIn === true && activeSession.email);
+        const currentUserEmail = isAccountReady ? activeSession.email.toLowerCase() : '';
+
+        if (isAccountReady && activeSession.name) {
+            document.getElementById('revAuthor').value = activeSession.name;
+        }
+
+        function isUsersOwnBooking(booking) {
+            return Boolean(booking && currentUserEmail && booking.driverEmail && booking.driverEmail.toLowerCase() === currentUserEmail);
+        }
+
         function renderUnitOptions() {
             unitSelect.innerHTML = sameModelUnits.map(u => {
-                const busy = Boolean(window.getActiveBookingForPlate(u.plate));
-                return `<option value="${u.id}" ${String(u.id) === String(car.id) ? 'selected' : ''}>Экземпляр #${u.copyNumber} — ${window.escapeHtml(u.plate)}${busy ? ' (В АРЕНДЕ)' : ' (Свободна)'}</option>`;
+                const activeB = window.getActiveBookingForPlate(u.plate);
+                let statusLabel = ' (Свободна)';
+                if (activeB) {
+                    statusLabel = isUsersOwnBooking(activeB) ? ' (Ваша аренда)' : ' (Занята)';
+                }
+                return `<option value="${u.id}" ${String(u.id) === String(car.id) ? 'selected' : ''}>Экземпляр #${u.copyNumber} — ${window.escapeHtml(u.plate)}${statusLabel}</option>`;
             }).join('');
         }
 
@@ -292,24 +325,22 @@
             const chosen = sameModelUnits.find(u => String(u.id) === String(unitSelect.value));
             if (chosen) {
                 car = chosen;
+                document.getElementById('bookingSuccessMsg').classList.add('hidden');
                 updateHeaderAndAvailability();
                 recalc();
             }
         });
 
-        let activeSession = null;
-        try { activeSession = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) {}
-        const isAccountReady = Boolean(activeSession && activeSession.loggedIn === true && activeSession.email);
-
-        if (isAccountReady && activeSession.name) {
-            document.getElementById('revAuthor').value = activeSession.name;
-        }
-
         const confirmBtn = document.getElementById('confirmBookingBtn');
         const authGateBox = document.getElementById('authGateBox');
+        const ownRentalBox = document.getElementById('ownRentalBox');
+        const ownRentalText = document.getElementById('ownRentalText');
+        const finishOwnRentalBtn = document.getElementById('finishOwnRentalBtn');
         const busyGateBox = document.getElementById('busyGateBox');
         const busyGateText = document.getElementById('busyGateText');
         const driverBadge = document.getElementById('driverSessionBadge');
+
+        let currentOwnBookingId = null;
 
         function updateHeaderAndAvailability() {
             const photoEl = document.getElementById('carPhoto');
@@ -329,27 +360,61 @@
             renderUnitOptions();
 
             const activeBooking = window.getActiveBookingForPlate(car.plate);
+            const ownBooking = isUsersOwnBooking(activeBooking);
+            currentOwnBookingId = ownBooking ? activeBooking.id : null;
+
             if (!isAccountReady) {
                 authGateBox.style.display = 'block';
+                ownRentalBox.style.display = 'none';
                 busyGateBox.style.display = 'none';
+                confirmBtn.style.display = 'inline-flex';
                 confirmBtn.disabled = true;
                 confirmBtn.style.opacity = '0.5';
+                confirmBtn.textContent = 'Оформить бронирование';
                 driverBadge.innerHTML = 'Статус водителя: <strong style="color:var(--danger);">не авторизован</strong>';
+            } else if (ownBooking) {
+                authGateBox.style.display = 'none';
+                busyGateBox.style.display = 'none';
+                ownRentalBox.style.display = 'block';
+                ownRentalText.textContent = `Заказ ${activeBooking.id} • ${car.name} (${car.plate}) • ${activeBooking.tariff} (${Number(activeBooking.total).toLocaleString('ru-RU')} ₽). Вы можете управлять арендой в личном кабинете или завершить её прямо здесь.`;
+                confirmBtn.style.display = 'none';
+                driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${window.escapeHtml(activeSession.name || activeSession.email)}</strong>`;
             } else if (activeBooking) {
                 authGateBox.style.display = 'none';
+                ownRentalBox.style.display = 'none';
                 busyGateBox.style.display = 'block';
-                busyGateText.textContent = `Госномер ${car.plate} занят по заказу ${activeBooking.id}. Выберите другой свободный экземпляр из списка выше.`;
+                busyGateText.textContent = `Госномер ${car.plate} сейчас занят по заказу ${activeBooking.id}. Выберите другой свободный экземпляр из списка выше.`;
+                confirmBtn.style.display = 'inline-flex';
                 confirmBtn.disabled = true;
                 confirmBtn.style.opacity = '0.5';
+                confirmBtn.textContent = 'Экземпляр занят';
                 driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${window.escapeHtml(activeSession.name || activeSession.email)}</strong>`;
             } else {
                 authGateBox.style.display = 'none';
+                ownRentalBox.style.display = 'none';
                 busyGateBox.style.display = 'none';
+                confirmBtn.style.display = 'inline-flex';
                 confirmBtn.disabled = false;
                 confirmBtn.style.opacity = '1';
+                confirmBtn.textContent = 'Оформить бронирование';
                 driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${window.escapeHtml(activeSession.name || activeSession.email)}</strong>`;
             }
         }
+
+        finishOwnRentalBtn.addEventListener('click', () => {
+            if (!currentOwnBookingId) return;
+            let list = [];
+            try { list = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]'); } catch (e) {}
+            const target = list.find(b => b.id === currentOwnBookingId);
+            if (target) {
+                target.status = 'Завершена';
+                localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
+            }
+            const msg = document.getElementById('bookingSuccessMsg');
+            msg.textContent = `Аренда заказа ${currentOwnBookingId} завершена. Автомобиль ${car.plate} снова свободен.`;
+            msg.classList.remove('hidden');
+            updateHeaderAndAvailability();
+        });
 
         let mode = 'minute';
         let tariffLabel = 'Минуты (30 мин)';
@@ -400,7 +465,6 @@
             });
         });
 
-        // Fix BUG-053: не перезаписываем поле на input, чтобы работал Backspace; нормализуем на blur/change
         const hoursInput = document.getElementById('hoursCountInput');
         hoursInput.addEventListener('input', () => {
             if (mode === 'hours') tariffLabel = `Аренда на ${getHoursCount()} ч`;
@@ -464,13 +528,11 @@
             list.unshift(booking);
             localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
 
-            const msg = document.getElementById('bookingSuccessMsg');
-            msg.innerHTML = `✅ Забронировано: <strong>${window.escapeHtml(car.name)} (${window.escapeHtml(car.plate)})</strong>, заказ <strong>${code}</strong>. <a href="profile.html" style="color:var(--gold); text-decoration:underline;">В кабинет →</a>`;
-            msg.classList.remove('hidden');
+            document.getElementById('bookingSuccessMsg').classList.add('hidden');
             updateHeaderAndAvailability();
         });
 
-        // Кликабельные звёзды и отзывы (защита от XSS BUG-055)
+        // Кликабельные звёзды и отзывы
         let selectedStars = 5;
         function paintStarPicker(val) {
             selectedStars = val;

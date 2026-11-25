@@ -258,7 +258,20 @@
                 ? bookings.find(b => b.status === 'Активна' && (String(b.carId) === String(foundCar.id) || (b.plate && window.normalizePlate(b.plate) === q)))
                 : null;
 
-            if (activeBooking) {
+                        let curEmail = '';
+            try {
+                const s = JSON.parse(localStorage.getItem('melldrive_active_session_v1') || 'null');
+                if (s && s.loggedIn && s.email) curEmail = s.email.toLowerCase();
+            } catch (err) {}
+            const isOwnBooking = Boolean(activeBooking && curEmail && activeBooking.driverEmail && activeBooking.driverEmail.toLowerCase() === curEmail);
+
+            if (isOwnBooking) {
+                resBox.innerHTML = `
+                    <div><strong>${foundCar.name}</strong> (${foundCar.category}) • Госномер: <code>${foundCar.plate}</code> • Зона: ${foundZone ? foundZone.title : 'Москва'}</div>
+                    <div style="margin-top:6px; color:var(--success); font-weight:700;">Статус: В ВАШЕЙ АРЕНДЕ (заказ ${activeBooking.id}, оформлен ${activeBooking.createdAt})</div>
+                    <div style="margin-top:10px;"><a href="profile.html" class="btn btn--primary btn--sm">Открыть в кабинете</a></div>
+                `;
+            } else if (activeBooking) {
                 resBox.innerHTML = `
                     <div><strong>${foundCar.name}</strong> (${foundCar.category}) • Госномер: <code>${foundCar.plate}</code> • Зона: ${foundZone ? foundZone.title : 'Москва'}</div>
                     <div style="margin-top:6px; color:var(--danger); font-weight:700;">Статус: В АРЕНДЕ (заказ ${activeBooking.id}, оформлен ${activeBooking.createdAt})</div>
@@ -277,4 +290,5 @@
     <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
+
 
