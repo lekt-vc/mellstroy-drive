@@ -14,14 +14,14 @@
         }
         .stat-box {
             background: var(--bg-card);
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             border-radius: var(--radius);
             padding: 20px;
         }
         .stat-box__val { font-size: 1.8rem; font-weight: 800; color: var(--gold); margin-top: 6px; }
         .admin-panel-box {
             background: var(--bg-card);
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             border-radius: var(--radius);
             padding: 22px;
             margin-bottom: 24px;
@@ -37,7 +37,7 @@
         }
         .add-car-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
             gap: 12px;
             align-items: end;
         }
@@ -48,19 +48,19 @@
             font-size: 0.85rem;
             color: var(--text-muted);
         }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        th, td { padding: 11px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        th, td { padding: 10px 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
         th { color: var(--text-muted); }
         select.status-select, input.edit-input {
             background: var(--bg-main);
             color: var(--text-main);
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             border-radius: 8px;
-            padding: 7px 10px;
-            font-size: 0.86rem;
+            padding: 7px 9px;
+            font-size: 0.85rem;
         }
         input.edit-input { width: 100%; }
-        input.num-input { width: 105px; }
+        input.num-input { width: 88px; }
         .toast-banner {
             display: none;
             margin-bottom: 18px;
@@ -76,23 +76,22 @@
     </style>
 </head>
 <body>
-    <!-- Окно входа администратора -->
     <div id="adminAuthOverlay" style="position:fixed; inset:0; background:var(--bg-main); display:flex; align-items:center; justify-content:center; padding:20px; z-index:9999;">
-        <div style="width:100%; max-width:420px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px;">
+        <div style="width:100%; max-width:420px; background:var(--bg-card); border:1.5px solid var(--border); border-radius:var(--radius); padding:28px;">
             <a href="../index.html" class="logo" style="justify-content:center; margin-bottom:16px;"><span class="logo__highlight">MELL</span>DRIVE <small style="font-size:0.75rem; color:var(--gold); margin-left:6px;">ADMIN</small></a>
             <h2 style="font-size:1.35rem; text-align:center; margin-bottom:8px;">Вход в панель администратора</h2>
             <p style="font-size:0.82rem; color:var(--text-muted); text-align:center; margin-bottom:16px;">
-                Доступ только для сотрудников • Логин: <code>admin@melldrive.ru</code> / Пароль: <code>admin123</code>
+                Доступ для сотрудников • Логин: <code>admin@melldrive.ru</code> / Пароль: <code>admin123</code>
             </p>
             <form id="adminLoginForm" style="display:grid; gap:13px;">
                 <label>Логин администратора
-                    <input type="text" id="adminLoginInput" required value="admin@melldrive.ru" placeholder="admin@melldrive.ru" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+                    <input type="text" id="adminLoginInput" required value="admin@melldrive.ru" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1.5px solid var(--border);">
                 </label>
                 <label>Пароль
-                    <input type="password" id="adminPassInput" required placeholder="admin123" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1px solid var(--border);">
+                    <input type="password" id="adminPassInput" required placeholder="admin123" style="width:100%; margin-top:6px; padding:10px 12px; border-radius:8px; background:var(--bg-main); color:var(--text-main); border:1.5px solid var(--border);">
                 </label>
                 <p id="adminAuthErr" style="display:none; color:var(--danger); font-size:0.86rem; margin:0;"></p>
-                <button type="submit" id="adminLoginSubmitBtn" class="btn btn--primary btn--block">Войти в админку</button>
+                <button type="submit" class="btn btn--primary btn--block">Войти в админку</button>
             </form>
             <p style="margin-top:14px; text-align:center; font-size:0.88rem;">
                 <a href="../index.html" style="color:var(--gold);">← Вернуться на главную</a>
@@ -103,16 +102,17 @@
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE <small style="font-size:0.75rem; color:var(--gold); margin-left:6px;">ADMIN</small></a>
-            <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
-                <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
+            <nav class="nav" id="mainNav">
+                <ul class="nav__list">
                     <li><a href="../index.html" class="nav__link">На сайт</a></li>
-                    <li><a href="catalog.html" class="nav__link">Каталог</a></li>
+                    <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
                     <li><a href="map.html" class="nav__link">Карта зон</a></li>
                     <li><a href="admin.html" class="nav__link active">Админка</a></li>
                     <li><a href="ui-kit.html" class="nav__link">UI-кит</a></li>
                 </ul>
             </nav>
             <div class="header__actions">
+                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Сменить тему">🌙</button>
                 <button type="button" class="btn btn--outline btn--sm" id="adminLogoutBtn">Выйти из админки</button>
             </div>
         </div>
@@ -121,22 +121,20 @@
     <main class="section">
         <div class="container">
             <h1 class="section__title">Панель администратора</h1>
-            <p class="section__subtitle">Управление автопарком и ценами, контроль заказов, модерация отзывов и база аккаунтов</p>
+            <p class="section__subtitle">Единое управление автопарком (синхронизировано с главной, каталогом, картой и бронированием)</p>
 
             <div class="toast-banner" id="adminToast"></div>
 
             <div class="admin-stats">
-                <div class="stat-box"><div>Автомобилей в парке</div><div class="stat-box__val" id="statCars">0</div></div>
+                <div class="stat-box"><div>Моделей / Машин</div><div class="stat-box__val" id="statCars">0 / 0</div></div>
                 <div class="stat-box"><div>Всего бронирований</div><div class="stat-box__val" id="statOrders">0</div></div>
                 <div class="stat-box"><div>Активных аренд</div><div class="stat-box__val" id="statActive">0</div></div>
                 <div class="stat-box"><div>Выручка (без отмен)</div><div class="stat-box__val" id="statRevenue">0 ₽</div></div>
             </div>
 
-            <!-- Блок 1: Добавление нового автомобиля -->
             <div class="admin-panel-box">
                 <div class="panel-head">
-                    <h3>Добавить автомобиль в автопарк</h3>
-                    <span style="font-size:0.84rem; color:var(--text-muted);">Авто сразу появится на главной и в общем каталоге</span>
+                    <h3 style="margin:0;">Добавить модель в автопарк (сразу 3 авто с госномерами)</h3>
                 </div>
                 <form class="add-car-grid" id="adminAddCarForm">
                     <label>Марка и модель
@@ -146,42 +144,46 @@
                         <select class="status-select" id="admCarCat">
                             <option value="Эконом">Эконом</option>
                             <option value="Комфорт">Комфорт</option>
-                            <option value="Электро">Электро</option>
-                            <option value="Бизнес">Бизнес</option>
-                            <option value="Спорт">Спорт</option>
+                            <option value="Суприм">Суприм</option>
                         </select>
                     </label>
                     <label>Характеристики
                         <input class="edit-input" type="text" id="admCarSpecs" required placeholder="АКПП • 544 л.с. • Полный привод">
                     </label>
-                    <label>Цена ₽ / мин
-                        <input class="edit-input" type="number" id="admCarMin" step="0.5" min="1" required value="22">
+                    <label>₽ / мин
+                        <input class="edit-input" type="number" id="admCarMin" step="1" min="1" required value="30">
                     </label>
-                    <label>Цена ₽ / сутки
-                        <input class="edit-input" type="number" id="admCarDay" step="50" min="100" required value="5900">
+                    <label>₽ / час
+                        <input class="edit-input" type="number" id="admCarHour" step="50" min="50" required value="1600">
                     </label>
-                    <label>URL фото (необязательно)
-                        <input class="edit-input" type="url" id="admCarImg" placeholder="https://...">
+                    <label>₽ / день
+                        <input class="edit-input" type="number" id="admCarDay" step="500" min="500" required value="38000">
                     </label>
-                    <button type="submit" class="btn btn--primary">Добавить авто</button>
+                    <label>Госномера (через запятую)
+                        <input class="edit-input" type="text" id="admCarPlates" placeholder="А901МД77, В902МД190, Е903МД777">
+                    </label>
+                    <label>Путь к фото (необязательно)
+                        <input class="edit-input" type="text" id="admCarImg" placeholder="assets/img/cars/zeekr.jpg">
+                    </label>
+                    <button type="submit" class="btn btn--primary">Добавить модель</button>
                 </form>
             </div>
 
-            <!-- Блок 2: Редактирование парка и тарифов -->
             <div class="admin-panel-box">
                 <div class="panel-head">
-                    <h3>Автопарк и управление тарифами</h3>
-                    <button type="button" class="btn btn--outline btn--sm" id="resetFleetBtn">Сбросить парк к базовому</button>
+                    <h3 style="margin:0;">Автопарк и тарифы (13 моделей по 3 шт.)</h3>
+                    <button type="button" class="btn btn--outline btn--sm" id="resetFleetBtn">Сбросить парк к базовым 13 моделям</button>
                 </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Модель</th>
                             <th>Класс</th>
                             <th>Характеристики</th>
-                            <th>₽ / мин</th>
-                            <th>₽ / сутки</th>
+                            <th>₽/мин</th>
+                            <th>₽/час</th>
+                            <th>₽/день</th>
+                            <th>Госномера (3 шт.)</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -189,27 +191,25 @@
                 </table>
             </div>
 
-            <!-- Блок 3: Журнал бронирований -->
             <div class="admin-panel-box">
-                <h3 style="margin-bottom: 14px;">Журнал бронирований клиентов</h3>
+                <h3 style="margin:0 0 14px;">Журнал бронирований клиентов</h3>
                 <table>
                     <thead>
                         <tr>
                             <th>№ Заказа</th>
-                            <th>Автомобиль</th>
+                            <th>Авто и госномер</th>
+                            <th>Водитель</th>
                             <th>Тариф и опции</th>
                             <th>Сумма</th>
-                            <th>Дата</th>
-                            <th>Статус заказа</th>
+                            <th>Статус</th>
                         </tr>
                     </thead>
                     <tbody id="adminOrdersBody"></tbody>
                 </table>
             </div>
 
-            <!-- Блок 4: Модерация отзывов -->
             <div class="admin-panel-box">
-                <h3 style="margin-bottom: 14px;">Редактирование и модерация отзывов</h3>
+                <h3 style="margin:0 0 14px;">Модерация отзывов</h3>
                 <table>
                     <thead>
                         <tr>
@@ -224,11 +224,10 @@
                 </table>
             </div>
 
-            <!-- Блок 5: Локальная база аккаунтов -->
             <div class="admin-panel-box">
                 <div class="panel-head">
-                    <h3>Локальная база аккаунтов (melldrive_accounts_db_v1)</h3>
-                    <button type="button" class="btn btn--danger btn--sm" id="clearAccountsDbBtn">Очистить базу аккаунтов</button>
+                    <h3 style="margin:0;">Локальная база аккаунтов (без демо-учёток)</h3>
+                    <button type="button" class="btn btn--danger btn--sm" id="clearAccountsDbBtn">Полностью очистить базу аккаунтов</button>
                 </div>
                 <table>
                     <thead>
@@ -247,9 +246,9 @@
         </div>
     </main>
 
+    <script src="../assets/js/fleet-data.js"></script>
     <script>
         const ADMIN_SESSION_KEY = 'melldrive_admin_session_v1';
-        const STORAGE_KEY = 'melldrive_cms_v2';
         const BOOKINGS_KEY = 'melldrive_bookings_v1';
         const REVIEWS_KEY = 'melldrive_reviews_v1';
         const DB_KEY = 'melldrive_accounts_db_v1';
@@ -257,27 +256,6 @@
 
         const ADMIN_LOGIN = 'admin@melldrive.ru';
         const ADMIN_PASS = 'admin123';
-
-        const DEFAULT_CARS = [
-            { id: 1, name: 'Hyundai Solaris', category: 'Эконом', specs: 'АКПП • Бензин • Кондиционер', priceMin: 11.5, priceDay: 2400, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg/960px-2018_Hyundai_Accent_%28Solaris%29_front_3.13.18.jpg' },
-            { id: 2, name: 'Haval Jolion 4WD', category: 'Комфорт', specs: 'Робот • Полный привод • Камеры 360', priceMin: 15.5, priceDay: 3500, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Haval_Jolion_China_%282%29.jpg/960px-Haval_Jolion_China_%282%29.jpg' },
-            { id: 3, name: 'Tesla Model 3', category: 'Электро', specs: 'Автопилот • Запас 490 км • Премиум', priceMin: 25.0, priceDay: 6900, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/2019_Tesla_Model_3_Performance_AWD_Red_Front.jpg/960px-2019_Tesla_Model_3_Performance_AWD_Red_Front.jpg' },
-            { id: 4, name: 'BMW M5 Competition', category: 'Спорт', specs: 'АКПП • 625 л.с. • 0-100 за 3.3 с', priceMin: 55.0, priceDay: 39000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/BMW_M5_F90_Competition_IMG_3602.jpg/960px-BMW_M5_F90_Competition_IMG_3602.jpg' },
-            { id: 5, name: 'Mercedes-Maybach S 580', category: 'Бизнес', specs: 'АКПП • 503 л.с. • Полный привод', priceMin: 75.0, priceDay: 55000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Mercedes-Maybach_S_580_4MATIC_X223_IMG_4266.jpg/960px-Mercedes-Maybach_S_580_4MATIC_X223_IMG_4266.jpg' },
-            { id: 6, name: 'Porsche 911 Turbo S', category: 'Спорт', specs: 'PDK • 650 л.с. • 0-100 за 2.7 с', priceMin: 90.0, priceDay: 72000, img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg/960px-Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg' }
-        ];
-
-        const BASE_DEMO_ACCOUNT = [
-            {
-                id: 1,
-                name: 'Водитель MELLDRIVE',
-                email: '',
-                phone: '+79990000000',
-                password: 'password123',
-                license: '9901123456',
-                licenseConfirmed: true
-            }
-        ];
 
         function showToast(msg) {
             const el = document.getElementById('adminToast');
@@ -295,61 +273,42 @@
                 const s = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
                 isAuthed = Boolean(s && s.isAdmin === true);
             } catch (e) {}
-            if (overlay) {
-                overlay.style.display = isAuthed ? 'none' : 'flex';
-            }
+            if (overlay) overlay.style.display = isAuthed ? 'none' : 'flex';
             return isAuthed;
         }
 
-        function getCmsState() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    return {
-                        texts: parsed.texts || {},
-                        cars: Array.isArray(parsed.cars) && parsed.cars.length ? parsed.cars : [...DEFAULT_CARS]
-                    };
-                }
-            } catch (e) {}
-            return { texts: {}, cars: [...DEFAULT_CARS] };
-        }
-
-        function saveCmsCars(cars) {
-            const state = getCmsState();
-            state.cars = cars;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        }
-
-        function saveCarRow(idx) {
-            const cars = getCmsState().cars;
-            if (!cars[idx]) return;
+        function saveModelRow(idx) {
+            const models = window.getMellModels();
+            if (!models[idx]) return;
             const name = document.getElementById(`carName_${idx}`).value.trim();
             const category = document.getElementById(`carCat_${idx}`).value;
             const specs = document.getElementById(`carSpecs_${idx}`).value.trim();
             const priceMin = Number(document.getElementById(`carMin_${idx}`).value);
+            const priceHour = Number(document.getElementById(`carHour_${idx}`).value);
             const priceDay = Number(document.getElementById(`carDay_${idx}`).value);
+            const platesRaw = document.getElementById(`carPlates_${idx}`).value;
+            const plates = platesRaw.split(',').map(p => window.normalizePlate(p)).filter(Boolean);
 
-            if (!name || !specs || priceMin <= 0 || priceDay <= 0 || Number.isNaN(priceMin) || Number.isNaN(priceDay)) {
-                showToast('Ошибка: проверьте название и положительную цену.');
+            if (!name || !specs || priceMin <= 0 || priceHour <= 0 || priceDay <= 0 || !plates.length) {
+                showToast('Ошибка: проверьте название, положительные тарифы и хотя бы один госномер.');
                 return;
             }
-            cars[idx] = { ...cars[idx], name, category, specs, priceMin, priceDay };
-            saveCmsCars(cars);
+            models[idx] = { ...models[idx], name, category, specs, priceMin, priceHour, priceDay, plates };
+            window.saveMellModels(models);
             renderAll();
-            showToast(`Тарифы и данные для «${name}» сохранены.`);
+            showToast(`Модель «${name}» и её тарифы сохранены для всех страниц сайта.`);
         }
 
-        function deleteCarRow(idx) {
-            const cars = getCmsState().cars;
-            if (cars.length <= 1) {
-                showToast('Нельзя удалить последний автомобиль из парка.');
+        function deleteModelRow(idx) {
+            const models = window.getMellModels();
+            if (models.length <= 1) {
+                showToast('Нельзя удалить последнюю модель из автопарка.');
                 return;
             }
-            const removed = cars.splice(idx, 1)[0];
-            saveCmsCars(cars);
+            const removed = models.splice(idx, 1)[0];
+            window.saveMellModels(models);
             renderAll();
-            showToast(`Автомобиль «${removed.name}» удалён из каталога.`);
+            showToast(`Модель «${removed.name}» удалена.`);
         }
 
         function getBookings() {
@@ -400,33 +359,34 @@
                 const raw = localStorage.getItem(DB_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) return parsed;
+                    if (Array.isArray(parsed)) return parsed.filter(a => a && a.email && a.email.toLowerCase() !== 'demo@melldrive.ru');
                 }
             } catch (e) {}
-            localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
-            return [...BASE_DEMO_ACCOUNT];
+            return [];
         }
 
         function renderAll() {
-            const cars = getCmsState().cars;
-            document.getElementById('statCars').textContent = cars.length;
+            const models = window.getMellModels();
+            const totalUnits = models.reduce((sum, m) => sum + ((m.plates && m.plates.length) || 1), 0);
+            document.getElementById('statCars').textContent = `${models.length} / ${totalUnits}`;
 
-            const categories = ['Эконом', 'Комфорт', 'Электро', 'Бизнес', 'Спорт'];
-            document.getElementById('adminCarsBody').innerHTML = cars.map((c, idx) => `
+            const categories = ['Эконом', 'Комфорт', 'Суприм'];
+            document.getElementById('adminCarsBody').innerHTML = models.map((m, idx) => `
                 <tr>
-                    <td><strong>#${c.id}</strong></td>
-                    <td><input id="carName_${idx}" class="edit-input" type="text" value="${(c.name || '').replace(/"/g, '&quot;')}"></td>
+                    <td><input id="carName_${idx}" class="edit-input" type="text" value="${window.escapeHtml(m.name)}"></td>
                     <td>
                         <select id="carCat_${idx}" class="status-select">
-                            ${categories.map(cat => `<option value="${cat}" ${c.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                            ${categories.map(cat => `<option value="${cat}" ${m.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
                         </select>
                     </td>
-                    <td><input id="carSpecs_${idx}" class="edit-input" type="text" value="${(c.specs || '').replace(/"/g, '&quot;')}"></td>
-                    <td><input id="carMin_${idx}" class="edit-input num-input" type="number" step="0.5" min="1" value="${c.priceMin}"></td>
-                    <td><input id="carDay_${idx}" class="edit-input num-input" type="number" step="50" min="100" value="${c.priceDay}"></td>
+                    <td><input id="carSpecs_${idx}" class="edit-input" type="text" value="${window.escapeHtml(m.specs)}"></td>
+                    <td><input id="carMin_${idx}" class="edit-input num-input" type="number" step="1" min="1" value="${Number(m.priceMin)}"></td>
+                    <td><input id="carHour_${idx}" class="edit-input num-input" type="number" step="50" min="50" value="${Number(m.priceHour)}"></td>
+                    <td><input id="carDay_${idx}" class="edit-input num-input" type="number" step="500" min="500" value="${Number(m.priceDay)}"></td>
+                    <td><input id="carPlates_${idx}" class="edit-input" type="text" value="${window.escapeHtml((m.plates || []).join(', '))}"></td>
                     <td style="white-space:nowrap; display:flex; gap:6px;">
-                        <button type="button" class="btn btn--primary btn--sm" onclick="saveCarRow(${idx})">Сохранить</button>
-                        <button type="button" class="btn btn--danger btn--sm" onclick="deleteCarRow(${idx})">✕</button>
+                        <button type="button" class="btn btn--primary btn--sm" onclick="saveModelRow(${idx})">Сохранить</button>
+                        <button type="button" class="btn btn--danger btn--sm" onclick="deleteModelRow(${idx})">✕</button>
                     </td>
                 </tr>
             `).join('');
@@ -442,11 +402,11 @@
                 ? '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">Заказов пока нет.</td></tr>'
                 : list.map((b, idx) => `
                     <tr>
-                        <td><strong>${b.id}</strong></td>
-                        <td>${b.carName}</td>
-                        <td>${b.tariff} (${b.options})</td>
+                        <td><strong>${window.escapeHtml(b.id)}</strong><br><small style="color:var(--text-muted);">${window.escapeHtml(b.createdAt)}</small></td>
+                        <td>${window.escapeHtml(b.carName)}<br><small style="color:var(--gold);">${window.escapeHtml(b.plate || '—')}</small></td>
+                        <td>${window.escapeHtml(b.driverEmail || '—')}</td>
+                        <td>${window.escapeHtml(b.tariff)} (${window.escapeHtml(b.options)})</td>
                         <td><strong style="color:var(--gold);">${Number(b.total).toLocaleString('ru-RU')} ₽</strong></td>
-                        <td>${b.createdAt}</td>
                         <td>
                             <select class="status-select" onchange="updateStatus(${idx}, this.value)">
                                 <option value="Активна" ${b.status === 'Активна' ? 'selected' : ''}>Активна</option>
@@ -463,13 +423,13 @@
                 ? '<tr><td colspan="5" style="color:var(--text-muted); text-align:center;">Отзывов пока нет.</td></tr>'
                 : reviews.map((r, idx) => `
                     <tr>
-                        <td><strong>${r.author}</strong><br><small style="color:var(--text-muted);">${r.date || ''}</small></td>
+                        <td><strong>${window.escapeHtml(r.author)}</strong><br><small style="color:var(--text-muted);">${window.escapeHtml(r.date || '')}</small></td>
                         <td>
                             <select id="revRatingEdit_${idx}" class="status-select">
                                 ${[5,4,3,2,1].map(n => `<option value="${n}" ${Number(r.rating) === n ? 'selected' : ''}>${n} ★</option>`).join('')}
                             </select>
                         </td>
-                        <td><input id="revTextEdit_${idx}" class="edit-input" type="text" value="${(r.text || '').replace(/"/g, '&quot;')}"></td>
+                        <td><input id="revTextEdit_${idx}" class="edit-input" type="text" value="${window.escapeHtml(r.text || '')}"></td>
                         <td>
                             <select id="revStatusEdit_${idx}" class="status-select">
                                 <option value="Опубликован" ${r.status === 'Опубликован' ? 'selected' : ''}>Опубликован</option>
@@ -487,14 +447,14 @@
             const accs = getAccountsDb();
             const accBody = document.getElementById('adminAccountsBody');
             accBody.innerHTML = !accs.length
-                ? '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста.</td></tr>'
+                ? '<tr><td colspan="6" style="color:var(--text-muted); text-align:center;">База аккаунтов пуста. Зарегистрируйтесь через страницу регистрации.</td></tr>'
                 : accs.map(a => `
                     <tr>
-                        <td><strong>${a.name}</strong></td>
-                        <td>${a.email}</td>
-                        <td>${a.phone}</td>
-                        <td><code>${a.password}</code></td>
-                        <td>${a.license || '—'}</td>
+                        <td><strong>${window.escapeHtml(a.name)}</strong></td>
+                        <td>${window.escapeHtml(a.email)}</td>
+                        <td>${window.escapeHtml(a.phone)}</td>
+                        <td><code>${window.escapeHtml(a.password)}</code></td>
+                        <td>${window.escapeHtml(a.license || '—')}</td>
                         <td style="color:var(--success);">${a.licenseConfirmed ? 'Подтверждено' : 'Не проверено'}</td>
                     </tr>
                 `).join('');
@@ -512,7 +472,7 @@
                 checkAdminAuth();
                 renderAll();
             } else {
-                err.textContent = 'Неверный логин или пароль администратора. Введите admin@melldrive.ru и admin123.';
+                err.textContent = 'Неверный логин или пароль администратора.';
                 err.style.display = 'block';
             }
         });
@@ -528,49 +488,59 @@
             const category = document.getElementById('admCarCat').value;
             const specs = document.getElementById('admCarSpecs').value.trim();
             const priceMin = Number(document.getElementById('admCarMin').value);
+            const priceHour = Number(document.getElementById('admCarHour').value);
             const priceDay = Number(document.getElementById('admCarDay').value);
             const imgInput = document.getElementById('admCarImg').value.trim();
+            const platesRaw = document.getElementById('admCarPlates').value.trim();
 
-            if (!name || !specs || priceMin <= 0 || priceDay <= 0) {
-                showToast('Укажите корректные данные и положительные цены.');
+            if (!name || !specs || priceMin <= 0 || priceHour <= 0 || priceDay <= 0) {
+                showToast('Укажите корректные данные и положительные тарифы.');
                 return;
             }
-            const cars = getCmsState().cars;
-            const nextId = Math.max(0, ...cars.map(c => Number(c.id) || 0)) + 1;
-            cars.push({
-                id: nextId,
+            const rnd = Math.floor(100 + Math.random() * 799);
+            const plates = platesRaw
+                ? platesRaw.split(',').map(p => window.normalizePlate(p)).filter(Boolean)
+                : [`А${rnd}МД77`, `В${rnd + 1}МД190`, `Е${rnd + 2}МД777`];
+
+            const models = window.getMellModels();
+            models.push({
+                modelId: 'model-' + Date.now(),
                 name,
                 category,
                 specs,
                 priceMin,
+                priceHour,
                 priceDay,
-                img: imgInput || 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg/960px-Porsche_911_Turbo_S_%28992%29_%E2%80%93_f_26072021.jpg'
+                img: imgInput || 'assets/img/cars/porsche-911.jpg',
+                plates
             });
-            saveCmsCars(cars);
+            window.saveMellModels(models);
             e.target.reset();
             renderAll();
-            showToast(`Автомобиль «${name}» добавлен в автопарк.`);
+            showToast(`Модель «${name}» (${plates.length} авто) добавлена во весь сайт.`);
         });
 
         document.getElementById('resetFleetBtn').addEventListener('click', () => {
-            if (confirm('Вернуть исходный список из 6 автомобилей и базовые тарифы?')) {
-                saveCmsCars([...DEFAULT_CARS]);
+            if (confirm('Вернуть базовые 13 моделей (39 автомобилей) и исходные тарифы?')) {
+                window.resetMellModels();
                 renderAll();
-                showToast('Базовый автопарк восстановлен.');
+                showToast('Базовый автопарк (13 моделей / 39 авто) восстановлен.');
             }
         });
 
+        // Fix BUG-051: полная очистка базы без восстановления демо-учётки
         document.getElementById('clearAccountsDbBtn').addEventListener('click', () => {
-            if (confirm('Очистить локальную базу зарегистрированных аккаунтов и оставить только demo-аккаунт?')) {
-                localStorage.setItem(DB_KEY, JSON.stringify(BASE_DEMO_ACCOUNT));
+            if (confirm('Полностью очистить локальную базу зарегистрированных аккаунтов?')) {
+                localStorage.setItem(DB_KEY, JSON.stringify([]));
                 localStorage.removeItem(SESSION_KEY);
+                document.cookie = 'melldrive_account_cookie=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
                 renderAll();
-                showToast('Локальная база аккаунтов очищена.');
+                showToast('База аккаунтов полностью очищена (0 записей).');
             }
         });
 
-        window.saveCarRow = saveCarRow;
-        window.deleteCarRow = deleteCarRow;
+        window.saveModelRow = saveModelRow;
+        window.deleteModelRow = deleteModelRow;
         window.updateStatus = updateStatus;
         window.saveReviewEdit = saveReviewEdit;
         window.deleteReview = deleteReview;
@@ -578,60 +548,6 @@
         checkAdminAuth();
         renderAll();
     </script>
-<script>
-(function() {
-    const SESSION_KEY = 'melldrive_active_session_v1';
-    const DB_KEY = 'melldrive_accounts_db_v1';
-
-    // Удаляем старые демо-записи, если остались в localStorage
-    try {
-        const rawDb = localStorage.getItem(DB_KEY);
-        if (rawDb) {
-            const parsedDb = JSON.parse(rawDb);
-            if (Array.isArray(parsedDb)) {
-                const filtered = parsedDb.filter(acc => acc && acc.email && acc.email.toLowerCase() !== 'demo@melldrive.ru');
-                localStorage.setItem(DB_KEY, JSON.stringify(filtered));
-            }
-        }
-    } catch (e) {}
-
-    function hasActiveSession() {
-        try {
-            const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-            return Boolean(s && s.loggedIn === true && s.email);
-        } catch (e) {
-            return false;
-        }
-    }
-
-    window.mellLogout = function() {
-        localStorage.removeItem(SESSION_KEY);
-        const isInPages = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
-        window.location.href = isInPages ? '../index.html' : 'index.html';
-    };
-
-    const loggedIn = hasActiveSession();
-
-    // Если сессии нет — убираем ссылки на кабинет из меню
-    if (!loggedIn) {
-        document.querySelectorAll('a[href*="profile.html"]').forEach(a => {
-            const li = a.closest('li');
-            if (li) li.remove();
-            else a.remove();
-        });
-    }
-
-    // Навешиваем выход на любые кнопки/ссылки с data-logout или #logoutBtn
-    document.querySelectorAll('[data-logout], #logoutBtn').forEach(el => {
-        el.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.mellLogout();
-        });
-    });
-})();
-</script>
-<script src="../assets/js/theme-session.js"></script>
+    <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
-
-

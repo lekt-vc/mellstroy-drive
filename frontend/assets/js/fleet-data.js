@@ -1,4 +1,6 @@
-﻿window.MELLDRIVE_MODELS = [
+﻿window.MELLDRIVE_MODELS_KEY = 'melldrive_fleet_models_v3';
+
+window.MELLDRIVE_DEFAULT_MODELS = [
     // Эконом
     {
         modelId: 'priora',
@@ -149,43 +151,109 @@
     }
 ];
 
+window.escapeHtml = function(val) {
+    return String(val == null ? '' : val)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
+window.normalizePlate = function(plate) {
+    const map = {
+        A: 'А', B: 'В', E: 'Е', K: 'К', M: 'М', H: 'Н',
+        O: 'О', P: 'Р', C: 'С', T: 'Т', Y: 'У', X: 'Х'
+    };
+    return String(plate || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[\s\-]+/g, '')
+        .replace(/[ABEKMHOPCTYX]/g, ch => map[ch] || ch);
+};
+
+window.getMellModels = function() {
+    try {
+        const raw = localStorage.getItem(window.MELLDRIVE_MODELS_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length) return parsed;
+        }
+    } catch (e) {}
+    return window.MELLDRIVE_DEFAULT_MODELS.map(m => ({ ...m, plates: [...m.plates] }));
+};
+
+window.saveMellModels = function(models) {
+    localStorage.setItem(window.MELLDRIVE_MODELS_KEY, JSON.stringify(models));
+};
+
+window.resetMellModels = function() {
+    const fresh = window.MELLDRIVE_DEFAULT_MODELS.map(m => ({ ...m, plates: [...m.plates] }));
+    window.saveMellModels(fresh);
+    return fresh;
+};
+
+window.MELLDRIVE_MODELS = window.getMellModels();
+
+window.resolveCarImgPath = function(src, isSubPage) {
+    if (!src) return isSubPage ? '../assets/img/cars/solaris.jpg' : 'assets/img/cars/solaris.jpg';
+    if (/^(https?:|data:)/i.test(src)) return src;
+    if (isSubPage) return src.startsWith('../') ? src : ('../' + src.replace(/^\/+/, ''));
+    return src.replace(/^\.\.\//, '');
+};
+
 window.buildMellFleetUnits = function(isSubPage) {
+    const models = window.getMellModels();
     const units = [];
     let idCounter = 1;
-    window.MELLDRIVE_MODELS.forEach((m, mIdx) => {
-        m.plates.forEach((plate, copyIdx) => {
+    models.forEach(m => {
+        const plates = Array.isArray(m.plates) && m.plates.length ? m.plates : ['М001МД77'];
+        plates.forEach((plate, copyIdx) => {
             units.push({
                 id: idCounter++,
                 modelId: m.modelId,
                 copyNumber: copyIdx + 1,
-                plate: plate,
+                plate: window.normalizePlate(plate),
                 name: m.name,
                 category: m.category,
                 specs: m.specs,
-                priceMin: m.priceMin,
-                priceHour: m.priceHour,
-                priceDay: m.priceDay,
-                img: isSubPage ? ('../' + m.img) : m.img
+                priceMin: Number(m.priceMin),
+                priceHour: Number(m.priceHour),
+                priceDay: Number(m.priceDay),
+                img: window.resolveCarImgPath(m.img, isSubPage)
             });
         });
     });
     return units;
 };
 
+window.getActiveBookingForPlate = function(plate) {
+    const target = window.normalizePlate(plate);
+    if (!target) return null;
+    try {
+        const list = JSON.parse(localStorage.getItem('melldrive_bookings_v1') || '[]');
+        if (!Array.isArray(list)) return null;
+        return list.find(b => b && b.status === 'Активна' && window.normalizePlate(b.plate) === target) || null;
+    } catch (e) {
+        return null;
+    }
+};
+
 window.mellCarPlaceholder = function(imgEl, title, category) {
     if (!imgEl || imgEl.dataset.fallbackApplied) return;
     imgEl.dataset.fallbackApplied = '1';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+    const safeTitle = window.escapeHtml(title);
+    const safeCat = window.escapeHtml(String(category || '').toUpperCase());
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice">
         <defs>
             <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#181824"/>
+                <stop offset="0%" stop-color="#1a1a28"/>
                 <stop offset="100%" stop-color="#0d0d14"/>
             </linearGradient>
         </defs>
         <rect width="800" height="450" fill="url(#g)"/>
-        <rect x="24" y="24" width="752" height="402" rx="18" fill="none" stroke="#eab308" stroke-opacity="0.35" stroke-width="2"/>
-        <text x="400" y="205" fill="#eab308" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">${category.toUpperCase()} • MELLDRIVE</text>
-        <text x="400" y="250" fill="#f4f4f8" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800" text-anchor="middle">${title}</text>
+        <text x="400" y="195" fill="#eab308" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">${safeCat} • MELLDRIVE</text>
+        <text x="400" y="245" fill="#f4f4f8" font-family="Segoe UI, Arial, sans-serif" font-size="36" font-weight="800" text-anchor="middle">${safeTitle}</text>
         <text x="400" y="290" fill="#9ca3af" font-family="Segoe UI, Arial, sans-serif" font-size="16" text-anchor="middle">Фото ожидает загрузки в assets/img/cars/</text>
     </svg>`;
     imgEl.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);

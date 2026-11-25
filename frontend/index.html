@@ -102,8 +102,8 @@
 
         function renderHomeModels() {
             const list = activeCat === 'all'
-                ? window.MELLDRIVE_MODELS
-                : window.MELLDRIVE_MODELS.filter(m => m.category === activeCat);
+                ? window.getMellModels()
+                : window.getMellModels().filter(m => m.category === activeCat);
 
             const grid = document.getElementById('homeCarsGrid');
             grid.innerHTML = list.map(m => {
@@ -141,3 +141,4 @@
     <script src="assets/js/theme-session.js"></script>
 </body>
 </html>
+

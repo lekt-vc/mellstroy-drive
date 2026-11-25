@@ -22,17 +22,19 @@
     <header class="header">
         <div class="container header__container">
             <a href="../index.html" class="logo"><span class="logo__highlight">MELL</span>DRIVE</a>
-            <nav class="nav" id="mainNav" style="display:flex; visibility:visible; opacity:1;">
-                <ul class="nav__list" style="display:flex; flex-wrap:wrap; gap:16px; list-style:none; margin:0; padding:0; align-items:center;">
+            <nav class="nav" id="mainNav">
+                <ul class="nav__list">
                     <li><a href="../index.html" class="nav__link">Главная</a></li>
                     <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
                     <li><a href="map.html" class="nav__link">Карта зон</a></li>
                     <li><a href="profile.html" class="nav__link active">Кабинет</a></li>
+                    <li><a href="admin.html" class="nav__link">Админка</a></li>
                     <li><a href="ui-kit.html" class="nav__link">UI-кит</a></li>
                 </ul>
             </nav>
             <div class="header__actions">
-                <button type="button" class="btn btn--outline btn--sm" id="logoutBtn" onclick="localStorage.removeItem('melldrive_active_session_v1'); window.location.href='../index.html';">Выйти</button>
+                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Сменить тему">🌙</button>
+                <button type="button" class="btn btn--outline btn--sm" id="logoutBtn" onclick="window.mellLogout()">Выйти</button>
             </div>
         </div>
     </header>
@@ -40,19 +42,20 @@
     <main class="section">
         <div class="container">
             <h1 class="section__title">Личный кабинет водителя</h1>
-            <p class="section__subtitle">Активный профиль и история ваших бронирований</p>
+            <p class="section__subtitle">Активный профиль и управление вашими арендами</p>
 
             <div class="car-card" style="padding:22px; margin-bottom:24px;">
-                <h3 id="driverProfileTitle">Профиль водителя</h3>
-                <p id="driverProfileContacts" style="color:var(--text-muted); font-size:0.88rem; margin-top:6px;"></p>
-                <p id="driverLicenseInfo" style="color:var(--success); font-size:0.86rem; margin-top:6px;"></p>
+                <h3 id="driverProfileTitle" style="margin:0;">Профиль водителя</h3>
+                <p id="driverProfileContacts" style="color:var(--text-muted); font-size:0.88rem; margin:6px 0 0;"></p>
+                <p id="driverLicenseInfo" style="color:var(--success); font-size:0.86rem; margin:6px 0 0;"></p>
             </div>
 
             <h2 style="font-size:1.35rem; margin-bottom:14px;">Мои бронирования</h2>
-            <div id="myBookingsList" class="cars-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));"></div>
+            <div id="myBookingsList" class="cars-grid" style="grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));"></div>
         </div>
     </main>
 
+    <script src="../assets/js/fleet-data.js"></script>
     <script>
         const SESSION_KEY = 'melldrive_active_session_v1';
         const BOOKINGS_KEY = 'melldrive_bookings_v1';
@@ -66,6 +69,17 @@
             document.getElementById('driverLicenseInfo').textContent = sess.license ? ('ВУ: ' + sess.license + (sess.licenseConfirmed ? ' (подтверждено)' : '')) : '';
         }
 
+        function finishBooking(bookingId) {
+            let list = [];
+            try { list = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]'); } catch (e) {}
+            const target = list.find(b => b.id === bookingId);
+            if (target && target.status === 'Активна') {
+                target.status = 'Завершена';
+                localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
+                renderBookings();
+            }
+        }
+
         function renderBookings() {
             const box = document.getElementById('myBookingsList');
             let list = [];
@@ -75,31 +89,32 @@
             } catch (e) { list = []; }
 
             const mine = sess && sess.email
-                ? list.filter(b => !b.driverEmail || b.driverEmail.toLowerCase() === sess.email.toLowerCase())
-                : list;
+                ? list.filter(b => b.driverEmail && b.driverEmail.toLowerCase() === sess.email.toLowerCase())
+                : [];
 
             if (!mine.length) {
-                box.innerHTML = '<div class="car-card" style="padding:20px;"><p style="color:var(--text-muted);">У вас пока нет оформленных бронирований. <a href="catalog.html" style="color:var(--gold);">Выбрать автомобиль →</a></p></div>';
+                box.innerHTML = '<div class="car-card" style="padding:20px;"><p style="color:var(--text-muted); margin:0;">У вас пока нет оформленных бронирований. <a href="catalog.html" style="color:var(--gold);">Выбрать автомобиль →</a></p></div>';
                 return;
             }
 
             box.innerHTML = mine.map(b => `
                 <div class="car-card" style="padding:20px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                        <strong>${b.id}</strong>
-                        <span style="color:var(--gold); font-weight:700;">${b.status}</span>
+                        <strong>${window.escapeHtml(b.id)}</strong>
+                        <span style="color:${b.status === 'Активна' ? 'var(--gold)' : 'var(--text-muted)'}; font-weight:700;">${window.escapeHtml(b.status)}</span>
                     </div>
-                    <h3 style="margin:8px 0 4px;">${b.carName}</h3>
-                    <p style="color:var(--text-muted); font-size:0.88rem;">${b.tariff} • ${b.options}</p>
-                    <p style="margin-top:10px; font-weight:800; color:var(--gold);">${Number(b.total).toLocaleString('ru-RU')} ₽</p>
-                    <small style="color:var(--text-muted);">${b.createdAt}</small>
+                    <h3 style="margin:8px 0 4px;">${window.escapeHtml(b.carName)} ${b.plate ? `<small style="color:var(--text-muted);">(${window.escapeHtml(b.plate)})</small>` : ''}</h3>
+                    <p style="color:var(--text-muted); font-size:0.88rem; margin:0;">${window.escapeHtml(b.tariff)} • ${window.escapeHtml(b.options)}</p>
+                    <p style="margin:10px 0 4px; font-weight:800; color:var(--gold);">${Number(b.total).toLocaleString('ru-RU')} ₽</p>
+                    <small style="color:var(--text-muted);">${window.escapeHtml(b.createdAt)}</small>
+                    ${b.status === 'Активна' ? `<button type="button" class="btn btn--outline btn--sm" style="margin-top:12px;" onclick="finishBooking('${window.escapeHtml(b.id)}')">Завершить аренду и освободить авто</button>` : ''}
                 </div>
             `).join('');
         }
 
+        window.finishBooking = finishBooking;
         renderBookings();
     </script>
-<script src="../assets/js/theme-session.js"></script>
+    <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
-

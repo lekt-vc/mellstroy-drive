@@ -12,10 +12,14 @@
             gap: 28px;
             align-items: stretch;
         }
+        .car-detail > div:first-child {
+            display: flex;
+            flex-direction: column;
+        }
         .car-detail__photo {
             width: 100%;
             border-radius: var(--radius);
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             object-fit: cover;
             height: 320px;
             display: block;
@@ -23,11 +27,17 @@
         }
         .panel-card, .booking-box {
             background: var(--bg-card);
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             border-radius: var(--radius);
             padding: 24px;
         }
-        .panel-card { margin-top: 20px; }
+        .panel-card {
+            margin-top: 20px;
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-card > .review-form { margin-top: auto; }
         .car-title-row {
             display: flex;
             justify-content: space-between;
@@ -53,10 +63,10 @@
             gap: 10px;
             margin: 12px 0;
         }
-        .tariff-pill { border: 1.5px solid var(--btn-border);
+        .tariff-pill {
             padding: 10px 8px;
             border-radius: 10px;
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--btn-border);
             background: var(--bg-main);
             color: var(--text-main);
             cursor: pointer;
@@ -83,7 +93,7 @@
             margin-top: 6px;
             padding: 9px 12px;
             border-radius: 8px;
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             background: var(--bg-card);
             color: var(--text-main);
         }
@@ -93,7 +103,7 @@
             flex: 1;
             padding: 9px 12px;
             border-radius: 8px;
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             background: var(--bg-main);
             color: var(--text-main);
         }
@@ -107,21 +117,21 @@
             font-size: 1.25rem;
             font-weight: 800;
         }
-        .auth-gate {
+        .auth-gate, .busy-gate {
             padding: 14px 16px;
             border-radius: 10px;
-            border: 1px solid rgba(239, 68, 68, 0.45);
+            border: 1.5px solid rgba(239, 68, 68, 0.5);
             background: rgba(239, 68, 68, 0.1);
             margin-bottom: 14px;
         }
         .review-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
         .review-item:last-child { border-bottom: none; }
-        .review-form { display: grid; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .review-form { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--border); }
         .review-form input, .review-form textarea {
             width: 100%;
             padding: 9px 12px;
             border-radius: 8px;
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             background: var(--bg-main);
             color: var(--text-main);
             font-family: inherit;
@@ -129,18 +139,6 @@
         @media (max-width: 900px) {
             .car-detail { grid-template-columns: 1fr; }
             .car-detail__photo { height: 260px; }
-        }
-            .car-detail > div:first-child {
-            display: flex;
-            flex-direction: column;
-        }
-        .car-detail > div:first-child > .panel-card {
-            flex: 1 1 auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .car-detail > div:first-child > .panel-card > .review-form {
-            margin-top: auto;
         }
     </style>
 </head>
@@ -151,7 +149,7 @@
             <nav class="nav" id="mainNav">
                 <ul class="nav__list">
                     <li><a href="../index.html" class="nav__link">Главная</a></li>
-                    <li><a href="catalog.html" class="nav__link">Автопарк (39)</a></li>
+                    <li><a href="catalog.html" class="nav__link">Автопарк</a></li>
                     <li><a href="map.html" class="nav__link">Карта зон</a></li>
                     <li><a href="profile.html" class="nav__link">Кабинет</a></li>
                     <li><a href="admin.html" class="nav__link">Админка</a></li>
@@ -173,7 +171,7 @@
 
                     <div class="panel-card">
                         <h3 style="margin:0 0 8px;">Отзывы водителей (<span id="reviewsCount">0</span>)</h3>
-                        <div id="reviewsList"></div>
+                        <div id="reviewsList" style="margin-bottom:16px;"></div>
 
                         <form class="review-form" id="reviewForm">
                             <strong>Оставить отзыв об автомобиле</strong>
@@ -209,7 +207,7 @@
                     </div>
 
                     <label style="display:block; font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
-                        Выберите экземпляр (госномер из 3 доступных):
+                        Выберите экземпляр (госномер):
                         <select id="unitPlateSelect" class="plate-select"></select>
                     </label>
 
@@ -257,6 +255,11 @@
                         </div>
                     </div>
 
+                    <div id="busyGateBox" class="busy-gate" style="display:none;">
+                        <strong style="color:var(--danger); display:block; margin-bottom:4px;">Этот экземпляр сейчас в аренде (BUG-050)</strong>
+                        <p id="busyGateText" style="font-size:0.86rem; color:var(--text-muted); margin:0;"></p>
+                    </div>
+
                     <button type="button" id="confirmBookingBtn" class="btn btn--primary btn--large btn--block">Оформить бронирование</button>
                     <p id="bookingSuccessMsg" class="hidden" style="margin-top: 14px; color: var(--success); font-weight: 600;"></p>
                 </div>
@@ -266,7 +269,6 @@
 
     <script src="../assets/js/fleet-data.js"></script>
     <script>
-        const STORAGE_KEY = 'melldrive_cms_v2';
         const BOOKINGS_KEY = 'melldrive_bookings_v1';
         const REVIEWS_KEY = 'melldrive_reviews_v1';
         const SESSION_KEY = 'melldrive_active_session_v1';
@@ -275,85 +277,78 @@
         const params = new URLSearchParams(window.location.search);
         const carIdParam = params.get('id');
 
-        function resolveCar() {
-            if (carIdParam) {
-                const found = allUnits.find(u => String(u.id) === String(carIdParam));
-                if (found) return found;
-            }
-            try {
-                const cms = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-                if (Array.isArray(cms.cars) && carIdParam) {
-                    const custom = cms.cars.find(c => String(c.id) === String(carIdParam));
-                    if (custom) {
-                        return {
-                            ...custom,
-                            modelId: custom.modelId || ('custom-' + custom.id),
-                            plate: custom.plate || `Н${200 + (Number(custom.id) % 700)}ММ77`,
-                            priceHour: custom.priceHour || Math.round((Number(custom.priceMin) * 50) / 10) * 10,
-                            img: (custom.img && custom.img.startsWith('assets/')) ? ('../' + custom.img) : (custom.img || '../assets/img/cars/porsche-911.jpg')
-                        };
-                    }
-                }
-            } catch (e) {}
-            return allUnits[0];
-        }
-
-        let car = resolveCar();
+        let car = allUnits.find(u => String(u.id) === String(carIdParam)) || allUnits[0];
         const sameModelUnits = allUnits.filter(u => u.modelId === car.modelId);
         const unitSelect = document.getElementById('unitPlateSelect');
 
-        if (sameModelUnits.length) {
-            unitSelect.innerHTML = sameModelUnits.map(u => `
-                <option value="${u.id}" ${String(u.id) === String(car.id) ? 'selected' : ''}>Экземпляр #${u.copyNumber} — Госномер ${u.plate}</option>
-            `).join('');
-            unitSelect.addEventListener('change', () => {
-                const chosen = sameModelUnits.find(u => String(u.id) === String(unitSelect.value));
-                if (chosen) {
-                    car = chosen;
-                    updateHeaderAndBadges();
-                }
-            });
-        } else {
-            unitSelect.innerHTML = `<option value="${car.id}" selected>Госномер ${car.plate}</option>`;
+        function renderUnitOptions() {
+            unitSelect.innerHTML = sameModelUnits.map(u => {
+                const busy = Boolean(window.getActiveBookingForPlate(u.plate));
+                return `<option value="${u.id}" ${String(u.id) === String(car.id) ? 'selected' : ''}>Экземпляр #${u.copyNumber} — ${window.escapeHtml(u.plate)}${busy ? ' (В АРЕНДЕ)' : ' (Свободна)'}</option>`;
+            }).join('');
         }
 
-        const hourPrice = Number(car.priceHour) || Math.round((Number(car.priceMin) * 50) / 10) * 10;
+        unitSelect.addEventListener('change', () => {
+            const chosen = sameModelUnits.find(u => String(u.id) === String(unitSelect.value));
+            if (chosen) {
+                car = chosen;
+                updateHeaderAndAvailability();
+                recalc();
+            }
+        });
 
-        function updateHeaderAndBadges() {
+        let activeSession = null;
+        try { activeSession = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) {}
+        const isAccountReady = Boolean(activeSession && activeSession.loggedIn === true && activeSession.email);
+
+        if (isAccountReady && activeSession.name) {
+            document.getElementById('revAuthor').value = activeSession.name;
+        }
+
+        const confirmBtn = document.getElementById('confirmBookingBtn');
+        const authGateBox = document.getElementById('authGateBox');
+        const busyGateBox = document.getElementById('busyGateBox');
+        const busyGateText = document.getElementById('busyGateText');
+        const driverBadge = document.getElementById('driverSessionBadge');
+
+        function updateHeaderAndAvailability() {
             const photoEl = document.getElementById('carPhoto');
+            photoEl.dataset.fallbackApplied = '';
             photoEl.onerror = () => window.mellCarPlaceholder(photoEl, car.name, car.category);
             photoEl.src = car.img;
             photoEl.alt = car.name;
+
             document.getElementById('carCategory').textContent = `${car.category} • Госномер ${car.plate}`;
             document.getElementById('carTitle').textContent = car.name;
             document.getElementById('carSpecs').textContent = car.specs;
             document.getElementById('rateMinText').textContent = `${Number(car.priceMin)} ₽/мин`;
-            document.getElementById('rateHourText').textContent = `${hourPrice.toLocaleString('ru-RU')} ₽/час`;
+            document.getElementById('rateHourText').textContent = `${Number(car.priceHour).toLocaleString('ru-RU')} ₽/час`;
             document.getElementById('rateDayText').textContent = `${Number(car.priceDay).toLocaleString('ru-RU')} ₽/день`;
             document.title = `${car.name} (${car.plate}) — Аренда в MELLDRIVE`;
-        }
-        updateHeaderAndBadges();
 
-        // Проверка оформленного аккаунта
-        let activeSession = null;
-        try {
-            activeSession = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-        } catch (e) {}
+            renderUnitOptions();
 
-        const isAccountReady = Boolean(activeSession && activeSession.loggedIn === true && activeSession.email);
-        const confirmBtn = document.getElementById('confirmBookingBtn');
-        const authGateBox = document.getElementById('authGateBox');
-        const driverBadge = document.getElementById('driverSessionBadge');
-
-        if (!isAccountReady) {
-            authGateBox.style.display = 'block';
-            confirmBtn.disabled = true;
-            confirmBtn.style.opacity = '0.5';
-            driverBadge.innerHTML = 'Статус водителя: <strong style="color:var(--danger);">не авторизован</strong>';
-        } else {
-            authGateBox.style.display = 'none';
-            confirmBtn.disabled = false;
-            driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${activeSession.name || activeSession.email}</strong>`;
+            const activeBooking = window.getActiveBookingForPlate(car.plate);
+            if (!isAccountReady) {
+                authGateBox.style.display = 'block';
+                busyGateBox.style.display = 'none';
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.5';
+                driverBadge.innerHTML = 'Статус водителя: <strong style="color:var(--danger);">не авторизован</strong>';
+            } else if (activeBooking) {
+                authGateBox.style.display = 'none';
+                busyGateBox.style.display = 'block';
+                busyGateText.textContent = `Госномер ${car.plate} занят по заказу ${activeBooking.id}. Выберите другой свободный экземпляр из списка выше.`;
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.5';
+                driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${window.escapeHtml(activeSession.name || activeSession.email)}</strong>`;
+            } else {
+                authGateBox.style.display = 'none';
+                busyGateBox.style.display = 'none';
+                confirmBtn.disabled = false;
+                confirmBtn.style.opacity = '1';
+                driverBadge.innerHTML = `Водитель: <strong style="color:var(--success);">${window.escapeHtml(activeSession.name || activeSession.email)}</strong>`;
+            }
         }
 
         let mode = 'minute';
@@ -362,12 +357,15 @@
         let activePromo = '';
 
         function getHoursCount() {
-            const val = Math.floor(Number(document.getElementById('hoursCountInput').value) || 1);
-            return Math.min(72, Math.max(1, val));
+            const raw = document.getElementById('hoursCountInput').value;
+            const parsed = parseInt(raw, 10);
+            if (Number.isNaN(parsed)) return 1;
+            return Math.min(72, Math.max(1, parsed));
         }
 
         function recalc() {
             const hours = getHoursCount();
+            const hourPrice = Number(car.priceHour);
             document.getElementById('hourlyRateHint').textContent = `Тариф: ${hourPrice.toLocaleString('ru-RU')} ₽/час × ${hours} ч = ${(hourPrice * hours).toLocaleString('ru-RU')} ₽`;
 
             let base = 0;
@@ -402,10 +400,15 @@
             });
         });
 
-        document.getElementById('hoursCountInput').addEventListener('input', () => {
-            const h = getHoursCount();
-            document.getElementById('hoursCountInput').value = h;
-            if (mode === 'hours') tariffLabel = `Аренда на ${h} ч`;
+        // Fix BUG-053: не перезаписываем поле на input, чтобы работал Backspace; нормализуем на blur/change
+        const hoursInput = document.getElementById('hoursCountInput');
+        hoursInput.addEventListener('input', () => {
+            if (mode === 'hours') tariffLabel = `Аренда на ${getHoursCount()} ч`;
+            recalc();
+        });
+        hoursInput.addEventListener('blur', () => {
+            hoursInput.value = getHoursCount();
+            if (mode === 'hours') tariffLabel = `Аренда на ${getHoursCount()} ч`;
             recalc();
         });
 
@@ -426,8 +429,9 @@
         });
 
         confirmBtn.addEventListener('click', () => {
-            if (!isAccountReady) {
-                authGateBox.style.display = 'block';
+            if (!isAccountReady) return;
+            if (window.getActiveBookingForPlate(car.plate)) {
+                updateHeaderAndAvailability();
                 return;
             }
             const code = 'MD-' + Math.floor(100000 + Math.random() * 900000);
@@ -461,11 +465,12 @@
             localStorage.setItem(BOOKINGS_KEY, JSON.stringify(list));
 
             const msg = document.getElementById('bookingSuccessMsg');
-            msg.innerHTML = `✅ Забронировано: <strong>${car.name} (${car.plate})</strong>, заказ <strong>${code}</strong>. <a href="profile.html" style="color:var(--gold); text-decoration:underline;">В кабинет →</a>`;
+            msg.innerHTML = `✅ Забронировано: <strong>${window.escapeHtml(car.name)} (${window.escapeHtml(car.plate)})</strong>, заказ <strong>${code}</strong>. <a href="profile.html" style="color:var(--gold); text-decoration:underline;">В кабинет →</a>`;
             msg.classList.remove('hidden');
+            updateHeaderAndAvailability();
         });
 
-        // Кликабельные звёзды и средний рейтинг рядом с маркой авто
+        // Кликабельные звёзды и отзывы (защита от XSS BUG-055)
         let selectedStars = 5;
         function paintStarPicker(val) {
             selectedStars = val;
@@ -512,11 +517,11 @@
                 return `
                     <div class="review-item">
                         <div style="display:flex; justify-content:space-between; gap:8px;">
-                            <strong>${r.author}</strong>
+                            <strong>${window.escapeHtml(r.author)}</strong>
                             <span style="color:#f59e0b;">${stars}</span>
                         </div>
-                        <p style="margin:6px 0 0; font-size:0.92rem;">${r.text}</p>
-                        <small style="color:var(--text-muted);">${r.date}</small>
+                        <p style="margin:6px 0 0; font-size:0.92rem;">${window.escapeHtml(r.text)}</p>
+                        <small style="color:var(--text-muted);">${window.escapeHtml(r.date)}</small>
                     </div>
                 `;
             }).join('');
@@ -540,16 +545,15 @@
                 date: new Date().toLocaleDateString('ru-RU')
             });
             localStorage.setItem(REVIEWS_KEY, JSON.stringify(all));
-            e.target.reset();
+            document.getElementById('revText').value = '';
             paintStarPicker(5);
             renderReviews();
         });
 
+        updateHeaderAndAvailability();
         recalc();
         renderReviews();
     </script>
     <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
-
-

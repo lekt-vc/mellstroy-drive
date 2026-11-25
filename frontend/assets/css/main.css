@@ -269,3 +269,21 @@ a { color: inherit; text-decoration: none; }
     .header .nav__list { gap: 12px !important; font-size: 0.9rem; padding: 0 !important; }
     .hero__title { font-size: 1.9rem; }
 }
+
+/* Fix BUG-056: светлая тема на уровне :root и системных контролов */
+:root { color-scheme: dark; }
+:root[data-theme="light"] {
+    color-scheme: light;
+    --bg-main: #f3f5f9 !important;
+    --bg-card: #ffffff !important;
+    --bg-elevated: #e9edf5 !important;
+    --text-main: #111827 !important;
+    --text-muted: #4b5563 !important;
+    --border: rgba(17, 24, 39, 0.22) !important;
+    --btn-border: rgba(17, 24, 39, 0.35) !important;
+    --gold: #b45309 !important;
+    --gold-soft: rgba(180, 83, 9, 0.14) !important;
+}
+:root[data-theme="light"] .btn--primary {
+    color: #ffffff !important;
+}

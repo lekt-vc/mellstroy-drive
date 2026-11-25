@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Автопарк (39 авто) — MELLDRIVE</title>
+    <title>Автопарк — MELLDRIVE</title>
     <link rel="stylesheet" href="../assets/css/main.css">
     <style>
         .catalog-toolbar {
@@ -14,12 +14,22 @@
         }
         .catalog-toolbar input, .catalog-toolbar select {
             background: var(--bg-card);
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             color: var(--text-main);
             padding: 11px 14px;
             border-radius: 10px;
             font-size: 0.95rem;
             width: 100%;
+        }
+        .status-tag-busy {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(239, 68, 68, 0.18);
+            color: var(--danger);
+            font-size: 0.75rem;
+            font-weight: 700;
         }
         @media (max-width: 768px) {
             .catalog-toolbar { grid-template-columns: 1fr; }
@@ -33,7 +43,7 @@
             <nav class="nav" id="mainNav">
                 <ul class="nav__list">
                     <li><a href="../index.html" class="nav__link">Главная</a></li>
-                    <li><a href="catalog.html" class="nav__link active">Автопарк (39)</a></li>
+                    <li><a href="catalog.html" class="nav__link active">Автопарк</a></li>
                     <li><a href="map.html" class="nav__link">Карта зон</a></li>
                     <li><a href="profile.html" class="nav__link">Кабинет</a></li>
                     <li><a href="admin.html" class="nav__link">Админка</a></li>
@@ -42,7 +52,7 @@
             </nav>
             <div class="header__actions">
                 <button type="button" class="theme-toggle" id="themeToggle" aria-label="Сменить тему">🌙</button>
-                <a href="map.html" class="btn btn--outline btn--sm">Карта зон</a>
+                <a href="login.html" class="btn btn--primary btn--sm">Войти</a>
             </div>
         </div>
     </header>
@@ -52,13 +62,13 @@
             <div class="section__header">
                 <div>
                     <h1 class="section__title" id="catalogHeading">Каталог автопарка</h1>
-                    <p class="section__subtitle">Доступно автомобилей: <strong id="carsCount">0</strong> <span id="zoneBadgeText"></span></p>
+                    <p class="section__subtitle">Автомобилей в списке: <strong id="carsCount">0</strong> <span id="zoneBadgeText"></span></p>
                 </div>
-                <a id="allCarsBtn" href="catalog.html" class="btn btn--outline btn--sm hidden">Показать все 39 авто</a>
+                <a id="allCarsBtn" href="catalog.html" class="btn btn--outline btn--sm hidden">Показать весь парк</a>
             </div>
 
             <div class="catalog-toolbar">
-                <input type="search" id="qInput" placeholder="Поиск по марке, госномеру или характеристикам...">
+                <input type="search" id="qInput" placeholder="Поиск по марке, госномеру (можно латиницей) или характеристикам...">
                 <select id="catFilter">
                     <option value="all">Все классы (Эконом, Комфорт, Суприм)</option>
                     <option value="Эконом">Эконом</option>
@@ -79,25 +89,7 @@
     <script src="../assets/js/fleet-data.js"></script>
     <script>
         const ZONES_KEY = 'melldrive_zones_v1';
-        const STORAGE_KEY = 'melldrive_cms_v2';
-
         let cars = window.buildMellFleetUnits(true);
-
-        // Добавляем машины, созданные вручную в админке (если есть)
-        try {
-            const cms = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-            if (Array.isArray(cms.cars)) {
-                const extra = cms.cars.filter(c => Number(c.id) > 100);
-                extra.forEach(c => {
-                    cars.push({
-                        ...c,
-                        plate: c.plate || `Н${200 + (Number(c.id) % 700)}ММ77`,
-                        priceHour: c.priceHour || Math.round((Number(c.priceMin) * 50) / 10) * 10,
-                        img: (c.img && c.img.startsWith('assets/')) ? ('../' + c.img) : (c.img || '../assets/img/cars/porsche-911.jpg')
-                    });
-                });
-            }
-        } catch (e) {}
 
         const params = new URLSearchParams(window.location.search);
         const zoneParam = params.get('zone');
@@ -111,40 +103,53 @@
         }
 
         if (activeZone && Array.isArray(activeZone.cars) && activeZone.cars.length) {
-            cars = activeZone.cars;
+            // Синхронизируем актуальные цены из fleet-data по plate
+            const byPlate = new Map(cars.map(c => [c.plate, c]));
+            cars = activeZone.cars.map(zc => byPlate.get(window.normalizePlate(zc.plate)) || zc);
             document.getElementById('catalogHeading').textContent = `Авто в зоне: ${activeZone.title}`;
             document.getElementById('zoneBadgeText').textContent = `(${activeZone.badge})`;
             document.getElementById('allCarsBtn').classList.remove('hidden');
         }
 
         function render() {
-            const q = document.getElementById('qInput').value.trim().toLowerCase();
+            const rawQ = document.getElementById('qInput').value.trim();
+            const q = rawQ.toLowerCase();
+            const qPlate = window.normalizePlate(rawQ);
             const cat = document.getElementById('catFilter').value;
             const sort = document.getElementById('sortFilter').value;
 
             let list = cars.filter(c =>
                 (!cat || cat === 'all' || c.category === cat) &&
-                (!q || c.name.toLowerCase().includes(q) || c.specs.toLowerCase().includes(q) || (c.plate || '').toLowerCase().includes(q))
+                (!q || c.name.toLowerCase().includes(q) || c.specs.toLowerCase().includes(q) || window.normalizePlate(c.plate).includes(qPlate))
             );
             if (sort === 'price-asc') list.sort((a, b) => a.priceMin - b.priceMin);
             if (sort === 'price-desc') list.sort((a, b) => b.priceMin - a.priceMin);
 
             document.getElementById('carsCount').textContent = list.length;
             document.getElementById('catalogGrid').innerHTML = list.map(car => {
-                const zoneSuffix = activeZone ? `&zone=${activeZone.id}` : '';
-                const hourPrice = car.priceHour || Math.round((Number(car.priceMin) * 50) / 10) * 10;
+                const zoneSuffix = activeZone ? `&zone=${encodeURIComponent(activeZone.id)}` : '';
+                const busy = Boolean(window.getActiveBookingForPlate(car.plate));
+                const safeName = window.escapeHtml(car.name);
+                const safeCat = window.escapeHtml(car.category);
+                const safeSpecs = window.escapeHtml(car.specs);
+                const safePlate = window.escapeHtml(car.plate);
                 return `
                     <article class="car-card">
-                        <div class="car-card__badge">${car.category} • ${car.plate}</div>
-                        <img class="car-card__img" src="${car.img}" alt="${car.name}" onerror="window.mellCarPlaceholder(this, '${car.name}', '${car.category}')">
+                        <div class="car-card__badge">${safeCat} • ${safePlate}</div>
+                        <img class="car-card__img" src="${window.escapeHtml(car.img)}" alt="${safeName}" onerror="window.mellCarPlaceholder(this, '${safeName}', '${safeCat}')">
                         <div class="car-card__body">
-                            <h3 class="car-card__title">${car.name} <small style="font-weight:500; color:var(--text-muted); font-size:0.85rem;">(бортовой №${car.copyNumber || 1})</small></h3>
-                            <div class="car-card__specs">${car.specs}</div>
+                            <h3 class="car-card__title">
+                                ${safeName} <small style="font-weight:500; color:var(--text-muted); font-size:0.84rem;">(#${car.copyNumber || 1})</small>
+                                ${busy ? '<span class="status-tag-busy">В аренде</span>' : ''}
+                            </h3>
+                            <div class="car-card__specs">${safeSpecs}</div>
                             <div class="car-card__pricing">
-                                <span class="car-card__price">${Number(car.priceMin)} ₽ / мин • ${Number(hourPrice).toLocaleString('ru-RU')} ₽ / час</span>
+                                <span class="car-card__price">${Number(car.priceMin)} ₽ / мин • ${Number(car.priceHour).toLocaleString('ru-RU')} ₽ / час</span>
                                 <span class="car-card__price-sub">или ${Number(car.priceDay).toLocaleString('ru-RU')} ₽ / день</span>
                             </div>
-                            <a href="car.html?id=${car.id}${zoneSuffix}" class="btn btn--primary btn--block" style="margin-top:8px;">Забронировать</a>
+                            <a href="car.html?id=${car.id}${zoneSuffix}" class="btn ${busy ? 'btn--outline' : 'btn--primary'} btn--block" style="margin-top:8px;">
+                                ${busy ? 'Посмотреть (в аренде)' : 'Забронировать'}
+                            </a>
                         </div>
                     </article>
                 `;

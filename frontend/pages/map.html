@@ -229,14 +229,14 @@
 
         document.getElementById('plateCheckForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const q = document.getElementById('plateQueryInput').value.trim().toUpperCase().replace(/\s+/g, '');
+            const q = window.normalizePlate(document.getElementById('plateQueryInput').value);
             const resBox = document.getElementById('plateCheckResult');
             if (!q) return;
 
             let foundCar = null;
             let foundZone = null;
             for (const z of ZONES) {
-                const c = z.cars.find(item => (item.plate || '').toUpperCase().replace(/\s+/g, '') === q);
+                const c = z.cars.find(item => window.normalizePlate(item.plate) === q);
                 if (c) {
                     foundCar = c;
                     foundZone = z;
@@ -255,7 +255,7 @@
             } catch (err) {}
 
             const activeBooking = Array.isArray(bookings)
-                ? bookings.find(b => b.status === 'Активна' && (String(b.carId) === String(foundCar.id) || (b.plate && b.plate.toUpperCase() === q)))
+                ? bookings.find(b => b.status === 'Активна' && (String(b.carId) === String(foundCar.id) || (b.plate && window.normalizePlate(b.plate) === q)))
                 : null;
 
             if (activeBooking) {
@@ -277,3 +277,4 @@
     <script src="../assets/js/theme-session.js"></script>
 </body>
 </html>
+
