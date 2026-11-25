@@ -4,7 +4,7 @@
     const ACCOUNT_COOKIE = 'melldrive_account_cookie';
 
     function setCookie(name, value, days) {
-        const maxAge = days ? `; max-age=${days * 86400}` : '';
+        const maxAge = days ? `; max-age=${days * 86400}` : '; max-age=0';
         document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; path=/${maxAge}; SameSite=Lax`;
     }
 
@@ -30,7 +30,10 @@
 
     function applyTheme(mode) {
         const isLight = mode === 'light';
-        document.body.classList.toggle('light-theme', isLight);
+        document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+        if (document.body) {
+            document.body.classList.toggle('light-theme', isLight);
+        }
         setCookie(THEME_KEY, isLight ? 'light' : 'dark', 30);
         localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');
         document.querySelectorAll('.theme-toggle, #themeToggle').forEach(btn => {
@@ -39,7 +42,6 @@
         });
     }
 
-    // Синхронизация куки аккаунта
     try {
         const sessRaw = localStorage.getItem(SESSION_KEY);
         if (sessRaw) {
@@ -51,7 +53,7 @@
                     license: sess.license || ''
                 }), 14);
             } else {
-                setCookie(ACCOUNT_COOKIE, '', -1);
+                setCookie(ACCOUNT_COOKIE, '', 0);
             }
         } else {
             const cookieAcc = getCookie(ACCOUNT_COOKIE);
@@ -78,7 +80,6 @@
 
     applyTheme(getSavedTheme());
 
-    // Гарантируем наличие кнопки смены темы в шапке на всех страницах
     const headerActions = document.querySelector('header .header__actions');
     if (headerActions && !headerActions.querySelector('.theme-toggle')) {
         const btn = document.createElement('button');
@@ -90,14 +91,13 @@
         headerActions.prepend(btn);
     }
 
-    document.querySelectorAll('.theme-toggle, #themeToggle').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const nextMode = document.body.classList.contains('light-theme') ? 'dark' : 'light';
-            applyTheme(nextMode);
-        });
+    document.addEventListener('click', (e) => {
+        const toggle = e.target.closest('.theme-toggle, #themeToggle');
+        if (!toggle) return;
+        const isCurrentlyLight = document.body.classList.contains('light-theme') || document.documentElement.getAttribute('data-theme') === 'light';
+        applyTheme(isCurrentlyLight ? 'dark' : 'light');
     });
 
-    // Скрываем Кабинет и Админку для неавторизованных пользователей
     let loggedIn = false;
     try {
         const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
@@ -128,7 +128,7 @@
 
     window.mellLogout = function() {
         localStorage.removeItem(SESSION_KEY);
-        setCookie(ACCOUNT_COOKIE, '', -1);
+        setCookie(ACCOUNT_COOKIE, '', 0);
         const isInPages = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
         window.location.href = isInPages ? '../index.html' : 'index.html';
     };
